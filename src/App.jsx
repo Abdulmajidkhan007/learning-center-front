@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { decodeJwt } from './utils/jwt'
 import Login from './pages/Login'
 import AdminDashboard from './pages/AdminDashboard'
 import TeacherDashboard from './pages/TeacherDashboard'
+import AttendancePage from './pages/AttendancePage'
+import { AuthContext } from './AuthContext'
 
-export default function App() {
-    const [session, setSession] = useState(null) // { token, role, claims }
+function AppShell() {
+    const [session, setSession] = useState(null)
     const [checking, setChecking] = useState(true)
+    const navigate = useNavigate()
 
     useEffect(() => {
         fetch('/api/v1/auth/refresh-token', { method: 'POST', credentials: 'include' })
@@ -21,26 +25,43 @@ export default function App() {
 
     function handleLogout() {
         setSession(null)
+        navigate('/')
     }
 
     if (checking) return null
 
     if (!session) return <Login onLoggedIn={setSession} />
 
+    return (
+        <AuthContext.Provider value={{ session, onLogout: handleLogout }}>
+            <Routes>
+                <Route path="/attendance" element={<AttendancePage standalone />} />
+                <Route path="/*" element={<DashboardRouter session={session} onLogout={handleLogout} />} />
+            </Routes>
+        </AuthContext.Provider>
+    )
+}
+
+function DashboardRouter({ session, onLogout }) {
     switch (session.role) {
         case 'ADMINISTRATOR':
-            return <AdminDashboard session={session} onLogout={handleLogout} />
+            return <AdminDashboard session={session} onLogout={onLogout} />
         case 'TEACHER':
-            return <TeacherDashboard session={session} onLogout={handleLogout} />
-        case 'STUDENT':
-        case 'SUPER_ADMIN':
+            return <TeacherDashboard session={session} onLogout={onLogout} />
+        default:
             return (
                 <div style={{ padding: 60, fontFamily: 'sans-serif' }}>
                     <p>{session.role} dashboard isn't built yet.</p>
-                    <button onClick={handleLogout}>Sign out</button>
+                    <button onClick={onLogout}>Sign out</button>
                 </div>
             )
-        default:
-            return <div style={{ padding: 60 }}>Unknown role: {session.role}</div>
     }
+}
+
+export default function App() {
+    return (
+        <BrowserRouter>
+            <AppShell />
+        </BrowserRouter>
+    )
 }

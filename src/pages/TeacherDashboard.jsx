@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Teacher dashboard.
@@ -24,6 +25,7 @@ import { useEffect, useState, useCallback } from 'react'
 
 const GROUP_ENDPOINT = '/api/v1/group'
 const LESSON_ENDPOINT = '/api/v1/lesson'
+const ATTENDANCE_ENDPOINT = '/api/v1/attendance'
 
 async function authFetch(path, token, options = {}) {
     const res = await fetch(path, {
@@ -84,12 +86,25 @@ export default function TeacherDashboard({ session, onLogout }) {
     const [startingLesson, setStartingLesson] = useState(false)
     const [lessonError, setLessonError] = useState('')
     const [activeLesson, setActiveLesson] = useState(null) // LessonDto once created
+    const navigate = useNavigate()
 
     // Load the teacher's own groups for the dropdown, once.
     useEffect(() => {
         authFetch(`${GROUP_ENDPOINT}/groups`, session.token)
-            .then((list) => setGroupOptions(list || []))
-            .catch(() => setGroupOptions([]))
+            .then((list) => {
+                const groups = list || []
+                setGroupOptions(groups)
+                // Default to the first group if none is selected yet
+                if (groups.length > 0) {
+                    loadGroupInfo(groups[0].id)
+                } else {
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                setGroupOptions([])
+                setLoading(false)
+            })
     }, [session.token])
 
     const loadGroupInfo = useCallback(
@@ -97,8 +112,7 @@ export default function TeacherDashboard({ session, onLogout }) {
             setLoading(true)
             setLoadError('')
             try {
-                const params = groupId ? `?groupId=${encodeURIComponent(groupId)}` : ''
-                const data = await authFetch(`${GROUP_ENDPOINT}/groupInfo${params}`, session.token)
+                const data = await authFetch(`${GROUP_ENDPOINT}/groupInfo?groupId=${encodeURIComponent(groupId)}`, session.token)
                 setGroupInfo(data)
                 setSelectedGroupId(data?.groupDto?.id || '')
             } catch (err) {
@@ -110,11 +124,6 @@ export default function TeacherDashboard({ session, onLogout }) {
         },
         [session.token]
     )
-
-    // Initial load — no groupId, backend auto-selects nearest/ongoing.
-    useEffect(() => {
-        loadGroupInfo(null)
-    }, [loadGroupInfo])
 
     function switchGroup(id) {
         setActiveLesson(null)
@@ -184,6 +193,13 @@ export default function TeacherDashboard({ session, onLogout }) {
                         )}
                         <button
                             className="tch-btn"
+                            style={s.attendanceHeaderBtn}
+                            onClick={() => navigate('/attendance', { state: { session, students, activeLesson } })}
+                        >
+                            Attendance
+                        </button>
+                        <button
+                            className="tch-btn"
                             style={s.startBtn}
                             disabled={!selectedGroupId}
                             onClick={() => setLessonModalOpen(true)}
@@ -243,19 +259,21 @@ export default function TeacherDashboard({ session, onLogout }) {
                 {activeLesson && (
                     <div style={s.lessonBanner}>
                         <span style={s.stamp}>In progress</span>
-                        <div>
+                        <div style={s.lessonBannerContent}>
                             <div style={s.lessonBannerTitle}>
                                 Lesson {activeLesson.lessonNumber} started
                             </div>
                             <div style={s.lessonBannerSub}>
-                                {activeLesson.lessonDate} · id {activeLesson.id} — attendance marking
-                                isn't wired up yet, coming once the Attendance API is shared.
+                                {activeLesson.lessonDate}
                             </div>
                         </div>
+                        <button style={s.markAttendanceBtn} onClick={() => navigate('/attendance', { state: { session, students, activeLesson } })}>
+                            Mark Attendance
+                        </button>
                     </div>
                 )}
 
-                {!loading && !loadError && group && (
+                {!loading && !loadError && group && !activeLesson && (
                     <>
                         <div style={s.panel}>
                             <header style={s.panelHeader}>
@@ -386,6 +404,7 @@ const s = {
     brandName: { fontFamily: fontMono, fontSize: '0.78rem', letterSpacing: '0.03em', color: color.inkSoft },
     headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
     startBtn: { background: color.highlighter, color: color.highlighterInk, border: 'none', borderRadius: 4, padding: '10px 18px', fontSize: '0.9rem', fontWeight: 600, fontFamily: fontBody },
+    attendanceHeaderBtn: { background: color.purple, color: color.paper, border: 'none', borderRadius: 4, padding: '10px 16px', fontSize: '0.85rem', fontWeight: 500, fontFamily: fontBody },
     logoutBtn: { background: 'transparent', border: `1px solid ${color.border}`, color: color.ink, padding: '9px 14px', borderRadius: 4, fontSize: '0.85rem', fontFamily: fontBody },
 
     headerSubRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
@@ -421,6 +440,8 @@ const s = {
     errorBox: { background: color.claySoft, color: color.clay, borderRadius: 4, padding: '14px 16px', marginBottom: 20 },
 
     lessonBanner: { display: 'flex', alignItems: 'center', gap: 16, background: color.forestSoft, border: `1px solid ${color.forest}33`, borderRadius: 6, padding: '16px 20px', marginBottom: 24 },
+    lessonBannerContent: { flex: 1 },
+    markAttendanceBtn: { background: color.forest, color: color.paper, border: 'none', borderRadius: 4, padding: '10px 20px', fontSize: '0.85rem', fontWeight: 600, fontFamily: fontBody, cursor: 'pointer', whiteSpace: 'nowrap' },
     stamp: { display: 'inline-flex', flexShrink: 0, fontFamily: fontMono, fontSize: '0.65rem', letterSpacing: '0.05em', textTransform: 'uppercase', padding: '3px 8px', border: `1.5px solid ${color.forest}`, borderRadius: 3, color: color.forest, transform: 'rotate(-2deg)' },
     lessonBannerTitle: { fontFamily: fontDisplay, fontWeight: 600, fontSize: '1.05rem', color: color.ink },
     lessonBannerSub: { fontSize: '0.85rem', color: color.inkSoft, marginTop: 2 },
