@@ -57,6 +57,11 @@ async function authFetch(path, token, options = {}) {
     }
 }
 
+function formatTime(t) {
+    // LocalTime serializes as "HH:mm:ss" — nobody needs the seconds.
+    return t ? t.slice(0, 5) : ''
+}
+
 function initials(name) {
     if (!name) return '?'
     return name
@@ -65,13 +70,6 @@ function initials(name) {
         .slice(0, 2)
         .join('')
         .toUpperCase()
-}
-
-function formatTimetable(tt) {
-    if (!tt) return '—'
-    const days = (tt.days || []).join('/')
-    const time = tt.startTime && tt.endTime ? `${tt.startTime}–${tt.endTime}` : ''
-    return [days, time].filter(Boolean).join(' · ') || '—'
 }
 
 export default function TeacherDashboard({ session, onLogout }) {
@@ -118,8 +116,7 @@ export default function TeacherDashboard({ session, onLogout }) {
         loadGroupInfo(null)
     }, [loadGroupInfo])
 
-    function handleGroupChange(e) {
-        const id = e.target.value
+    function switchGroup(id) {
         setActiveLesson(null)
         loadGroupInfo(id)
     }
@@ -144,6 +141,10 @@ export default function TeacherDashboard({ session, onLogout }) {
     }
 
     const group = groupInfo?.groupDto
+    // Every group returned by this dashboard belongs to the logged-in
+    // teacher, so group.teacher.userDto.fullName IS the teacher's own name —
+    // far more reliable than guessing at JWT claim keys.
+    const teacherName = group?.teacher?.userDto?.fullName || 'Teacher'
     const students = groupInfo?.studentDto || []
 
     return (
@@ -154,7 +155,12 @@ export default function TeacherDashboard({ session, onLogout }) {
                 .tch-btn:active { transform: translateY(1px); }
                 .tch-select { transition: border-color 0.15s ease; cursor: pointer; }
                 .tch-select:hover { border-color: #b7ab8a; }
-                .tch-row:hover { background: #f4efe3; }
+                .tch-row:hover { background: #f4efe3; border-radius: 6px; margin: 0 -8px; padding-left: 12px; padding-right: 12px; }
+                .tch-group-switcher { position: relative; cursor: pointer; display: inline-block; }
+                .tch-group-dropdown { display: none; }
+                .tch-group-switcher:hover .tch-group-dropdown { display: block; }
+                .tch-dropdown-item { transition: background 0.12s ease; text-align: left; width: 100%; cursor: pointer; }
+                .tch-dropdown-item:hover { background: #f4efe3; }
                 .tch-input { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
                 .tch-input:focus {
                     outline: none;
@@ -164,41 +170,66 @@ export default function TeacherDashboard({ session, onLogout }) {
             `}</style>
 
             <header style={s.header}>
-                <div style={s.headerLeft}>
+                <div style={s.headerTopRow}>
                     <div style={s.brand}>
                         <span style={s.mark}>CLC</span>
                         <span style={s.brandName}>Cornerstone · Teacher</span>
                     </div>
 
-                    {groupOptions.length > 0 && (
-                        <select
-                            className="tch-select"
-                            style={s.groupSelect}
-                            value={selectedGroupId}
-                            onChange={handleGroupChange}
+                    <div style={s.headerRight}>
+                        {group?.timeTable && (
+                            <span style={s.timePill}>
+                                {formatTime(group.timeTable.startTime)}–{formatTime(group.timeTable.endTime)}
+                            </span>
+                        )}
+                        <button
+                            className="tch-btn"
+                            style={s.startBtn}
+                            disabled={!selectedGroupId}
+                            onClick={() => setLessonModalOpen(true)}
                         >
-                            {!selectedGroupId && <option value="">Select a group…</option>}
-                            {groupOptions.map((g) => (
-                                <option key={g.id} value={g.id}>
-                                    {g.name}
-                                </option>
-                            ))}
-                        </select>
-                    )}
+                            ▶ Start Lesson
+                        </button>
+                        <button className="tch-btn" style={s.logoutBtn} onClick={onLogout}>
+                            Sign out
+                        </button>
+                    </div>
                 </div>
 
-                <div style={s.headerRight}>
-                    <button
-                        className="tch-btn"
-                        style={s.startBtn}
-                        disabled={!selectedGroupId}
-                        onClick={() => setLessonModalOpen(true)}
-                    >
-                        ▶ Start Lesson
-                    </button>
-                    <button className="tch-btn" style={s.logoutBtn} onClick={onLogout}>
-                        Sign out
-                    </button>
+                <div style={s.headerSubRow}>
+                    <span style={s.teacherName}>{teacherName}</span>
+
+                    {group && (
+                        <>
+                            <span style={s.headerSep}>·</span>
+                            <div className="tch-group-switcher" style={s.groupSwitcher}>
+                                <span style={s.groupSwitcherLabel}>
+                                    {group.name}
+                                    <span style={s.caret}> ▾</span>
+                                </span>
+
+                                <div className="tch-group-dropdown" style={s.groupDropdown}>
+                                    <div style={s.groupDropdownHeading}>Switch group</div>
+                                    {groupOptions.map((g) => (
+                                        <button
+                                            key={g.id}
+                                            className="tch-dropdown-item"
+                                            style={{
+                                                ...s.groupDropdownItem,
+                                                ...(g.id === selectedGroupId ? s.groupDropdownItemActive : {}),
+                                            }}
+                                            onClick={() => switchGroup(g.id)}
+                                        >
+                                            <span style={s.dropdownCheck}>
+                                                {g.id === selectedGroupId ? '✓' : ''}
+                                            </span>
+                                            {g.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </header>
 
@@ -226,72 +257,44 @@ export default function TeacherDashboard({ session, onLogout }) {
 
                 {!loading && !loadError && group && (
                     <>
-                        <div style={s.groupCard}>
-                            <div style={s.groupCardHoles}>
-                                <span /><span />
-                            </div>
-                            <div style={s.groupCardMain}>
-                                <span style={s.eyebrow}>Current group</span>
-                                <h1 style={s.groupName}>{group.name}</h1>
-                                <div style={s.groupMeta}>
-                                    <span>Room {group.room || '—'}</span>
-                                    <span>·</span>
-                                    <span>{formatTimetable(group.timeTable)}</span>
-                                </div>
-                            </div>
-                            <span className="stamp" style={s.statusStamp}>
-                                {group.status}
-                            </span>
-                        </div>
-
                         <div style={s.panel}>
                             <header style={s.panelHeader}>
                                 <span style={s.eyebrow}>Roster</span>
                                 <h2 style={s.panelTitle}>Students ({students.length})</h2>
                             </header>
 
-                            <div style={s.tableWrap}>
-                                <table style={s.table}>
-                                    <thead>
-                                    <tr>
-                                        <th style={s.th}></th>
-                                        <th style={s.th}>Full name</th>
-                                        <th style={s.th}>Phone</th>
-                                        <th style={s.th}>Birth date</th>
-                                        <th style={s.th}>Parent phone</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {students.length === 0 && (
-                                        <tr>
-                                            <td colSpan={5} style={s.tdEmpty}>
-                                                No students in this group yet.
-                                            </td>
-                                        </tr>
-                                    )}
-                                    {students.map((st) => (
-                                        <tr key={st.id} className="tch-row">
-                                            <td style={{ ...s.td, width: 44 }}>
-                                                {st.userDto?.imgUrl ? (
-                                                    <img
-                                                        src={st.userDto.imgUrl}
-                                                        alt=""
-                                                        style={s.avatarImg}
-                                                    />
-                                                ) : (
-                                                    <div style={s.avatarFallback}>
-                                                        {initials(st.userDto?.fullName)}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td style={s.td}>{st.userDto?.fullName || '—'}</td>
-                                            <td style={s.td}>{st.userDto?.phone || '—'}</td>
-                                            <td style={s.td}>{st.userDto?.birthDate || '—'}</td>
-                                            <td style={s.td}>{st.parentPhone || '—'}</td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                            <div style={s.rosterList}>
+                                {students.length === 0 && (
+                                    <p style={s.tdEmpty}>No students in this group yet.</p>
+                                )}
+                                {students.map((st, i) => (
+                                    <div key={st.id} className="tch-row" style={s.rosterItem}>
+                                        <span style={s.rosterRank}>{i + 1}</span>
+                                        {st.userDto?.imgUrl ? (
+                                            <img
+                                                src={st.userDto.imgUrl}
+                                                alt=""
+                                                style={s.rosterAvatarImg}
+                                            />
+                                        ) : (
+                                            <div style={s.rosterAvatarFallback}>
+                                                {initials(st.userDto?.fullName)}
+                                            </div>
+                                        )}
+                                        <div style={s.rosterInfo}>
+                                            <div style={s.rosterName}>{st.userDto?.fullName || '—'}</div>
+                                            <div style={s.rosterMeta}>
+                                                <span>{st.userDto?.phone || '—'}</span>
+                                                <span style={s.rosterDot}>·</span>
+                                                <span>{st.userDto?.birthDate || '—'}</span>
+                                            </div>
+                                        </div>
+                                        <div style={s.rosterParent}>
+                                            <span style={s.eyebrowSmall}>Parent</span>
+                                            <div>{st.parentPhone || '—'}</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </>
@@ -366,6 +369,8 @@ const color = {
     inkSoft: '#4B5768', inkFaint: '#8892A0', highlighter: '#F2B705',
     highlighterInk: '#5C4400', border: '#E2D9C4', claySoft: '#F6E6E1', clay: '#B4533C',
     forest: '#2F6B4F', forestSoft: '#E7F0EA',
+    accent: '#4C5FD5', accentSoft: '#EAECFB',
+    purple: '#8B5CF6', purpleSoft: '#F1EBFD', magenta: '#C244B0',
 }
 const fontDisplay = "'Fraunces', ui-serif, Georgia, serif"
 const fontBody = "'Work Sans', ui-sans-serif, system-ui, sans-serif"
@@ -374,17 +379,44 @@ const fontMono = "'IBM Plex Mono', ui-monospace, monospace"
 const s = {
     page: { minHeight: '100vh', background: color.paper, fontFamily: fontBody },
 
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 40px', borderBottom: `1px solid ${color.border}`, background: color.card, flexWrap: 'wrap', gap: 14 },
-    headerLeft: { display: 'flex', alignItems: 'center', gap: 20 },
+    header: { display: 'flex', flexDirection: 'column', gap: 10, padding: '16px 40px', borderBottom: `1px solid ${color.border}`, background: color.card },
+    headerTopRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 },
     brand: { display: 'flex', alignItems: 'center', gap: 8 },
     mark: { fontFamily: fontMono, fontSize: '0.72rem', letterSpacing: '0.1em', background: color.highlighter, color: color.highlighterInk, padding: '2px 6px', borderRadius: 3 },
     brandName: { fontFamily: fontMono, fontSize: '0.78rem', letterSpacing: '0.03em', color: color.inkSoft },
-    groupSelect: { fontFamily: fontBody, fontSize: '0.95rem', fontWeight: 500, padding: '8px 12px', border: `1px solid ${color.border}`, borderRadius: 4, background: color.paper, color: color.ink },
     headerRight: { display: 'flex', alignItems: 'center', gap: 10 },
     startBtn: { background: color.highlighter, color: color.highlighterInk, border: 'none', borderRadius: 4, padding: '10px 18px', fontSize: '0.9rem', fontWeight: 600, fontFamily: fontBody },
     logoutBtn: { background: 'transparent', border: `1px solid ${color.border}`, color: color.ink, padding: '9px 14px', borderRadius: 4, fontSize: '0.85rem', fontFamily: fontBody },
 
-    main: { padding: '32px 40px 60px', maxWidth: 1000, margin: '0 auto', backgroundImage: `repeating-linear-gradient(to bottom, transparent, transparent 27px, ${color.paperLine} 28px)`, backgroundPosition: '0 8px' },
+    headerSubRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    teacherName: { fontFamily: fontDisplay, fontSize: '1.05rem', fontWeight: 600, color: color.ink },
+    headerSep: { color: color.inkFaint },
+
+    groupSwitcher: { position: 'relative', cursor: 'pointer' },
+    groupSwitcherLabel: { fontFamily: fontDisplay, fontSize: '1.05rem', fontWeight: 600, color: color.purple },
+    caret: { fontSize: '0.75rem' },
+
+    groupDropdown: { position: 'absolute', top: '100%', left: 0, marginTop: 8, background: color.card, border: `1px solid ${color.purple}44`, borderRadius: 8, boxShadow: `0 16px 40px -14px rgba(139,92,246,0.35)`, minWidth: 170, padding: 6, zIndex: 20 },
+    groupDropdownHeading: { fontFamily: fontMono, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: color.inkFaint, padding: '4px 10px 6px' },
+    groupDropdownItem: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'none', border: 'none', padding: '8px 10px', borderRadius: 5, fontSize: '0.88rem', color: color.ink, fontFamily: fontBody },
+    groupDropdownItemActive: { background: color.purpleSoft, color: color.purple, fontWeight: 600 },
+    dropdownCheck: { width: 14, color: color.purple, fontSize: '0.8rem', flexShrink: 0 },
+
+    timePill: { fontFamily: fontMono, fontSize: '0.82rem', fontWeight: 600, letterSpacing: '0.02em', background: color.accentSoft, color: color.accent, padding: '7px 14px', borderRadius: 20, whiteSpace: 'nowrap' },
+
+    main: {
+        position: 'relative',
+        padding: '32px 40px 60px',
+        background: `linear-gradient(180deg, ${color.purpleSoft}55, ${color.paper} 55%)`,
+        minHeight: 'calc(100vh - 90px)',
+        overflow: 'hidden',
+    },
+    mainContent: { position: 'relative', zIndex: 1 },
+    blob: { position: 'absolute', borderRadius: '50%', filter: 'blur(70px)', zIndex: 0, pointerEvents: 'none' },
+    blob1: { width: 380, height: 380, top: -120, left: '5%', background: color.purple, opacity: 0.22, animation: 'tchFloat1 16s ease-in-out infinite alternate' },
+    blob2: { width: 320, height: 320, top: 60, right: '8%', background: color.accent, opacity: 0.18, animation: 'tchFloat2 20s ease-in-out infinite alternate' },
+    blob3: { width: 300, height: 300, bottom: -140, left: '35%', background: color.magenta, opacity: 0.15, animation: 'tchFloat1 18s ease-in-out infinite alternate-reverse' },
+
     status: { color: color.inkFaint, fontFamily: fontMono, fontSize: '0.85rem' },
     errorBox: { background: color.claySoft, color: color.clay, borderRadius: 4, padding: '14px 16px', marginBottom: 20 },
 
@@ -393,26 +425,24 @@ const s = {
     lessonBannerTitle: { fontFamily: fontDisplay, fontWeight: 600, fontSize: '1.05rem', color: color.ink },
     lessonBannerSub: { fontSize: '0.85rem', color: color.inkSoft, marginTop: 2 },
 
-    groupCard: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: color.card, border: `1px solid ${color.border}`, borderRadius: 6, padding: '22px 26px', marginBottom: 24, boxShadow: `0 1px 0 ${color.border}, 0 10px 30px -18px rgba(31,42,61,0.3)` },
-    groupCardHoles: { position: 'absolute', top: 12, left: 20, display: 'flex', gap: 8 },
-    groupCardMain: { paddingTop: 6 },
     eyebrow: { fontFamily: fontMono, fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: color.inkFaint, display: 'block' },
     eyebrowSmall: { fontFamily: fontMono, fontSize: '0.68rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: color.inkFaint },
-    groupName: { fontFamily: fontDisplay, fontSize: '1.7rem', fontWeight: 600, color: color.ink, margin: '4px 0 6px' },
-    groupMeta: { display: 'flex', gap: 8, fontSize: '0.88rem', color: color.inkSoft },
-    statusStamp: { color: color.ink, borderColor: color.ink },
 
     panel: { background: color.card, border: `1px solid ${color.border}`, borderRadius: 6, padding: '24px 26px 20px', boxShadow: `0 1px 0 ${color.border}, 0 10px 30px -18px rgba(31,42,61,0.3)` },
     panelHeader: { marginBottom: 16 },
     panelTitle: { fontFamily: fontDisplay, fontSize: '1.3rem', fontWeight: 600, color: color.ink, margin: '4px 0 0' },
 
-    tableWrap: { border: `1px solid ${color.border}`, borderRadius: 4, overflowX: 'auto' },
-    table: { width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' },
-    th: { textAlign: 'left', padding: '10px 14px', fontFamily: fontMono, fontSize: '0.66rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: color.inkFaint, borderBottom: `1px solid ${color.border}`, background: color.paper, whiteSpace: 'nowrap' },
-    td: { padding: '10px 14px', borderBottom: `1px solid ${color.paperLine}`, color: color.ink, whiteSpace: 'nowrap' },
+    rosterList: { display: 'flex', flexDirection: 'column' },
+    rosterItem: { display: 'flex', alignItems: 'center', gap: 16, padding: '14px 4px', borderBottom: `1px solid ${color.paperLine}` },
+    rosterRank: { width: 22, flexShrink: 0, textAlign: 'center', fontFamily: fontMono, fontWeight: 700, fontSize: '0.85rem', color: color.accent },
+    rosterAvatarImg: { width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
+    rosterAvatarFallback: { width: 52, height: 52, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '1.05rem', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
+    rosterInfo: { flex: 1, minWidth: 0 },
+    rosterName: { fontFamily: fontDisplay, fontSize: '1.02rem', fontWeight: 600, color: color.ink },
+    rosterMeta: { display: 'flex', gap: 6, fontSize: '0.83rem', color: color.inkSoft, marginTop: 2 },
+    rosterDot: { color: color.inkFaint },
+    rosterParent: { textAlign: 'right', flexShrink: 0 },
     tdEmpty: { padding: '26px 16px', textAlign: 'center', color: color.inkFaint },
-    avatarImg: { width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', display: 'block' },
-    avatarFallback: { width: 30, height: 30, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '0.75rem' },
 
     emptyState: { background: color.card, border: `1px dashed ${color.border}`, borderRadius: 6, padding: '34px 26px', textAlign: 'center' },
     emptyTitle: { fontFamily: fontDisplay, fontSize: '1.1rem', fontWeight: 600, color: color.ink, margin: '0 0 6px' },
