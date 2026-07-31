@@ -1,31 +1,28 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /**
  * Teacher dashboard.
  *
  * Flow:
- *  - On load, GET .../groupInfo (no groupId) → backend auto-selects the
- *    nearest/ongoing group and returns { studentDto[], groupDto }.
- *  - The dropdown top-left is populated from GET .../groups (the teacher's
- *    own groups, lightweight {id,name} projection). Switching it re-fetches
- *    groupInfo with an explicit groupId.
+ *  - On load, fetch the teacher's own groups, default to the first one.
+ *  - The group switcher next to the teacher's name is a CLICK-toggled
+ *    dropdown (not hover — hover-to-open menus are unreliable for anything
+ *    you need to actually click into, since moving the cursor at the wrong
+ *    speed/angle closes it before the click registers). Click outside to
+ *    close it, same as any standard dropdown.
  *  - "Start Lesson" POSTs to /api/v1/lesson with { groupId, lessonName }.
+ *  - "Attendance" navigates to /attendance with the roster + active lesson
+ *    passed via router state.
  *
  * ASSUMPTIONS (flag if wrong, will fix):
- *  - Both /groups and /groupInfo live under /api/v1/group — not confirmed,
- *    just inferred from GroupController being where they were shown.
- *  - "Start Lesson" prompts for a lessonName. If it should be auto-generated
- *    server-side instead, the input can just be dropped.
- *  - No attendance-marking UI yet — once a lesson is created, the dashboard
- *    just shows a confirmation card with the real id/lessonNumber/date it
- *    got back. Wire in the real attendance flow once you share
- *    AttendanceCreateDto + AttendanceController.
+ *  - Both /groups and /groupInfo live under /api/v1/group — not confirmed.
+ *  - AttendanceCreateDto shape used on the Attendance page is a guess —
+ *    not yet confirmed against the real backend DTO.
  */
 
 const GROUP_ENDPOINT = '/api/v1/group'
 const LESSON_ENDPOINT = '/api/v1/lesson'
-const ATTENDANCE_ENDPOINT = '/api/v1/attendance'
 
 async function authFetch(path, token, options = {}) {
     const res = await fetch(path, {
@@ -75,44 +72,34 @@ function initials(name) {
 }
 
 export default function TeacherDashboard({ session, onLogout }) {
+    const navigate = useNavigate()
+
     const [groupOptions, setGroupOptions] = useState([])
     const [selectedGroupId, setSelectedGroupId] = useState('')
     const [groupInfo, setGroupInfo] = useState(null) // FullGroupDto
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
 
+    const [groupMenuOpen, setGroupMenuOpen] = useState(false)
+    const switcherRef = useRef(null)
+
     const [lessonModalOpen, setLessonModalOpen] = useState(false)
     const [lessonName, setLessonName] = useState('')
     const [startingLesson, setStartingLesson] = useState(false)
     const [lessonError, setLessonError] = useState('')
     const [activeLesson, setActiveLesson] = useState(null) // LessonDto once created
-    const navigate = useNavigate()
 
-    // Load the teacher's own groups for the dropdown, once.
-    useEffect(() => {
-        authFetch(`${GROUP_ENDPOINT}/groups`, session.token)
-            .then((list) => {
-                const groups = list || []
-                setGroupOptions(groups)
-                // Default to the first group if none is selected yet
-                if (groups.length > 0) {
-                    loadGroupInfo(groups[0].id)
-                } else {
-                    setLoading(false)
-                }
-            })
-            .catch(() => {
-                setGroupOptions([])
-                setLoading(false)
-            })
-    }, [session.token])
+    const [selectedStudent, setSelectedStudent] = useState(null)
 
     const loadGroupInfo = useCallback(
         async (groupId) => {
             setLoading(true)
             setLoadError('')
             try {
-                const data = await authFetch(`${GROUP_ENDPOINT}/groupInfo?groupId=${encodeURIComponent(groupId)}`, session.token)
+                const data = await authFetch(
+                    `${GROUP_ENDPOINT}/groupInfo?groupId=${encodeURIComponent(groupId)}`,
+                    session.token
+                )
                 setGroupInfo(data)
                 setSelectedGroupId(data?.groupDto?.id || '')
             } catch (err) {
@@ -125,8 +112,39 @@ export default function TeacherDashboard({ session, onLogout }) {
         [session.token]
     )
 
+    // Load the teacher's own groups, default to the first one.
+    useEffect(() => {
+        authFetch(`${GROUP_ENDPOINT}/groups`, session.token)
+            .then((list) => {
+                const groups = list || []
+                setGroupOptions(groups)
+                if (groups.length > 0) {
+                    loadGroupInfo(groups[0].id)
+                } else {
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                setGroupOptions([])
+                setLoading(false)
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session.token])
+
+    // Click-outside-to-close for the group switcher.
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (switcherRef.current && !switcherRef.current.contains(e.target)) {
+                setGroupMenuOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
     function switchGroup(id) {
         setActiveLesson(null)
+        setGroupMenuOpen(false)
         loadGroupInfo(id)
     }
 
@@ -151,10 +169,16 @@ export default function TeacherDashboard({ session, onLogout }) {
 
     const group = groupInfo?.groupDto
     // Every group returned by this dashboard belongs to the logged-in
-    // teacher, so group.teacher.userDto.fullName IS the teacher's own name —
-    // far more reliable than guessing at JWT claim keys.
+    // teacher, so group.teacher.userDto.fullName IS the teacher's own name.
     const teacherName = group?.teacher?.userDto?.fullName || 'Teacher'
     const students = groupInfo?.studentDto || []
+
+    // Guarantee the current group is always in the dropdown, even if the
+    // /groups fetch came back empty or is momentarily out of sync.
+    const dropdownGroups =
+        group && !groupOptions.some((g) => g.id === group.id)
+            ? [{ id: group.id, name: group.name }, ...groupOptions]
+            : groupOptions
 
     return (
         <div style={s.page}>
@@ -162,12 +186,7 @@ export default function TeacherDashboard({ session, onLogout }) {
                 .tch-btn { transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease; cursor: pointer; }
                 .tch-btn:hover { opacity: 0.88; }
                 .tch-btn:active { transform: translateY(1px); }
-                .tch-select { transition: border-color 0.15s ease; cursor: pointer; }
-                .tch-select:hover { border-color: #b7ab8a; }
                 .tch-row:hover { background: #f4efe3; border-radius: 6px; margin: 0 -8px; padding-left: 12px; padding-right: 12px; }
-                .tch-group-switcher { position: relative; cursor: pointer; display: inline-block; }
-                .tch-group-dropdown { display: none; }
-                .tch-group-switcher:hover .tch-group-dropdown { display: block; }
                 .tch-dropdown-item { transition: background 0.12s ease; text-align: left; width: 100%; cursor: pointer; }
                 .tch-dropdown-item:hover { background: #f4efe3; }
                 .tch-input { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
@@ -175,6 +194,14 @@ export default function TeacherDashboard({ session, onLogout }) {
                     outline: none;
                     border-color: #1f2a3d;
                     box-shadow: 0 0 0 3px rgba(31,42,61,0.08);
+                }
+                @keyframes tchFloat1 {
+                    0% { transform: translate(0, 0) scale(1); }
+                    100% { transform: translate(40px, 30px) scale(1.12); }
+                }
+                @keyframes tchFloat2 {
+                    0% { transform: translate(0, 0) scale(1); }
+                    100% { transform: translate(-35px, 25px) scale(1.08); }
                 }
             `}</style>
 
@@ -194,7 +221,9 @@ export default function TeacherDashboard({ session, onLogout }) {
                         <button
                             className="tch-btn"
                             style={s.attendanceHeaderBtn}
-                            onClick={() => navigate('/attendance', { state: { session, students, activeLesson } })}
+                            onClick={() =>
+                                navigate('/attendance', { state: { session, students, activeLesson } })
+                            }
                         >
                             Attendance
                         </button>
@@ -218,31 +247,37 @@ export default function TeacherDashboard({ session, onLogout }) {
                     {group && (
                         <>
                             <span style={s.headerSep}>·</span>
-                            <div className="tch-group-switcher" style={s.groupSwitcher}>
-                                <span style={s.groupSwitcherLabel}>
+                            <div ref={switcherRef} style={s.groupSwitcher}>
+                                <button
+                                    type="button"
+                                    style={s.groupSwitcherLabel}
+                                    onClick={() => setGroupMenuOpen((open) => !open)}
+                                >
                                     {group.name}
-                                    <span style={s.caret}> ▾</span>
-                                </span>
+                                    <span style={s.caret}>{groupMenuOpen ? ' ▴' : ' ▾'}</span>
+                                </button>
 
-                                <div className="tch-group-dropdown" style={s.groupDropdown}>
-                                    <div style={s.groupDropdownHeading}>Switch group</div>
-                                    {groupOptions.map((g) => (
-                                        <button
-                                            key={g.id}
-                                            className="tch-dropdown-item"
-                                            style={{
-                                                ...s.groupDropdownItem,
-                                                ...(g.id === selectedGroupId ? s.groupDropdownItemActive : {}),
-                                            }}
-                                            onClick={() => switchGroup(g.id)}
-                                        >
-                                            <span style={s.dropdownCheck}>
-                                                {g.id === selectedGroupId ? '✓' : ''}
-                                            </span>
-                                            {g.name}
-                                        </button>
-                                    ))}
-                                </div>
+                                {groupMenuOpen && (
+                                    <div style={s.groupDropdown}>
+                                        <div style={s.groupDropdownHeading}>Switch group</div>
+                                        {dropdownGroups.map((g) => (
+                                            <button
+                                                key={g.id}
+                                                className="tch-dropdown-item"
+                                                style={{
+                                                    ...s.groupDropdownItem,
+                                                    ...(g.id === selectedGroupId ? s.groupDropdownItemActive : {}),
+                                                }}
+                                                onClick={() => switchGroup(g.id)}
+                                            >
+                                                <span style={s.dropdownCheck}>
+                                                    {g.id === selectedGroupId ? '✓' : ''}
+                                                </span>
+                                                {g.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
@@ -250,31 +285,38 @@ export default function TeacherDashboard({ session, onLogout }) {
             </header>
 
             <main style={s.main}>
-                {loading && <p style={s.status}>Loading your group…</p>}
+                <div style={{ ...s.blob, ...s.blob1 }} />
+                <div style={{ ...s.blob, ...s.blob2 }} />
+                <div style={{ ...s.blob, ...s.blob3 }} />
 
-                {loadError && (
-                    <div style={s.errorBox}>Couldn't load group info: {loadError}</div>
-                )}
+                <div style={s.mainContent}>
+                    {loading && <p style={s.status}>Loading your group…</p>}
 
-                {activeLesson && (
-                    <div style={s.lessonBanner}>
-                        <span style={s.stamp}>In progress</span>
-                        <div style={s.lessonBannerContent}>
-                            <div style={s.lessonBannerTitle}>
-                                Lesson {activeLesson.lessonNumber} started
+                    {loadError && (
+                        <div style={s.errorBox}>Couldn't load group info: {loadError}</div>
+                    )}
+
+                    {activeLesson && (
+                        <div style={s.lessonBanner}>
+                            <span style={s.stamp}>In progress</span>
+                            <div style={s.lessonBannerContent}>
+                                <div style={s.lessonBannerTitle}>
+                                    Lesson {activeLesson.lessonNumber} started
+                                </div>
+                                <div style={s.lessonBannerSub}>{activeLesson.lessonDate}</div>
                             </div>
-                            <div style={s.lessonBannerSub}>
-                                {activeLesson.lessonDate}
-                            </div>
+                            <button
+                                style={s.markAttendanceBtn}
+                                onClick={() =>
+                                    navigate('/attendance', { state: { session, students, activeLesson } })
+                                }
+                            >
+                                Mark Attendance
+                            </button>
                         </div>
-                        <button style={s.markAttendanceBtn} onClick={() => navigate('/attendance', { state: { session, students, activeLesson } })}>
-                            Mark Attendance
-                        </button>
-                    </div>
-                )}
+                    )}
 
-                {!loading && !loadError && group && !activeLesson && (
-                    <>
+                    {!loading && !loadError && group && (
                         <div style={s.panel}>
                             <header style={s.panelHeader}>
                                 <span style={s.eyebrow}>Roster</span>
@@ -286,52 +328,42 @@ export default function TeacherDashboard({ session, onLogout }) {
                                     <p style={s.tdEmpty}>No students in this group yet.</p>
                                 )}
                                 {students.map((st, i) => (
-                                    <div key={st.id} className="tch-row" style={s.rosterItem}>
+                                    <button
+                                        key={st.id}
+                                        className="tch-row"
+                                        style={s.rosterItem}
+                                        onClick={() => setSelectedStudent(st)}
+                                    >
                                         <span style={s.rosterRank}>{i + 1}</span>
                                         {st.userDto?.imgUrl ? (
-                                            <img
-                                                src={st.userDto.imgUrl}
-                                                alt=""
-                                                style={s.rosterAvatarImg}
-                                            />
+                                            <img src={st.userDto.imgUrl} alt="" style={s.rosterAvatarImg} />
                                         ) : (
                                             <div style={s.rosterAvatarFallback}>
                                                 {initials(st.userDto?.fullName)}
                                             </div>
                                         )}
-                                        <div style={s.rosterInfo}>
-                                            <div style={s.rosterName}>{st.userDto?.fullName || '—'}</div>
-                                            <div style={s.rosterMeta}>
-                                                <span>{st.userDto?.phone || '—'}</span>
-                                                <span style={s.rosterDot}>·</span>
-                                                <span>{st.userDto?.birthDate || '—'}</span>
-                                            </div>
-                                        </div>
-                                        <div style={s.rosterParent}>
-                                            <span style={s.eyebrowSmall}>Parent</span>
-                                            <div>{st.parentPhone || '—'}</div>
-                                        </div>
-                                    </div>
+                                        <div style={s.rosterName}>{st.userDto?.fullName || '—'}</div>
+                                    </button>
                                 ))}
                             </div>
                         </div>
-                    </>
-                )}
+                    )}
 
-                {!loading && !loadError && !group && (
-                    <div style={s.emptyState}>
-                        <p style={s.emptyTitle}>
-                            {groupOptions.length === 0
-                                ? "You don't have any groups yet."
-                                : 'No upcoming lesson right now.'}
-                        </p>
-                        <p style={s.emptySub}>
-                            {groupOptions.length === 0
-                                ? "Once you're assigned to a group, it'll show up here."
-                                : 'Pick a group from the dropdown above to view its roster.'}
-                        </p>
-                    </div>
-                )}
+                    {!loading && !loadError && !group && (
+                        <div style={s.emptyState}>
+                            <p style={s.emptyTitle}>
+                                {groupOptions.length === 0
+                                    ? "You don't have any groups yet."
+                                    : 'No upcoming lesson right now.'}
+                            </p>
+                            <p style={s.emptySub}>
+                                {groupOptions.length === 0
+                                    ? "Once you're assigned to a group, it'll show up here."
+                                    : 'Pick a group from the dropdown above to view its roster.'}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </main>
 
             {lessonModalOpen && (
@@ -377,6 +409,51 @@ export default function TeacherDashboard({ session, onLogout }) {
                     </div>
                 </div>
             )}
+
+            {selectedStudent && (
+                <div style={s.modalOverlay} onClick={() => setSelectedStudent(null)}>
+                    <div style={s.modal} onClick={(e) => e.stopPropagation()}>
+                        <div style={s.studentModalHeader}>
+                            {selectedStudent.userDto?.imgUrl ? (
+                                <img
+                                    src={selectedStudent.userDto.imgUrl}
+                                    alt=""
+                                    style={s.studentModalAvatarImg}
+                                />
+                            ) : (
+                                <div style={s.studentModalAvatarFallback}>
+                                    {initials(selectedStudent.userDto?.fullName)}
+                                </div>
+                            )}
+                            <h2 style={s.modalTitle}>{selectedStudent.userDto?.fullName || '—'}</h2>
+                        </div>
+
+                        <div style={s.studentDetailRow}>
+                            <span style={s.eyebrowSmall}>Phone</span>
+                            <span>{selectedStudent.userDto?.phone || '—'}</span>
+                        </div>
+                        <div style={s.studentDetailRow}>
+                            <span style={s.eyebrowSmall}>Birth date</span>
+                            <span>{selectedStudent.userDto?.birthDate || '—'}</span>
+                        </div>
+                        <div style={s.studentDetailRow}>
+                            <span style={s.eyebrowSmall}>Parent phone</span>
+                            <span>{selectedStudent.parentPhone || '—'}</span>
+                        </div>
+
+                        <div style={s.modalActions}>
+                            <button
+                                type="button"
+                                className="tch-btn"
+                                style={s.cancelBtn}
+                                onClick={() => setSelectedStudent(null)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
@@ -411,8 +488,8 @@ const s = {
     teacherName: { fontFamily: fontDisplay, fontSize: '1.05rem', fontWeight: 600, color: color.ink },
     headerSep: { color: color.inkFaint },
 
-    groupSwitcher: { position: 'relative', cursor: 'pointer' },
-    groupSwitcherLabel: { fontFamily: fontDisplay, fontSize: '1.05rem', fontWeight: 600, color: color.purple },
+    groupSwitcher: { position: 'relative' },
+    groupSwitcherLabel: { fontFamily: fontDisplay, fontSize: '1.05rem', fontWeight: 600, color: color.purple, background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' },
     caret: { fontSize: '0.75rem' },
 
     groupDropdown: { position: 'absolute', top: '100%', left: 0, marginTop: 8, background: color.card, border: `1px solid ${color.purple}44`, borderRadius: 8, boxShadow: `0 16px 40px -14px rgba(139,92,246,0.35)`, minWidth: 170, padding: 6, zIndex: 20 },
@@ -454,15 +531,11 @@ const s = {
     panelTitle: { fontFamily: fontDisplay, fontSize: '1.3rem', fontWeight: 600, color: color.ink, margin: '4px 0 0' },
 
     rosterList: { display: 'flex', flexDirection: 'column' },
-    rosterItem: { display: 'flex', alignItems: 'center', gap: 16, padding: '14px 4px', borderBottom: `1px solid ${color.paperLine}` },
+    rosterItem: { display: 'flex', alignItems: 'center', gap: 16, padding: '14px 4px', borderBottom: `1px solid ${color.paperLine}`, background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: fontBody },
     rosterRank: { width: 22, flexShrink: 0, textAlign: 'center', fontFamily: fontMono, fontWeight: 700, fontSize: '0.85rem', color: color.accent },
-    rosterAvatarImg: { width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
-    rosterAvatarFallback: { width: 52, height: 52, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '1.05rem', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
-    rosterInfo: { flex: 1, minWidth: 0 },
+    rosterAvatarImg: { width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
+    rosterAvatarFallback: { width: 44, height: 44, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '0.95rem', flexShrink: 0, border: `2px solid ${color.paper}`, boxShadow: `0 0 0 1px ${color.border}` },
     rosterName: { fontFamily: fontDisplay, fontSize: '1.02rem', fontWeight: 600, color: color.ink },
-    rosterMeta: { display: 'flex', gap: 6, fontSize: '0.83rem', color: color.inkSoft, marginTop: 2 },
-    rosterDot: { color: color.inkFaint },
-    rosterParent: { textAlign: 'right', flexShrink: 0 },
     tdEmpty: { padding: '26px 16px', textAlign: 'center', color: color.inkFaint },
 
     emptyState: { background: color.card, border: `1px dashed ${color.border}`, borderRadius: 6, padding: '34px 26px', textAlign: 'center' },
@@ -479,4 +552,9 @@ const s = {
     modalActions: { display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 6 },
     cancelBtn: { background: 'transparent', border: `1px solid ${color.border}`, color: color.ink, padding: '9px 16px', borderRadius: 4, fontSize: '0.85rem', fontFamily: fontBody },
     saveBtn: { background: color.ink, color: color.paper, border: 'none', padding: '9px 18px', borderRadius: 4, fontSize: '0.85rem', fontWeight: 500, fontFamily: fontBody },
+
+    studentModalHeader: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 },
+    studentModalAvatarImg: { width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 },
+    studentModalAvatarFallback: { width: 52, height: 52, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '1.05rem', flexShrink: 0 },
+    studentDetailRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: `1px solid ${color.paperLine}`, fontSize: '0.92rem', color: color.ink },
 }
