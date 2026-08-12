@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, type CSSProperties, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { FullGroupDto, GroupDto, LessonDto, Session, StudentDto } from '../types'
 
 /**
  * Teacher dashboard.
@@ -24,7 +25,7 @@ import { useNavigate } from 'react-router-dom'
 const GROUP_ENDPOINT = '/api/v1/group'
 const LESSON_ENDPOINT = '/api/v1/lesson'
 
-async function authFetch(path, token, options = {}) {
+async function authFetch<T>(path: string, token: string, options: RequestInit = {}): Promise<T | null> {
     const res = await fetch(path, {
         ...options,
         credentials: 'include',
@@ -37,7 +38,7 @@ async function authFetch(path, token, options = {}) {
     if (!res.ok) {
         let message = `Request failed (${res.status})`
         try {
-            const body = await res.json()
+            const body = await res.json() as { message?: string; error?: string }
             message = body.message || body.error || message
         } catch {
             /* no json body */
@@ -50,18 +51,18 @@ async function authFetch(path, token, options = {}) {
     const text = await res.text()
     if (!text) return null
     try {
-        return JSON.parse(text)
+        return JSON.parse(text) as T
     } catch {
         return null
     }
 }
 
-function formatTime(t) {
+function formatTime(t?: string) {
     // LocalTime serializes as "HH:mm:ss" — nobody needs the seconds.
     return t ? t.slice(0, 5) : ''
 }
 
-function initials(name) {
+function initials(name?: string) {
     if (!name) return '?'
     return name
         .split(' ')
@@ -71,39 +72,44 @@ function initials(name) {
         .toUpperCase()
 }
 
-export default function TeacherDashboard({ session, onLogout }) {
+interface TeacherDashboardProps {
+    session: Session
+    onLogout: () => void
+}
+
+export default function TeacherDashboard({ session, onLogout }: TeacherDashboardProps) {
     const navigate = useNavigate()
 
-    const [groupOptions, setGroupOptions] = useState([])
+    const [groupOptions, setGroupOptions] = useState<GroupDto[]>([])
     const [selectedGroupId, setSelectedGroupId] = useState('')
-    const [groupInfo, setGroupInfo] = useState(null) // FullGroupDto
+    const [groupInfo, setGroupInfo] = useState<FullGroupDto | null>(null) // FullGroupDto
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
 
     const [groupMenuOpen, setGroupMenuOpen] = useState(false)
-    const switcherRef = useRef(null)
+    const switcherRef = useRef<HTMLDivElement>(null)
 
     const [lessonModalOpen, setLessonModalOpen] = useState(false)
     const [lessonName, setLessonName] = useState('')
     const [startingLesson, setStartingLesson] = useState(false)
     const [lessonError, setLessonError] = useState('')
-    const [activeLesson, setActiveLesson] = useState(null) // LessonDto once created
+    const [activeLesson, setActiveLesson] = useState<LessonDto | null>(null) // LessonDto once created
 
-    const [selectedStudent, setSelectedStudent] = useState(null)
+    const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null)
 
     const loadGroupInfo = useCallback(
-        async (groupId) => {
+        async (groupId: string) => {
             setLoading(true)
             setLoadError('')
             try {
-                const data = await authFetch(
+                const data = await authFetch<FullGroupDto>(
                     `${GROUP_ENDPOINT}/groupInfo?groupId=${encodeURIComponent(groupId)}`,
                     session.token
                 )
                 setGroupInfo(data)
                 setSelectedGroupId(data?.groupDto?.id || '')
             } catch (err) {
-                setLoadError(err.message)
+                setLoadError(err instanceof Error ? err.message : String(err))
                 setGroupInfo(null)
             } finally {
                 setLoading(false)
@@ -114,7 +120,7 @@ export default function TeacherDashboard({ session, onLogout }) {
 
     // Load the teacher's own groups, default to the first one.
     useEffect(() => {
-        authFetch(`${GROUP_ENDPOINT}/groups`, session.token)
+        authFetch<GroupDto[]>(`${GROUP_ENDPOINT}/groups`, session.token)
             .then((list) => {
                 const groups = list || []
                 setGroupOptions(groups)
@@ -133,8 +139,8 @@ export default function TeacherDashboard({ session, onLogout }) {
 
     // Click-outside-to-close for the group switcher.
     useEffect(() => {
-        function handleClickOutside(e) {
-            if (switcherRef.current && !switcherRef.current.contains(e.target)) {
+        function handleClickOutside(e: MouseEvent) {
+            if (switcherRef.current && e.target instanceof Node && !switcherRef.current.contains(e.target)) {
                 setGroupMenuOpen(false)
             }
         }
@@ -142,18 +148,18 @@ export default function TeacherDashboard({ session, onLogout }) {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    function switchGroup(id) {
+    function switchGroup(id: string) {
         setActiveLesson(null)
         setGroupMenuOpen(false)
         loadGroupInfo(id)
     }
 
-    async function handleStartLesson(e) {
+    async function handleStartLesson(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setStartingLesson(true)
         setLessonError('')
         try {
-            const lesson = await authFetch(LESSON_ENDPOINT, session.token, {
+            const lesson = await authFetch<LessonDto>(LESSON_ENDPOINT, session.token, {
                 method: 'POST',
                 body: JSON.stringify({ groupId: selectedGroupId, lessonName }),
             })
@@ -161,7 +167,7 @@ export default function TeacherDashboard({ session, onLogout }) {
             setLessonModalOpen(false)
             setLessonName('')
         } catch (err) {
-            setLessonError(err.message)
+            setLessonError(err instanceof Error ? err.message : String(err))
         } finally {
             setStartingLesson(false)
         }
@@ -458,7 +464,7 @@ export default function TeacherDashboard({ session, onLogout }) {
     )
 }
 
-// ---- design tokens, inline — same system as Login.jsx / AdminDashboard.jsx ----
+// ---- design tokens, inline — same system as Login.tsx / AdminDashboard.tsx ----
 const color = {
     paper: '#FAF6EE', paperLine: '#DDD3BC', card: '#FFFDF8', ink: '#1F2A3D',
     inkSoft: '#4B5768', inkFaint: '#8892A0', highlighter: '#F2B705',
@@ -557,4 +563,4 @@ const s = {
     studentModalAvatarImg: { width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 },
     studentModalAvatarFallback: { width: 52, height: 52, borderRadius: '50%', background: color.highlighter, color: color.highlighterInk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: fontDisplay, fontWeight: 700, fontSize: '1.05rem', flexShrink: 0 },
     studentDetailRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: `1px solid ${color.paperLine}`, fontSize: '0.92rem', color: color.ink },
-}
+} satisfies Record<string, CSSProperties>

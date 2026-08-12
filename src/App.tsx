@@ -6,15 +6,16 @@ import AdminDashboard from './pages/AdminDashboard'
 import TeacherDashboard from './pages/TeacherDashboard'
 import AttendancePage from './pages/AttendancePage'
 import { AuthContext } from './AuthContext'
+import type { AuthResponse, Session } from './types'
 
 function AppShell() {
-    const [session, setSession] = useState(null)
+    const [session, setSession] = useState<Session | null>(null)
     const [checking, setChecking] = useState(true)
     const navigate = useNavigate()
 
     useEffect(() => {
         fetch('/api/v1/auth/refresh-token', { method: 'POST', credentials: 'include' })
-            .then((res) => (res.ok ? res.json() : Promise.reject()))
+            .then((res) => (res.ok ? (res.json() as Promise<AuthResponse>) : Promise.reject()))
             .then((data) => {
                 const claims = decodeJwt(data.token)
                 if (claims?.role) setSession({ token: data.token, role: claims.role, claims })
@@ -42,7 +43,12 @@ function AppShell() {
     )
 }
 
-function DashboardRouter({ session, onLogout }) {
+interface DashboardRouterProps {
+    session: Session
+    onLogout: () => void
+}
+
+function DashboardRouter({ session, onLogout }: DashboardRouterProps) {
     switch (session.role) {
         case 'ADMINISTRATOR':
             return <AdminDashboard session={session} onLogout={onLogout} />

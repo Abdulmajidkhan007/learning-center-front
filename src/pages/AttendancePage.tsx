@@ -1,15 +1,24 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, type CSSProperties } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../AuthContext'
+import {
+    ATTENDANCE_STATUSES,
+    type AttendanceDto,
+    type AttendanceStatus,
+    type AttendanceStudentDto,
+    type LessonDto,
+    type Session,
+    type StudentDto,
+} from '../types'
 
 const ATTENDANCE_ENDPOINT = '/api/v1/attendance'
 
-function formatDate(d) {
+function formatDate(d?: string) {
     if (!d) return ''
     return d.slice(0, 10)
 }
 
-function authFetch(path, token, options = {}) {
+function authFetch<T>(path: string, token: string, options: RequestInit = {}): Promise<T | null> {
     return fetch(path, {
         ...options,
         credentials: 'include',
@@ -21,41 +30,63 @@ function authFetch(path, token, options = {}) {
     }).then(async (res) => {
         if (!res.ok) {
             let message = `Request failed (${res.status})`
-            try { const body = await res.json(); message = body.message || body.error || message } catch { }
+            try { const body = await res.json() as { message?: string; error?: string }; message = body.message || body.error || message } catch { }
             throw new Error(message)
         }
         const text = await res.text()
         if (!text) return null
-        return JSON.parse(text)
+        return JSON.parse(text) as T
     })
 }
 
-const STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED']
+const STATUSES = ATTENDANCE_STATUSES
 
-export default function AttendancePage({ standalone, session: propSession, onLogout: propOnLogout, onBack: propOnBack, students: propStudents, activeLesson: propActiveLesson, onLessonFinished: propOnLessonFinished }) {
-    const { session: ctxSession, onLogout: ctxOnLogout } = useContext(AuthContext) || {}
+/** Payload handed over through router state — read in standalone mode. */
+interface AttendanceLocationState {
+    students?: StudentDto[]
+    activeLesson?: LessonDto | null
+}
+
+interface AttendancePageProps {
+    /** true — opened on its own `/attendance` route (context + router state).
+     *  false/undefined — embedded in another page and fed through props. */
+    standalone?: boolean
+    session?: Session | null
+    onLogout?: () => void
+    onBack?: () => void
+    students?: StudentDto[]
+    activeLesson?: LessonDto | null
+    onLessonFinished?: () => void
+}
+
+export default function AttendancePage({ standalone, session: propSession, onLogout: propOnLogout, onBack: propOnBack, students: propStudents, activeLesson: propActiveLesson, onLessonFinished: propOnLessonFinished }: AttendancePageProps) {
+    const auth = useContext(AuthContext)
+    const ctxSession = auth?.session ?? null
+    const ctxOnLogout = auth?.onLogout
     const location = useLocation()
     const navigate = useNavigate()
+
+    const locationState = (location.state ?? null) as AttendanceLocationState | null
 
     const session = standalone ? ctxSession : propSession
     const onLogout = standalone ? ctxOnLogout : propOnLogout
     const onBack = standalone ? (propOnBack || (() => navigate('/'))) : propOnBack
-    const groupStudents = standalone ? (location.state?.students || []) : propStudents
-    const activeLesson = standalone ? (location.state?.activeLesson || null) : propActiveLesson
+    const groupStudents: StudentDto[] = standalone ? (locationState?.students || []) : (propStudents || [])
+    const activeLesson = standalone ? (locationState?.activeLesson || null) : propActiveLesson
     const onLessonFinished = standalone ? (propOnLessonFinished || (() => navigate('/'))) : propOnLessonFinished
-    const [records, setRecords] = useState([])
-    const [draftMap, setDraftMap] = useState({})
-    const [draftLessonInfo, setDraftLessonInfo] = useState(null)
+    const [records, setRecords] = useState<AttendanceDto[]>([])
+    const [draftMap, setDraftMap] = useState<Record<string, AttendanceStatus>>({})
+    const [draftLessonInfo, setDraftLessonInfo] = useState<LessonDto | null>(null)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
 
-    const groupStudentIds = new Set((groupStudents || []).map((st) => st.id))
+    const groupStudentIds = new Set(groupStudents.map((st) => st.id))
 
     useEffect(() => {
         if (!session || !groupStudents.length) return
-        authFetch(`${ATTENDANCE_ENDPOINT}?size=200`, session.token)
+        authFetch<AttendanceDto[] | { content?: AttendanceDto[] }>(`${ATTENDANCE_ENDPOINT}?size=200`, session.token)
             .then((data) => {
-                const all = data?.content || data || []
+                const all = (Array.isArray(data) ? data : data?.content) || []
                 const filtered = all.filter((r) =>
                     (r.attendanceStudents || []).some((as) => groupStudentIds.has(as.studentId))
                 )
@@ -68,9 +99,9 @@ export default function AttendancePage({ standalone, session: propSession, onLog
         if (activeLesson) startDraft(activeLesson)
     }, [activeLesson?.id])
 
-    function startDraft(lessonInfo) {
+    function startDraft(lessonInfo: LessonDto) {
         if (!groupStudents.length) return
-        const map = {}
+        const map: Record<string, AttendanceStatus> = {}
         groupStudents.forEach((st) => { map[st.id] = 'PRESENT' })
         setDraftMap(map)
         setDraftLessonInfo(lessonInfo)
@@ -78,22 +109,26 @@ export default function AttendancePage({ standalone, session: propSession, onLog
     }
 
     async function handleFinish() {
+        // The button only renders while a draft exists, but spell the guard out
+        // anyway — it satisfies the compiler and covers an unexpected call.
+        if (!session || !draftLessonInfo) return
+        const lessonInfo = draftLessonInfo
         setSubmitting(true)
         setError('')
         try {
             const body = {
-                lessonId: draftLessonInfo.id,
-                students: Object.entries(draftMap).map(([studentId, status]) => ({
+                lessonId: lessonInfo.id,
+                students: Object.entries(draftMap).map(([studentId, status]): AttendanceStudentDto => ({
                     studentId,
                     status,
                 })),
             }
-            const created = await authFetch(ATTENDANCE_ENDPOINT, session.token, {
+            const created = await authFetch<AttendanceDto>(ATTENDANCE_ENDPOINT, session.token, {
                 method: 'POST',
                 body: JSON.stringify(body),
             })
             setRecords((prev) => [{
-                lessonId: draftLessonInfo.id,
+                lessonId: lessonInfo.id,
                 createdAt: created?.createdAt || new Date().toISOString(),
                 attendanceStudents: created?.attendanceStudents || body.students,
             }, ...prev])
@@ -101,13 +136,13 @@ export default function AttendancePage({ standalone, session: propSession, onLog
             setDraftLessonInfo(null)
             if (onLessonFinished) onLessonFinished()
         } catch (err) {
-            setError(err.message)
+            setError(err instanceof Error ? err.message : String(err))
         } finally {
             setSubmitting(false)
         }
     }
 
-    function getStudentStatus(studentId, attendanceStudents) {
+    function getStudentStatus(studentId: string, attendanceStudents?: AttendanceStudentDto[]) {
         const found = (attendanceStudents || []).find((s) => s.studentId === studentId)
         return found ? found.status : null
     }
@@ -118,10 +153,10 @@ export default function AttendancePage({ standalone, session: propSession, onLog
         attendanceStudents: r.attendanceStudents || [],
     }))
 
-    const students = groupStudents || []
+    const students = groupStudents
     const hasDraft = draftLessonInfo && Object.keys(draftMap).length > 0
 
-    const draftCounts = { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 }
+    const draftCounts: Record<AttendanceStatus, number> = { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 }
     if (hasDraft) {
         Object.values(draftMap).forEach((status) => { draftCounts[status]++ })
     }
@@ -225,7 +260,7 @@ export default function AttendancePage({ standalone, session: propSession, onLog
                                                         className="att-cell-select"
                                                         style={s.cellSelect}
                                                         value={draftMap[studentId] || 'PRESENT'}
-                                                        onChange={(e) => setDraftMap((prev) => ({ ...prev, [studentId]: e.target.value }))}
+                                                        onChange={(e) => setDraftMap((prev) => ({ ...prev, [studentId]: e.target.value as AttendanceStatus }))}
                                                     >
                                                         {STATUSES.map((status) => (
                                                             <option key={status} value={status}>
@@ -260,6 +295,8 @@ const fontDisplay = "'Fraunces', ui-serif, Georgia, serif"
 const fontBody = "'Work Sans', ui-sans-serif, system-ui, sans-serif"
 const fontMono = "'IBM Plex Mono', ui-monospace, monospace"
 
+// `satisfies` keeps the keys literal, which is what makes the dynamic lookup
+// s[`badge${status}`] type-check instead of silently returning undefined.
 const s = {
     page: { minHeight: '100vh', background: color.paper, fontFamily: fontBody },
 
@@ -307,4 +344,4 @@ const s = {
     emptyState: { background: color.card, border: `1px dashed ${color.border}`, borderRadius: 6, padding: '34px 26px', textAlign: 'center', marginTop: 24 },
     emptyTitle: { fontFamily: fontDisplay, fontSize: '1.1rem', fontWeight: 600, color: color.ink, margin: '0 0 6px' },
     emptySub: { color: color.inkSoft, fontSize: '0.9rem', margin: 0 },
-}
+} satisfies Record<string, CSSProperties>

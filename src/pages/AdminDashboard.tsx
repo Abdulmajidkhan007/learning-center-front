@@ -1,4 +1,13 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, type CSSProperties, type FormEvent, type ReactNode } from 'react'
+import type {
+    GroupStatus,
+    Page,
+    Session,
+    TeacherDto,
+    TimeTableDto,
+    UserDto,
+    WeekDay,
+} from '../types'
 
 /**
  * Administrator dashboard — full CRUD across Students, Teachers, Groups,
@@ -11,30 +20,56 @@ import { useEffect, useState, useCallback } from 'react'
  * share those DTOs and I'll lock the forms to the exact right shape.
  */
 
-const ENTITIES = [
+type EntityKey = 'students' | 'teachers' | 'groups' | 'lessons'
+
+interface EntityConfig {
+    key: EntityKey
+    label: string
+    endpoint: string
+}
+
+const ENTITIES: EntityConfig[] = [
     { key: 'students', label: 'Students', endpoint: '/api/v1/student' },
     { key: 'teachers', label: 'Teachers', endpoint: '/api/v1/teacher' },
     { key: 'groups', label: 'Groups', endpoint: '/api/v1/group' },
     { key: 'lessons', label: 'Lessons', endpoint: '/api/v1/lesson' },
 ]
 
+/**
+ * One row of the table. This page renders four different DTOs through a
+ * single generic table, so the row type is the union of their fields plus an
+ * index signature for the inferred-column path (`inferColumns`, `row[c]`).
+ * Everything is optional because which fields arrive depends on the open tab.
+ */
+export interface AdminRow {
+    id: string
+    userDto?: UserDto
+    parentPhone?: string
+    name?: string
+    room?: string
+    teacher?: TeacherDto
+    timeTable?: TimeTableDto
+    status?: GroupStatus
+    [key: string]: unknown
+}
+
 const PAGE_SIZE = 10
-const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
-const DAY_ABBR = {
+const DAYS: WeekDay[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
+const DAY_ABBR: Record<WeekDay, string> = {
     MONDAY: 'Mon', TUESDAY: 'Tue', WEDNESDAY: 'Wed', THURSDAY: 'Thu',
     FRIDAY: 'Fri', SATURDAY: 'Sat', SUNDAY: 'Sun',
 }
-const GROUP_STATUSES = [
+const GROUP_STATUSES: { value: GroupStatus; label: string }[] = [
     { value: 'STARTING', label: 'Starting' },
     { value: 'ONGOING', label: 'Ongoing' },
     { value: 'ENDED', label: 'Ended' },
 ]
 
-function formatTime(t) {
+function formatTime(t: string) {
     return typeof t === 'string' ? t.slice(0, 5) : t
 }
 
-async function authFetch(path, token, options = {}) {
+async function authFetch<T>(path: string, token: string, options: RequestInit = {}): Promise<T | null> {
     const res = await fetch(path, {
         ...options,
         credentials: 'include',
@@ -47,7 +82,7 @@ async function authFetch(path, token, options = {}) {
     if (!res.ok) {
         let message = `Request failed (${res.status})`
         try {
-            const body = await res.json()
+            const body = await res.json() as { message?: string; error?: string }
             message = body.message || body.error || message
         } catch {
             /* no json body */
@@ -57,31 +92,61 @@ async function authFetch(path, token, options = {}) {
     const text = await res.text()
     if (!text) return null
     try {
-        return JSON.parse(text)
+        return JSON.parse(text) as T
     } catch {
         return null
     }
 }
 
-function inferColumns(rows) {
+function inferColumns(rows: AdminRow[]): string[] {
     if (!rows || !rows.length) return []
-    const keys = new Set()
+    const keys = new Set<string>()
     rows.forEach((row) => Object.keys(row).forEach((k) => keys.add(k)))
     keys.delete('id')
     return Array.from(keys)
 }
 
-function formatHeader(key) {
+function formatHeader(key: string) {
     return key
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/^./, (c) => c.toUpperCase())
 }
 
-function formatCell(value) {
+function formatCell(value: unknown) {
     if (value === null || value === undefined) return '—'
     if (typeof value === 'object') return JSON.stringify(value)
     if (typeof value === 'boolean') return value ? 'Yes' : 'No'
     return String(value)
+}
+
+type ModalMode = 'create' | 'edit'
+
+/**
+ * Form values are `unknown` because in the config-less (generic) mode any
+ * field of the row lands in the form, nested objects included. They get
+ * stringified at render time and kept as-is in state — exactly what the
+ * previous JS version did.
+ */
+type FormValues = Record<string, unknown>
+
+interface SelectOption {
+    value: string
+    label: string
+}
+
+interface FormField {
+    key: string
+    label: string
+    type: 'text' | 'tel' | 'date' | 'time' | 'select' | 'dayPicker'
+    options?: SelectOption[]
+    optionsSource?: 'teachers'
+}
+
+interface FormConfig {
+    fields: FormField[] | ((mode: ModalMode) => FormField[])
+    getInitialValues: (row: AdminRow | null) => FormValues
+    buildCreatePayload: (values: FormValues) => unknown
+    buildUpdatePayload: (values: FormValues) => unknown
 }
 
 /**
@@ -96,7 +161,7 @@ function formatCell(value) {
  *           getInitialValues tries both a nested `user` object and flat
  *           fields as a fallback.
  */
-const FORM_CONFIGS = {
+const FORM_CONFIGS: Partial<Record<EntityKey, FormConfig>> = {
     students: {
         fields: [
             { key: 'fullName', label: 'Full name', type: 'text' },
@@ -175,7 +240,7 @@ const FORM_CONFIGS = {
         // the day-picker + time fields, pre-filled from the group's current
         // timetable, and adds the status selector on top.
         fields(mode) {
-            const base = [
+            const base: FormField[] = [
                 { key: 'name', label: 'Group name', type: 'text' },
                 { key: 'room', label: 'Room', type: 'text' },
                 { key: 'teacherId', label: 'Teacher', type: 'select', optionsSource: 'teachers' },
@@ -232,11 +297,18 @@ const FORM_CONFIGS = {
     },
 }
 
+interface ColumnConfig {
+    key: string
+    label: string
+    get?: (row: AdminRow) => unknown
+    render?: (row: AdminRow) => ReactNode
+}
+
 /**
  * Table columns for entities with a form config — mirrors the form fields
  * so the table shows real values instead of a JSON dump of nested objects.
  */
-const COLUMN_CONFIGS = {
+const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
     students: [
         { key: 'fullName', label: 'Full name', get: (row) => row?.userDto?.fullName },
         { key: 'phone', label: 'Phone', get: (row) => row?.userDto?.phone },
@@ -257,7 +329,7 @@ const COLUMN_CONFIGS = {
     ],
 }
 
-function TimetableCell({ tt }) {
+function TimetableCell({ tt }: { tt?: TimeTableDto }) {
     if (!tt) return <span style={{ color: color.inkFaint }}>—</span>
     const days = tt.days || []
     const start = tt.startTime ? formatTime(tt.startTime) : null
@@ -281,7 +353,7 @@ function TimetableCell({ tt }) {
     )
 }
 
-function statusStyle(status) {
+function statusStyle(status: string) {
     switch (status) {
         case 'STARTING': return { bg: color.amberSoft, fg: color.amberInk }
         case 'ONGOING': return { bg: color.sageSoft, fg: color.sageInk }
@@ -290,7 +362,7 @@ function statusStyle(status) {
     }
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: GroupStatus }) {
     if (!status) return <span style={{ color: color.inkFaint }}>—</span>
     const st = statusStyle(status)
     return (
@@ -331,7 +403,14 @@ function UserPlusIcon() {
     )
 }
 
-function IconButton({ variant = 'default', label, onClick, children }) {
+interface IconButtonProps {
+    variant?: 'default' | 'danger'
+    label: string
+    onClick: () => void
+    children: ReactNode
+}
+
+function IconButton({ variant = 'default', label, onClick, children }: IconButtonProps) {
     const isDanger = variant === 'danger'
     return (
         <button
@@ -347,24 +426,30 @@ function IconButton({ variant = 'default', label, onClick, children }) {
     )
 }
 
-export default function AdminDashboard({ session, onLogout }) {
-    const [activeTab, setActiveTab] = useState('students')
-    const [rows, setRows] = useState([])
+interface AdminDashboardProps {
+    session: Session
+    onLogout: () => void
+}
+
+export default function AdminDashboard({ session, onLogout }: AdminDashboardProps) {
+    const [activeTab, setActiveTab] = useState<EntityKey>('students')
+    const [rows, setRows] = useState<AdminRow[]>([])
     const [page, setPage] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
     const [totalElements, setTotalElements] = useState(0)
     const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState('STARTING')
+    const [statusFilter, setStatusFilter] = useState<GroupStatus | ''>('STARTING')
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
-    const [counts, setCounts] = useState({})
-    const [modal, setModal] = useState(null)
+    const [counts, setCounts] = useState<Record<string, number | null>>({})
+    const [modal, setModal] = useState<{ mode: ModalMode; values: FormValues; id: string | null } | null>(null)
     const [modalError, setModalError] = useState('')
     const [saving, setSaving] = useState(false)
-    const [teacherOptions, setTeacherOptions] = useState([])
-    const [assignModal, setAssignModal] = useState(null) // { group } | null — API to be wired in later
+    const [teacherOptions, setTeacherOptions] = useState<SelectOption[]>([])
+    const [assignModal, setAssignModal] = useState<{ group: AdminRow } | null>(null) // API to be wired in later
 
-    const entity = ENTITIES.find((e) => e.key === activeTab)
+    // `!` — activeTab is an EntityKey, so it always matches one of ENTITIES.
+    const entity = ENTITIES.find((e) => e.key === activeTab)!
 
     const loadTable = useCallback(async () => {
         setLoading(true)
@@ -373,12 +458,12 @@ export default function AdminDashboard({ session, onLogout }) {
             const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) })
             if (search) params.set('search', search)
             if (activeTab === 'groups' && statusFilter) params.set('status', statusFilter)
-            const data = await authFetch(`${entity.endpoint}?${params}`, session.token)
-            setRows(data.content || [])
-            setTotalPages(data.totalPages ?? 1)
-            setTotalElements(data.totalElements ?? (data.content || []).length)
+            const data = await authFetch<Page<AdminRow>>(`${entity.endpoint}?${params}`, session.token)
+            setRows(data?.content || [])
+            setTotalPages(data?.totalPages ?? 1)
+            setTotalElements(data?.totalElements ?? (data?.content || []).length)
         } catch (err) {
-            setLoadError(err.message)
+            setLoadError(err instanceof Error ? err.message : String(err))
             setRows([])
         } finally {
             setLoading(false)
@@ -396,10 +481,10 @@ export default function AdminDashboard({ session, onLogout }) {
     }, [activeTab])
 
     const loadCounts = useCallback(async () => {
-        const results = {}
+        const results: Record<string, number | null> = {}
         for (const e of ENTITIES) {
             try {
-                const raw = await authFetch(`${e.endpoint}/count`, session.token)
+                const raw = await authFetch<number | { count?: number }>(`${e.endpoint}/count`, session.token)
                 // Handles both a bare number (5) and a wrapped object ({ count: 5 }) —
                 // standardize on one shape across your controllers when you get the chance.
                 const value = typeof raw === 'object' && raw !== null ? raw.count : raw
@@ -418,9 +503,9 @@ export default function AdminDashboard({ session, onLogout }) {
 
     // Powers the Teacher dropdown on the Group create/edit form.
     useEffect(() => {
-        authFetch('/api/v1/teacher?page=0&size=200', session.token)
+        authFetch<Page<TeacherDto>>('/api/v1/teacher?page=0&size=200', session.token)
             .then((data) => {
-                const opts = (data.content || []).map((t) => ({
+                const opts = (data?.content || []).map((t) => ({
                     value: t.id,
                     label: t.userDto?.fullName || t.id,
                 }))
@@ -437,14 +522,14 @@ export default function AdminDashboard({ session, onLogout }) {
         if (formConfig) {
             setModal({ mode: 'create', values: formConfig.getInitialValues(null), id: null })
         } else {
-            const template = {}
+            const template: FormValues = {}
             columns.forEach((c) => (template[c] = ''))
             setModal({ mode: 'create', values: template, id: null })
         }
         setModalError('')
     }
 
-    function openEdit(row) {
+    function openEdit(row: AdminRow) {
         if (formConfig) {
             setModal({ mode: 'edit', values: formConfig.getInitialValues(row), id: row.id })
         } else {
@@ -453,36 +538,38 @@ export default function AdminDashboard({ session, onLogout }) {
         setModalError('')
     }
 
-    function openAssignStudents(row) {
+    function openAssignStudents(row: AdminRow) {
         // Placeholder — wire this up to the real endpoint once it's shared.
         setAssignModal({ group: row })
     }
 
-    async function handleDelete(row) {
+    async function handleDelete(row: AdminRow) {
         if (!confirm(`Delete this ${entity.label.slice(0, -1).toLowerCase()}? This can't be undone.`)) return
         try {
             await authFetch(`${entity.endpoint}/${row.id}`, session.token, { method: 'DELETE' })
             loadTable()
             loadCounts()
         } catch (err) {
-            alert(`Couldn't delete: ${err.message}`)
+            alert(`Couldn't delete: ${err instanceof Error ? err.message : String(err)}`)
         }
     }
 
-    async function handleModalSubmit(e) {
+    async function handleModalSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
+        if (!modal) return
         setSaving(true)
         setModalError('')
         try {
-            let body
+            let body: unknown
             if (formConfig) {
                 body =
                     modal.mode === 'create'
                         ? formConfig.buildCreatePayload(modal.values)
                         : formConfig.buildUpdatePayload(modal.values)
             } else {
-                body = { ...modal.values }
-                delete body.id
+                const generic = { ...modal.values }
+                delete generic.id
+                body = generic
             }
             if (modal.mode === 'create') {
                 await authFetch(entity.endpoint, session.token, {
@@ -499,7 +586,7 @@ export default function AdminDashboard({ session, onLogout }) {
             loadTable()
             loadCounts()
         } catch (err) {
-            setModalError(err.message)
+            setModalError(err instanceof Error ? err.message : String(err))
         } finally {
             setSaving(false)
         }
@@ -587,7 +674,7 @@ export default function AdminDashboard({ session, onLogout }) {
                                     style={s.filterSelect}
                                     value={statusFilter}
                                     onChange={(e) => {
-                                        setStatusFilter(e.target.value)
+                                        setStatusFilter(e.target.value as GroupStatus)
                                         setPage(0)
                                     }}
                                 >
@@ -626,7 +713,7 @@ export default function AdminDashboard({ session, onLogout }) {
                                     {columns.map((c) => (
                                         <th key={c} style={s.th}>
                                             {configuredColumns
-                                                ? configuredColumns.find((cc) => cc.key === c).label
+                                                ? configuredColumns.find((cc) => cc.key === c)?.label ?? formatHeader(c)
                                                 : formatHeader(c)}
                                         </th>
                                     ))}
@@ -653,7 +740,7 @@ export default function AdminDashboard({ session, onLogout }) {
                                                 const cc = configuredColumns?.find((x) => x.key === c)
                                                 return (
                                                     <td key={c} style={s.td}>
-                                                        {cc?.render ? cc.render(row) : formatCell(cc ? cc.get(row) : row[c])}
+                                                        {cc?.render ? cc.render(row) : formatCell(cc?.get ? cc.get(row) : row[c])}
                                                     </td>
                                                 )
                                             })}
@@ -724,7 +811,7 @@ export default function AdminDashboard({ session, onLogout }) {
                                         ? typeof formConfig.fields === 'function'
                                             ? formConfig.fields(modal.mode)
                                             : formConfig.fields
-                                        : columns.map((c) => ({ key: c, label: formatHeader(c), type: 'text' }))
+                                        : columns.map((c): FormField => ({ key: c, label: formatHeader(c), type: 'text' }))
                                 ).map((f) => (
                                     <label key={f.key} style={s.field}>
                                         <span style={s.eyebrowSmall}>{f.label}</span>
@@ -732,9 +819,9 @@ export default function AdminDashboard({ session, onLogout }) {
                                             <select
                                                 className="adm-input"
                                                 style={s.input}
-                                                value={modal.values[f.key] ?? ''}
+                                                value={(modal.values[f.key] as string | undefined) ?? ''}
                                                 onChange={(e) =>
-                                                    setModal((m) => ({
+                                                    setModal((m) => m && ({
                                                         ...m,
                                                         values: { ...m.values, [f.key]: e.target.value },
                                                     }))
@@ -752,7 +839,8 @@ export default function AdminDashboard({ session, onLogout }) {
                                         ) : f.type === 'dayPicker' ? (
                                             <div style={s.dayPicker}>
                                                 {DAYS.map((day) => {
-                                                    const selected = (modal.values[f.key] || []).includes(day)
+                                                    // A dayPicker field always holds a list of days.
+                                                    const selected = ((modal.values[f.key] as WeekDay[] | undefined) || []).includes(day)
                                                     return (
                                                         <button
                                                             key={day}
@@ -764,7 +852,8 @@ export default function AdminDashboard({ session, onLogout }) {
                                                             }}
                                                             onClick={() =>
                                                                 setModal((m) => {
-                                                                    const current = m.values[f.key] || []
+                                                                    if (!m) return m
+                                                                    const current = (m.values[f.key] as WeekDay[] | undefined) || []
                                                                     const next = selected
                                                                         ? current.filter((d) => d !== day)
                                                                         : [...current, day]
@@ -786,10 +875,10 @@ export default function AdminDashboard({ session, onLogout }) {
                                                 value={
                                                     typeof modal.values[f.key] === 'object' && modal.values[f.key] !== null
                                                         ? JSON.stringify(modal.values[f.key])
-                                                        : modal.values[f.key] ?? ''
+                                                        : (modal.values[f.key] as string | number | undefined) ?? ''
                                                 }
                                                 onChange={(e) =>
-                                                    setModal((m) => ({
+                                                    setModal((m) => m && ({
                                                         ...m,
                                                         values: { ...m.values, [f.key]: e.target.value },
                                                     }))
@@ -846,7 +935,7 @@ export default function AdminDashboard({ session, onLogout }) {
     )
 }
 
-// ---- design tokens, inline — same system as Login.jsx ----
+// ---- design tokens, inline — same system as Login.tsx ----
 const color = {
     paper: '#FAF6EE', paperLine: '#DDD3BC', card: '#FFFDF8', ink: '#1F2A3D',
     inkSoft: '#4B5768', inkFaint: '#8892A0', highlighter: '#F2B705',
@@ -861,7 +950,7 @@ const fontDisplay = "'Fraunces', ui-serif, Georgia, serif"
 const fontBody = "'Work Sans', ui-sans-serif, system-ui, sans-serif"
 const fontMono = "'IBM Plex Mono', ui-monospace, monospace"
 
-const ENTITY_ACCENT = { students: color.clay, teachers: color.sage, groups: color.amber, lessons: color.steel }
+const ENTITY_ACCENT: Record<EntityKey, string> = { students: color.clay, teachers: color.sage, groups: color.amber, lessons: color.steel }
 
 const s = {
     page: {
@@ -972,4 +1061,4 @@ const s = {
     dayPicker: { display: 'flex', gap: 6, flexWrap: 'wrap' },
     dayPill: { background: color.card, border: `1px solid ${color.border}`, color: color.inkSoft, padding: '7px 10px', borderRadius: 4, fontSize: '0.78rem', fontFamily: fontMono, letterSpacing: '0.03em', textTransform: 'uppercase' },
     dayPillActive: { background: color.ink, borderColor: color.ink, color: color.paper },
-}
+} satisfies Record<string, CSSProperties>

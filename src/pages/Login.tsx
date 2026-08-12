@@ -1,14 +1,19 @@
-import { useState } from 'react'
+import { useState, type CSSProperties, type FormEvent } from 'react'
 import { decodeJwt } from '../utils/jwt'
+import type { AuthResponse, Session } from '../types'
 
-export default function Login({ onLoggedIn }) {
+interface LoginProps {
+    onLoggedIn?: (session: Session) => void
+}
+
+export default function Login({ onLoggedIn }: LoginProps) {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setError('')
         setLoading(true)
@@ -20,7 +25,7 @@ export default function Login({ onLoggedIn }) {
                 body: JSON.stringify({ phone, password, rememberMe }),
             })
             if (!res.ok) throw new Error('Invalid phone number or password')
-            const data = await res.json()
+            const data = (await res.json()) as AuthResponse
             // data: { token, expiry, refreshToken, refreshExpiry }
             const claims = decodeJwt(data.token)
             if (!claims?.role) {
@@ -28,7 +33,7 @@ export default function Login({ onLoggedIn }) {
             }
             onLoggedIn?.({ token: data.token, role: claims.role, claims })
         } catch (err) {
-            setError(err.message || 'Something went wrong. Try again.')
+            setError(err instanceof Error ? err.message : 'Something went wrong. Try again.')
         } finally {
             setLoading(false)
         }
@@ -131,6 +136,8 @@ const fontDisplay = "'Fraunces', ui-serif, Georgia, serif"
 const fontBody = "'Work Sans', ui-sans-serif, system-ui, sans-serif"
 const fontMono = "'IBM Plex Mono', ui-monospace, monospace"
 
+// `satisfies` checks every entry against CSSProperties while keeping the keys
+// literal, so a typo like `s.pag` is a compile error instead of `undefined`.
 const s = {
     page: { minHeight: '100vh', display: 'grid', gridTemplateColumns: 'minmax(360px, 460px) 1fr', fontFamily: fontBody },
     panel: { display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 56px', background: color.paper },
@@ -151,4 +158,4 @@ const s = {
     sideContent: { position: 'relative', maxWidth: 380 },
     stamp: { display: 'inline-flex', fontFamily: fontMono, fontSize: '0.65rem', letterSpacing: '0.05em', textTransform: 'uppercase', padding: '3px 8px', border: `1.5px solid ${color.highlighter}`, borderRadius: 3, color: color.highlighter, transform: 'rotate(-2deg)', marginBottom: 18 },
     quote: { fontFamily: fontDisplay, fontSize: '1.4rem', lineHeight: 1.4, fontStyle: 'italic', color: 'rgba(250,246,238,0.9)', margin: 0 },
-}
+} satisfies Record<string, CSSProperties>
