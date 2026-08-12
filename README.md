@@ -35,6 +35,19 @@ Dev server `/api` ni `http://localhost:8080` ga uzatadi, ya'ni backend o'sha
 yerda turishi kerak. Boshqa manzil kerak bo'lsa — `vite.config.ts` dagi
 `server.proxy.target`.
 
+Productionda bu proxy yo'q — hostingda `/api` ni uzatish sozlanishi kerak.
+Batafsil: [`docs/deployment.md`](docs/deployment.md).
+
+## Backendsiz demo
+
+```bash
+npm run build:demo    # → dist-demo/cornerstone-demo.html
+```
+
+Bitta o'zi yetarli HTML fayl: soxta API, soxta ma'lumot, shriftlar ham
+ichida. Dizaynni ko'rsatish yoki backend tayyor bo'lmaganda ekranlarni
+muhokama qilish uchun. Kod `src/demo/` da va production bundle'ga tushmaydi.
+
 Muhit o'zgaruvchilari (`.env`) loyihada ishlatilmaydi, shuning uchun
 `.env.example` ham yo'q. Kalit/token kodda saqlanmaydi.
 
@@ -49,6 +62,7 @@ Muhit o'zgaruvchilari (`.env`) loyihada ishlatilmaydi, shuning uchun
 | `npm run test:coverage` | Qamrov hisoboti                                 |
 | `npm run lint`          | ESLint                                          |
 | `npm run build`         | `tsc -b && vite build` → `dist/`                |
+| `npm run build:demo`    | Backendsiz demo: bitta HTML fayl → `dist-demo/`  |
 | `npm run preview`       | Tayyor `dist/` ni lokal ko'rish                 |
 
 Kodni topshirishdan oldin: `npm run typecheck && npm run lint && npm test && npm run build`.
@@ -101,4 +115,5 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/state-management.md](docs/state-management.md)   | TanStack Query qoidalari, nega Redux emas         |
 | [docs/typescript.md](docs/typescript.md)               | TS sozlamalari va tip yozish qoidalari            |
 | [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
+| [docs/deployment.md](docs/deployment.md)               | Deploy, `/api` proxysi, cookie va domen masalasi  |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

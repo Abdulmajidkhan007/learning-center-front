@@ -1,0 +1,33 @@
+# Netlify sozlamasi.
+#
+# Ikki narsa uchun kerak:
+#  1. SPA fallback — Router mijozda ishlaydi, shuning uchun `/attendance` ni
+#     to'g'ridan-to'g'ri ochganda yoki sahifani yangilaganda server
+#     index.html qaytarishi shart, aks holda 404 bo'ladi.
+#  2. `/api` proxysi — pastdagi izohga qarang.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# --- API proxysi (backend manzili ma'lum bo'lgach yoqing) ---
+#
+# NEGA PROXY, to'g'ridan-to'g'ri backend URL emas: refresh token httpOnly
+# cookie'da yuboriladi. Frontend `app.netlify.app` da, backend esa
+# `api.onrender.com` da bo'lsa — bu cross-site cookie, ya'ni `SameSite=None`
+# talab qilinadi va Safari/Brave uni baribir bloklashi mumkin.
+#
+# Proxy bilan brauzer hamma so'rovni O'ZI turgan domenga yuboradi: cookie
+# oddiy `SameSite=Lax` bo'lib qolaveradi va CORS umuman kerak emas.
+#
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://BACKEND-MANZILI/api/:splat"
+#   status = 200
+#   force = true
+
+# SPA fallback — HAR DOIM oxirgi qoida bo'lishi kerak
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

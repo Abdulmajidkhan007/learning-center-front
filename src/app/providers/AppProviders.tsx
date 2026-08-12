@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type ComponentType, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from '@/shared/api'
@@ -26,15 +26,25 @@ function createQueryClient() {
     })
 }
 
-export function AppProviders({ children }: { children: ReactNode }) {
+interface AppProvidersProps {
+    children: ReactNode
+    /**
+     * Marshrutlagichni almashtirish uchun. Odatda kerak emas; demo build
+     * `MemoryRouter` beradi, chunki u iframe ichida ishlaydi va u yerda
+     * URL o'zgartirish (pushState) bloklanishi mumkin.
+     */
+    router?: ComponentType<{ children: ReactNode }>
+}
+
+export function AppProviders({ children, router: Router = BrowserRouter }: AppProvidersProps) {
     const [queryClient] = useState(createQueryClient)
 
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider>
-                <BrowserRouter>
+                <Router>
                     <AuthProvider>{children}</AuthProvider>
-                </BrowserRouter>
+                </Router>
             </ThemeProvider>
         </QueryClientProvider>
     )

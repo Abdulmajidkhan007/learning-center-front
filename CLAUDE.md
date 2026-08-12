@@ -69,6 +69,15 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 20. Element rol/matn bo'yicha topiladi (`getByRole`, `getByLabelText`),
     `data-testid` bo'yicha emas. Tailwind klasslari test qilinmaydi.
 
+## Deploy
+
+22. **`/api` productionda hosting proxysi orqali uzatiladi**, kodga absolyut
+    backend URL yozilmaydi — refresh cookie same-site bo'lib qolishi kerak.
+23. **SPA fallback shart:** `/*` → `/index.html`. Busiz `/attendance` ni
+    yangilaganda 404 chiqadi.
+24. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
+    bundle'ga tushmaydi va unga bog'liqlik qo'shilmaydi.
+
 ## Hujjatlar
 
 21. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
@@ -83,3 +92,4 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 - Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
   bunday endpoint yo'q (`useAttendanceRecords`).
 - CI sozlanmagan.
+- Backend manzili ma'lum emas — `netlify.toml` dagi `/api` proxysi izohda.

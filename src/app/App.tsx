@@ -1,9 +1,10 @@
+import type { ComponentType, ReactNode } from 'react'
 import { AppProviders } from './providers/AppProviders'
 import { AppRoutes } from './routes/AppRoutes'
 
-export default function App() {
+export default function App({ router }: { router?: ComponentType<{ children: ReactNode }> }) {
     return (
-        <AppProviders>
+        <AppProviders router={router}>
             <AppRoutes />
         </AppProviders>
     )
