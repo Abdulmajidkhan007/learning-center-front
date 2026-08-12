@@ -71,8 +71,9 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 
 ## Deploy
 
-22. **`/api` productionda hosting proxysi orqali uzatiladi**, kodga absolyut
-    backend URL yozilmaydi — refresh cookie same-site bo'lib qolishi kerak.
+22. **`/api` productionda frontend xizmatining proxysi orqali uzatiladi**
+    (`Caddyfile`), kodga absolyut backend URL yozilmaydi — refresh cookie
+    same-site bo'lib qolishi kerak. Backendga ochiq domen berilmaydi.
 23. **SPA fallback shart:** `/*` → `/index.html`. Busiz `/attendance` ni
     yangilaganda 404 chiqadi.
 24. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
@@ -92,4 +93,5 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 - Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
   bunday endpoint yo'q (`useAttendanceRecords`).
 - CI sozlanmagan.
-- Backend manzili ma'lum emas — `netlify.toml` dagi `/api` proxysi izohda.
+- `Dockerfile` build qilib sinalmagan (bu muhitda Docker demoni yo'q edi);
+  `Caddyfile` haqiqiy `dist/` ustida tekshirilgan.

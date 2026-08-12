@@ -35,7 +35,8 @@ Dev server `/api` ni `http://localhost:8080` ga uzatadi, ya'ni backend o'sha
 yerda turishi kerak. Boshqa manzil kerak bo'lsa — `vite.config.ts` dagi
 `server.proxy.target`.
 
-Productionda bu proxy yo'q — hostingda `/api` ni uzatish sozlanishi kerak.
+Productionda Vite yo'q, shuning uchun `/api` ni frontend xizmatining o'zi
+uzatadi — ildizdagi `Dockerfile` + `Caddyfile` shuning uchun.
 Batafsil: [`docs/deployment.md`](docs/deployment.md).
 
 ## Backendsiz demo
@@ -115,5 +116,5 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/state-management.md](docs/state-management.md)   | TanStack Query qoidalari, nega Redux emas         |
 | [docs/typescript.md](docs/typescript.md)               | TS sozlamalari va tip yozish qoidalari            |
 | [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
-| [docs/deployment.md](docs/deployment.md)               | Deploy, `/api` proxysi, cookie va domen masalasi  |
+| [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

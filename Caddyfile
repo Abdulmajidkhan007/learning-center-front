@@ -1,0 +1,40 @@
+# Frontend xizmati: statik fayllarni beradi va `/api` ni backendga uzatadi.
+#
+# NEGA PROXY, alohida backend domeni emas: refresh token httpOnly cookie'da
+# yuboriladi. Frontend va backend turli domenlarda bo'lsa, bu cross-site
+# cookie bo'lib qoladi — `SameSite=None` talab qilinadi va Safari/Brave uni
+# baribir bloklaydi. Proxy bilan brauzer uchun hammasi BITTA origin: cookie
+# oddiy `SameSite=Lax` bo'lib qolaveradi va CORS umuman kerak bo'lmaydi.
+{
+	admin off
+	# Railway (va aksariyat PaaS) HTTPS'ni o'zi tugatadi — Caddy sertifikat
+	# olishga urinmasin, aks holda konteyner ishga tushmaydi.
+	auto_https off
+}
+
+:{$PORT:8080} {
+	encode gzip zstd
+
+	handle /api/* {
+		# Railway'da: http://<backend-xizmat-nomi>.railway.internal:8080
+		reverse_proxy {$BACKEND_URL:http://localhost:8080}
+	}
+
+	handle {
+		root * /srv
+
+		# Vite fayl nomiga hash qo'shadi, ya'ni ular hech qachon o'zgarmaydi.
+		@hashed path /assets/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+		# index.html esa keshlanmasin, aks holda foydalanuvchi yangi deploy'dan
+		# keyin ham eski ilovani ko'rib turaveradi.
+		@entry not path /assets/*
+		header @entry Cache-Control "no-cache"
+
+		# SPA fallback: `/attendance` ni to'g'ridan-to'g'ri ochganda ham
+		# index.html qaytsin, aks holda 404 bo'ladi.
+		try_files {path} /index.html
+		file_server
+	}
+}
