@@ -1,0 +1,12 @@
+import { createContext } from 'react'
+
+export type Theme = 'light' | 'dark'
+
+export interface ThemeContextValue {
+    theme: Theme
+    toggleTheme: () => void
+    setTheme: (theme: Theme) => void
+}
+
+/** Provider'siz ishlatilsa `null` — `useTheme` buni xatoga aylantiradi. */
+export const ThemeContext = createContext<ThemeContextValue | null>(null)

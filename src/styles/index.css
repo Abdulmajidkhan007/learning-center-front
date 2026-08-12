@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+/*
+ * Dark rejim `<html class="dark">` orqali boshqariladi (ThemeProvider).
+ * `prefers-color-scheme` emas, chunki foydalanuvchi tizim sozlamasidan
+ * qat'i nazar temani qo'lda tanlay olishi kerak.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * BARCHA o'zgaruvchan ranglar shu yerda — komponentlarda hex kod yo'q.
+ * Yangi rang kerak bo'lsa: (1) shu yerga light qiymatini qo'sh,
+ * (2) `.dark` blokiga dark qiymatini qo'sh, (3) @theme inline'ga ulab qo'y.
+ * Shundan keyin `bg-surface`, `text-fg-muted` kabi utility'lar o'zi paydo bo'ladi.
+ */
+:root {
+    /* Yuzalar: sahifa foni → karta → ajratilgan bloklar */
+    --surface: #faf6ee;
+    --surface-card: #fffdf8;
+    --surface-muted: #f1e8d3;
+    --surface-hover: #f4efe3;
+
+    --border: #e2d9c4;
+    --border-strong: #b7ab8a;
+
+    /* Matn: asosiy → ikkilamchi → eng xira (label, eyebrow) */
+    --fg: #1f2a3d;
+    --fg-muted: #4b5768;
+    --fg-faint: #8892a0;
+    --fg-inverted: #faf6ee;
+
+    /* Brend sarg'ish marker rangi — CLC belgisi va asosiy CTA */
+    --brand: #f2b705;
+    --brand-fg: #5c4400;
+
+    --accent: #4c5fd5;
+    --accent-fg: #4c5fd5;
+    --accent-soft: #eaecfb;
+
+    --success: #2f6b4f;
+    --success-fg: #2f6b4f;
+    --success-soft: #e7f0ea;
+
+    --danger: #b4533c;
+    --danger-fg: #b4533c;
+    --danger-soft: #f6e6e1;
+
+    --warning-fg: #8b7000;
+    --warning-soft: #fdf6e0;
+
+    --neutral-soft: #f0f0f2;
+
+    --purple: #8b5cf6;
+    --purple-fg: #8b5cf6;
+    --purple-soft: #f1ebfd;
+    --magenta: #c244b0;
+
+    /* Admin panelining chap ustuni — ikkala temada ham to'q */
+    --sidebar: #1f2a3d;
+    --sidebar-fg: #faf6ee;
+
+    /* Statistika kartalari va status nishonlari uchun qo'shimcha ranglar */
+    --sage-fg: #3c5f44;
+    --sage-soft: #e3ece0;
+    --amber: #c97a2b;
+    --amber-fg: #8a5416;
+    --amber-soft: #fbead2;
+    --steel: #3e6b8a;
+    --steel-fg: #2b4f66;
+    --steel-soft: #e2ebf0;
+    --slate-fg: #6b7280;
+    --slate-soft: #eae7dd;
+}
+
+.dark {
+    /* Dark'da ham "qog'oz" hissi saqlanadi: sovuq emas, iliq to'q kulrang */
+    --surface: #16171b;
+    --surface-card: #1e2025;
+    --surface-muted: #24262c;
+    --surface-hover: #282a31;
+
+    --border: #32353d;
+    --border-strong: #4a4e58;
+
+    --fg: #ece7db;
+    --fg-muted: #abb1bc;
+    --fg-faint: #7c828e;
+    --fg-inverted: #16171b;
+
+    --brand: #f2b705;
+    --brand-fg: #2a1f00;
+
+    /* To'q fonda to'yingan ranglar "yonib" ketadi — ochroq variant olinadi */
+    --accent: #8b9bff;
+    --accent-fg: #b9c2ff;
+    --accent-soft: #262a45;
+
+    --success: #4f9a74;
+    --success-fg: #7fc9a3;
+    --success-soft: #1b2e24;
+
+    --danger: #c96a51;
+    --danger-fg: #e79b83;
+    --danger-soft: #33201b;
+
+    --warning-fg: #e3c15c;
+    --warning-soft: #2e2716;
+
+    --neutral-soft: #2a2c32;
+
+    --purple: #a78bfa;
+    --purple-fg: #bda6ff;
+    --purple-soft: #2a2340;
+    --magenta: #e06bcb;
+
+    --sidebar: #101216;
+    --sidebar-fg: #ece7db;
+
+    --sage-fg: #8fbd9c;
+    --sage-soft: #1e2a21;
+    --amber: #d8964e;
+    --amber-fg: #dfae6f;
+    --amber-soft: #2e2416;
+    --steel: #6d9cba;
+    --steel-fg: #8fb6cd;
+    --steel-soft: #1b262e;
+    --slate-fg: #9aa1ad;
+    --slate-soft: #262830;
+}
+
+/*
+ * `inline` — utility'lar CSS o'zgaruvchisiga havola qiladi, qiymatni
+ * nusxalab olmaydi. Aynan shu tufayli `.dark` klassi qo'shilganda butun
+ * sahifa qayta bo'yaladi, hech qanday JS ishtirokisiz.
+ */
+@theme inline {
+    --color-surface: var(--surface);
+    --color-surface-card: var(--surface-card);
+    --color-surface-muted: var(--surface-muted);
+    --color-surface-hover: var(--surface-hover);
+
+    --color-border-base: var(--border);
+    --color-border-strong: var(--border-strong);
+
+    --color-fg: var(--fg);
+    --color-fg-muted: var(--fg-muted);
+    --color-fg-faint: var(--fg-faint);
+    --color-fg-inverted: var(--fg-inverted);
+
+    --color-brand: var(--brand);
+    --color-brand-fg: var(--brand-fg);
+
+    --color-accent: var(--accent);
+    --color-accent-fg: var(--accent-fg);
+    --color-accent-soft: var(--accent-soft);
+
+    --color-success: var(--success);
+    --color-success-fg: var(--success-fg);
+    --color-success-soft: var(--success-soft);
+
+    --color-danger: var(--danger);
+    --color-danger-fg: var(--danger-fg);
+    --color-danger-soft: var(--danger-soft);
+
+    --color-warning-fg: var(--warning-fg);
+    --color-warning-soft: var(--warning-soft);
+
+    --color-neutral-soft: var(--neutral-soft);
+
+    --color-purple: var(--purple);
+    --color-purple-fg: var(--purple-fg);
+    --color-purple-soft: var(--purple-soft);
+    --color-magenta: var(--magenta);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-fg: var(--sidebar-fg);
+
+    --color-sage-fg: var(--sage-fg);
+    --color-sage-soft: var(--sage-soft);
+    --color-amber: var(--amber);
+    --color-amber-fg: var(--amber-fg);
+    --color-amber-soft: var(--amber-soft);
+    --color-steel: var(--steel);
+    --color-steel-fg: var(--steel-fg);
+    --color-steel-soft: var(--steel-soft);
+    --color-slate-fg: var(--slate-fg);
+    --color-slate-soft: var(--slate-soft);
+
+    --font-display: "Fraunces", ui-serif, Georgia, serif;
+    --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    --animate-float-slow: float-slow 16s ease-in-out infinite alternate;
+    --animate-float-slower: float-slower 20s ease-in-out infinite alternate;
+}
+
+@keyframes float-slow {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(40px, 30px) scale(1.12); }
+}
+
+@keyframes float-slower {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(-35px, 25px) scale(1.08); }
+}
+
+@layer base {
+    html {
+        /* Tema almashganda ranglar keskin sakramasin */
+        color-scheme: light;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
+    body {
+        @apply bg-surface text-fg font-body antialiased;
+    }
+
+    /* Checkbox/radio'lar ham brend rangida bo'lsin */
+    input[type="checkbox"],
+    input[type="radio"] {
+        accent-color: var(--accent);
+    }
+}

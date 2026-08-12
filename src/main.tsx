@@ -1,8 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
+import App from '@/app/App'
+import '@/styles/index.css'
 
-// `!` — #root always exists in index.html; without it nothing can render anyway.
+// `!` — #root index.html da doim bor; bo'lmasa ilova baribir ishlamaydi.
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <App />

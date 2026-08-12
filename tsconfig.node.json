@@ -11,6 +11,9 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
 
+    /* vite.config.ts Node muhitida ishlaydi: `node:url`, `import.meta.url` */
+    "types": ["node"],
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

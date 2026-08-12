@@ -1,91 +1,104 @@
 # Cornerstone Learning Centre — frontend
 
-Admin and teacher web client for the Cornerstone Learning Centre. It talks to a
-Spring backend over `/api/v1/**` and renders a different dashboard per role:
+O'quv markazi uchun veb-mijoz. Spring backend bilan `/api/v1/**` orqali
+ishlaydi va rolga qarab har xil panel ko'rsatadi:
 
-| Role            | What they get                                                        |
-| --------------- | -------------------------------------------------------------------- |
-| `ADMINISTRATOR` | CRUD over Students, Teachers, Groups, Lessons + record counts        |
-| `TEACHER`       | Own groups, roster, "Start lesson", attendance                       |
-| anything else   | Placeholder screen (`StudentDashboard` / `SuperAdminDashboard` are stubs) |
+| Rol             | Nima ko'radi                                                      |
+| --------------- | ----------------------------------------------------------------- |
+| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons bo'yicha to'liq CRUD        |
+| `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
+| `STUDENT`       | Placeholder ekran (panel hali qurilmagan)                          |
+| `SUPER_ADMIN`   | Placeholder ekran                                                  |
+| boshqa          | Tushunarli xabar bilan placeholder                                 |
 
 ## Stack
 
 - **React 19** + **React Router 7**
-- **TypeScript 6** (strict) — the whole `src/` tree is `.ts` / `.tsx`
-- **Vite 8** for dev server and build
-- **ESLint 10** (flat config) with `typescript-eslint`
-- No CSS files: every screen styles itself with inline style objects
-  (`const s = { … } satisfies Record<string, CSSProperties>`) plus a small
-  `<style>` block for `:hover` / `@keyframes`, which inline styles can't express.
+- **TypeScript 6** (`strict`) — butun `src/` `.ts`/`.tsx`
+- **Vite 8** — dev server va build
+- **Tailwind CSS 4** — `tailwind.config.js` YO'Q, sozlama `src/styles/index.css` ichida
+- **TanStack Query 5** — server ma'lumoti (cache, loading, xato, invalidatsiya)
+- **Vitest 4 + Testing Library** — testlar
+- **ESLint 10** (flat config) + `typescript-eslint`
 
-## Getting started
+Dark/light rejim bor: barcha ranglar CSS o'zgaruvchilari, tanlov
+`localStorage` da saqlanadi.
+
+## Ishga tushirish
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
 ```
 
-The dev server proxies `/api` to `http://localhost:8080`, so the backend has to
-be running there or every request fails with `ECONNREFUSED`. To point at a
-different backend, change the `server.proxy` target in `vite.config.ts`.
+Dev server `/api` ni `http://localhost:8080` ga uzatadi, ya'ni backend o'sha
+yerda turishi kerak. Boshqa manzil kerak bo'lsa — `vite.config.ts` dagi
+`server.proxy.target`.
 
-## Scripts
+Muhit o'zgaruvchilari (`.env`) loyihada ishlatilmaydi, shuning uchun
+`.env.example` ham yo'q. Kalit/token kodda saqlanmaydi.
 
-| Command             | What it does                                        |
-| ------------------- | --------------------------------------------------- |
-| `npm run dev`       | Vite dev server on port 5173 with `/api` proxy       |
-| `npm run typecheck` | `tsc -b` — type errors only, no output emitted       |
-| `npm run build`     | `tsc -b && vite build` → `dist/`                     |
-| `npm run lint`      | ESLint over `**/*.{ts,tsx}`                          |
-| `npm run preview`   | Serve the built `dist/` locally                      |
+## Buyruqlar
 
-> `npm run lint` currently exits non-zero on 5 pre-existing `react-hooks`
-> findings in `AdminDashboard.tsx` and `AttendancePage.tsx` (`set-state-in-effect`,
-> `immutability`, `no-empty`). They were already there before the TypeScript
-> migration and are untouched by it — fixing them means changing runtime
-> behaviour, which is its own task.
+| Buyruq                  | Nima qiladi                                     |
+| ----------------------- | ----------------------------------------------- |
+| `npm run dev`           | Dev server (port 5173, `/api` proxy)            |
+| `npm run typecheck`     | `tsc -b` — faqat tiplarni tekshiradi            |
+| `npm test`              | Vitest, bir marta                               |
+| `npm run test:watch`    | Vitest, kuzatuv rejimida                        |
+| `npm run test:coverage` | Qamrov hisoboti                                 |
+| `npm run lint`          | ESLint                                          |
+| `npm run build`         | `tsc -b && vite build` → `dist/`                |
+| `npm run preview`       | Tayyor `dist/` ni lokal ko'rish                 |
 
-## Layout
+Kodni topshirishdan oldin: `npm run typecheck && npm run lint && npm test && npm run build`.
+
+## Papka tuzilishi
+
+Qatlamli tuzilma: **`app` → `features` → `shared`**. O'q faqat pastga
+qaraydi — `shared` hech qachon `features` dan import qilmaydi.
 
 ```
 src/
-  main.tsx              app entry, mounts <App/>
-  App.tsx               refresh-token bootstrap, auth state, role routing
-  AuthContext.ts        session + logout for the standalone attendance route
-  types.ts              every backend DTO shape, in one place
-  utils/jwt.ts          unverified JWT payload decode (for role routing only)
-  pages/
-    Login.tsx
-    AdminDashboard.tsx      generic CRUD table over four entities
-    TeacherDashboard.tsx    group switcher, roster, start lesson
-    AttendancePage.tsx      attendance grid, standalone or embedded
-    StudentDashboard.tsx        stub
-    SuperAdminDashboard.tsx     stub
+  app/                 ilova karkasi
+    App.tsx            provider'lar + marshrutlar
+    providers/         Theme, Auth, QueryClient
+    routes/            AppRoutes, RoleDashboard
+  features/            biznes bo'limlari (har biri o'zicha to'liq)
+    auth/  admin/  teacher/  attendance/  student/  super-admin/
+      api/         shu bo'lim endpoint'lari
+      hooks/       TanStack Query hooklari va holat mantiqi
+      components/  shu bo'limga tegishli komponentlar
+      config/      jadval/forma konfiguratsiyasi (admin)
+      pages/       ekran
+  shared/            bo'limlarga bog'liq bo'lmagan hamma narsa
+    api/     apiFetch, ApiError, queryKeys
+    ui/      Button, Modal, Table, Badge, ThemeToggle …
+    lib/     format, jwt, cn
+    hooks/   useClickOutside
+    types/   backend DTO tiplari
+  styles/index.css   Tailwind + rang tokenlari + dark rejim
+  test/              test setup va yordamchilari
 ```
 
-## Auth flow
+Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 
-1. On load `App.tsx` POSTs `/api/v1/auth/refresh-token` with `credentials: 'include'`
-   so the httpOnly refresh cookie can mint a fresh access token.
-2. The access token's payload is decoded client-side **without signature
-   verification** (`utils/jwt.ts`) purely to read `role` and pick a dashboard.
-   Authorisation is the backend's job — never gate anything sensitive on this.
-3. Every page-level request sends `Authorization: Bearer <token>` through its
-   local `authFetch` helper.
+## Auth oqimi
 
-Tokens live in React state only. There is nothing in `localStorage`, and no
-secrets belong in this repo — the app has no build-time configuration beyond
-the proxy target.
+1. Sahifa ochilganda `AuthProvider` `/auth/refresh-token` ga POST yuboradi
+   (`credentials: 'include'`) — httpOnly refresh cookie yangi access token beradi.
+2. Access token payload'i **imzo tekshirilmasdan** ochiladi (`shared/lib/jwt.ts`),
+   faqat `role` ni bilib kerakli panelni ko'rsatish uchun. Avtorizatsiya —
+   backendning ishi.
+3. Token faqat React state'da yashaydi, `localStorage` da **emas**.
 
-## TypeScript conventions
+## Hujjatlar
 
-Types are documented in [`docs/typescript.md`](docs/typescript.md) — read it
-before adding a page or wiring up a new endpoint. The short version:
-
-- All DTO shapes go in `src/types.ts`, not next to the component that fetches them.
-- Fields are optional (`?`) until the real backend DTO is confirmed.
-- `authFetch<T>()` returns `T | null` — the `null` is real (some endpoints
-  answer `200` with an empty body), so handle it.
-- Style objects end with `satisfies Record<string, CSSProperties>`, never a
-  type annotation, so keys stay literal and typos fail the build.
+| Fayl                                                   | Nima haqida                                       |
+| ------------------------------------------------------ | ------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)           | Papka tuzilishi, qatlam qoidalari, yangi bo'lim qo'shish |
+| [docs/styling.md](docs/styling.md)                     | Tailwind v4, rang tokenlari, dark rejim           |
+| [docs/state-management.md](docs/state-management.md)   | TanStack Query qoidalari, nega Redux emas         |
+| [docs/typescript.md](docs/typescript.md)               | TS sozlamalari va tip yozish qoidalari            |
+| [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
+| [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

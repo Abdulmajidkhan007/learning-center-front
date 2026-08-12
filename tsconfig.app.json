@@ -6,16 +6,23 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
 
-    /* Vite transpiles each file in isolation, so type-only imports have to be
-       erasable on their own — hence isolatedModules + verbatimModuleSyntax. */
+    /* Vite har bir faylni alohida transpilyatsiya qiladi, shuning uchun
+       tip-importlar o'zi turganda ham o'chirilishi mumkin bo'lishi kerak. */
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "noEmit": true,
 
-    /* strict is the whole point of the migration: every DTO comes off the
-       wire and can be missing, and the compiler should be the one to say so. */
+    /* `@/...` aliasi — vite.config.ts dagi resolve.alias bilan bir xil.
+       `baseUrl` yo'q: TS 6 da u eskirgan, `paths` esa tsconfig joylashgan
+       papkaga nisbatan hisoblanadi. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* strict — migratsiyaning butun ma'nosi shu: DTO'lar backenddan keladi,
+       ular yo'q bo'lishi mumkin, buni kompilyator aytsin. */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
