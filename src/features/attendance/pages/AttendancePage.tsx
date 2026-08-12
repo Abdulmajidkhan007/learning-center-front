@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { errorMessage } from '@/shared/api'
 import { useAuth, useSession } from '@/app/providers/useAuth'
-import { Brand, Button, EmptyState, ErrorBox, ThemeToggle } from '@/shared/ui'
+import { useT } from '@/shared/i18n'
+import { AppShell, Button, EmptyState, ErrorBox } from '@/shared/ui'
 import { AttendanceTable, type PastLessonColumn } from '../components/AttendanceTable'
 import { DraftBar } from '../components/DraftBar'
 import { useAttendanceDraft } from '../hooks/useAttendanceDraft'
@@ -17,6 +18,7 @@ interface AttendanceRouteState {
 }
 
 export function AttendancePage() {
+    const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
     const navigate = useNavigate()
@@ -51,60 +53,51 @@ export function AttendancePage() {
     const failure = submit.error ?? error
 
     return (
-        <div className="min-h-screen bg-surface">
-            <header className="border-b border-border-base bg-surface-card px-6 py-3.5 sm:px-10">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <Brand subtitle="Cornerstone · Attendance" />
-                    <div className="flex items-center gap-2.5">
-                        <ThemeToggle />
-                        <Button size="sm" onClick={() => navigate('/')}>
-                            ← Back to Dashboard
-                        </Button>
-                        <Button size="sm" onClick={signOut}>
-                            Sign out
-                        </Button>
-                    </div>
+        <AppShell
+            subtitle={t('attendance.title')}
+            onSignOut={signOut}
+            actions={
+                <Button size="sm" onClick={() => navigate('/')}>
+                    ← {t('attendance.backToDashboard')}
+                </Button>
+            }
+        >
+            {failure && (
+                <div className="mb-5">
+                    <ErrorBox>{errorMessage(failure)}</ErrorBox>
                 </div>
-            </header>
+            )}
 
-            <main className="px-6 py-8 pb-16 sm:px-10">
-                {failure && (
-                    <div className="mb-5">
-                        <ErrorBox>{errorMessage(failure)}</ErrorBox>
-                    </div>
-                )}
+            {students.length === 0 ? (
+                <EmptyState
+                    title={t('attendance.noStudents')}
+                    description={t('attendance.noStudentsHint')}
+                />
+            ) : (
+                <>
+                    {pastColumns.length > 0 && (
+                        <p className="mb-4 font-mono text-xs text-fg-faint">
+                            {t('attendance.pastLessons', { count: pastColumns.length })}
+                        </p>
+                    )}
 
-                {students.length === 0 ? (
-                    <EmptyState
-                        title="No students in this group"
-                        description="Add students to the group to start taking attendance."
-                    />
-                ) : (
-                    <>
-                        {pastColumns.length > 0 && (
-                            <p className="mb-5 font-mono text-xs text-fg-faint">
-                                {pastColumns.length} past lesson{pastColumns.length !== 1 ? 's' : ''}
-                            </p>
-                        )}
-
-                        {draft.hasDraft && (
-                            <DraftBar
-                                counts={draft.counts}
-                                statuses={draft.statuses}
-                                isSubmitting={submit.isPending}
-                                onFinish={handleFinish}
-                            />
-                        )}
-
-                        <AttendanceTable
-                            students={students}
-                            pastColumns={pastColumns}
-                            draft={draft.draft}
-                            onStatusChange={draft.setStatus}
+                    {draft.hasDraft && (
+                        <DraftBar
+                            counts={draft.counts}
+                            statuses={draft.statuses}
+                            isSubmitting={submit.isPending}
+                            onFinish={handleFinish}
                         />
-                    </>
-                )}
-            </main>
-        </div>
+                    )}
+
+                    <AttendanceTable
+                        students={students}
+                        pastColumns={pastColumns}
+                        draft={draft.draft}
+                        onStatusChange={draft.setStatus}
+                    />
+                </>
+            )}
+        </AppShell>
     )
 }

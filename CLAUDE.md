@@ -51,41 +51,49 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 
 13. **Kod izohlari — o'zbekcha.** Izoh "nima qilinyapti" emas, **nega shunday**
     qilinganini tushuntirsin.
-14. **UI matnlari, xato xabarlari, commit xabarlari — inglizcha** (loyihada
-    shunday).
+14. **Commit xabarlari — inglizcha** (loyihada shunday).
+15. **UI matni kodga yozilmaydi.** Faqat `t('kalit')`. Yangi matn: avval
+    `locales/uz.ts` ga (haqiqat manbai), keyin `ru.ts` va `en.ts` ga —
+    unutilsa `tsc` xato beradi.
+16. **Backenddan kelgan matn tarjima qilinmaydi** (ism, guruh nomi, server
+    xatosi) — u qanday kelsa shunday ko'rsatiladi.
 
 ## Xavfsizlik
 
-15. **Kalit, token, parol kodga yozilmaydi.** Loyihada `.env` ishlatilmaydi.
-16. **Access token faqat React state'da**, `localStorage` da emas. Uzoq
+17. **Kalit, token, parol kodga yozilmaydi.** Loyihada `.env` ishlatilmaydi.
+18. **Access token faqat React state'da**, `localStorage` da emas. Uzoq
     muddatli kirish — httpOnly refresh cookie orqali.
-17. `shared/lib/jwt.ts` imzoni **tekshirmaydi**. U faqat UI'ni kerakli panelga
+19. `shared/lib/jwt.ts` imzoni **tekshirmaydi**. U faqat UI'ni kerakli panelga
     yo'naltirish uchun. Xavfsizlik qarori backendda.
 
 ## Testlar
 
-18. Mantiq qo'shilsa yoki xato tuzatilsa — test yoziladi.
-19. Test tekshirayotgan fayl yonida turadi (`format.ts` → `format.test.ts`).
-20. Element rol/matn bo'yicha topiladi (`getByRole`, `getByLabelText`),
+20. Mantiq qo'shilsa yoki xato tuzatilsa — test yoziladi.
+21. Test tekshirayotgan fayl yonida turadi (`format.ts` → `format.test.ts`).
+22. Element rol/matn bo'yicha topiladi (`getByRole`, `getByLabelText`),
     `data-testid` bo'yicha emas. Tailwind klasslari test qilinmaydi.
 
 ## Deploy
 
-22. **`/api` productionda frontend xizmatining proxysi orqali uzatiladi**
+24. **`/api` productionda frontend xizmatining proxysi orqali uzatiladi**
     (`Caddyfile`), kodga absolyut backend URL yozilmaydi — refresh cookie
     same-site bo'lib qolishi kerak. Backendga ochiq domen berilmaydi.
-23. **SPA fallback shart:** `/*` → `/index.html`. Busiz `/attendance` ni
+25. **SPA fallback shart:** `/*` → `/index.html`. Busiz `/attendance` ni
     yangilaganda 404 chiqadi.
-24. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
+26. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
     bundle'ga tushmaydi va unga bog'liqlik qo'shilmaydi.
 
 ## Hujjatlar
 
-21. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
+23. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
     `README.md` va tegishli `docs/` fayli yangilanadi.
 
 ## Hali yechilmagan narsalar
 
+- Teacher paneldagi KPI kartalar, uy vazifasi, guruh progressi va ballar —
+  backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
+- Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
+  yuborish o'chirilgan).
 - Backend DTO'lari tasdiqlanmagan — `features/admin/config/forms.ts` va
   `shared/types/` dagi shakllar taxminiy.
 - Guruhga o'quvchi biriktirish endpoint'i yo'q (`AssignStudentsModal` —

@@ -1,34 +1,38 @@
+import { useT } from '@/shared/i18n'
 import { Avatar, Button, Modal } from '@/shared/ui'
+import type { TranslationKey } from '@/shared/i18n'
 import type { StudentDto } from '@/shared/types'
 
-const ROWS = [
-    { label: 'Phone', get: (student: StudentDto) => student.userDto?.phone },
-    { label: 'Birth date', get: (student: StudentDto) => student.userDto?.birthDate },
-    { label: 'Parent phone', get: (student: StudentDto) => student.parentPhone },
+const ROWS: { labelKey: TranslationKey; get: (student: StudentDto) => string | undefined }[] = [
+    { labelKey: 'field.phone', get: (student) => student.userDto?.phone },
+    { labelKey: 'field.birthDate', get: (student) => student.userDto?.birthDate },
+    { labelKey: 'field.parentPhone', get: (student) => student.parentPhone },
 ]
 
 export function StudentDetailModal({ student, onClose }: { student: StudentDto; onClose: () => void }) {
+    const { t } = useT()
+
     return (
         <Modal
             title={
-                <span className="flex items-center gap-3.5">
+                <span className="flex items-center gap-3">
                     <Avatar name={student.userDto?.fullName} src={student.userDto?.imgUrl} size="lg" />
-                    {student.userDto?.fullName || '—'}
+                    <span className="min-w-0 truncate">{student.userDto?.fullName || '—'}</span>
                 </span>
             }
             onClose={onClose}
-            footer={<Button onClick={onClose}>Close</Button>}
+            footer={<Button onClick={onClose}>{t('common.close')}</Button>}
         >
             <dl>
                 {ROWS.map((row) => (
                     <div
-                        key={row.label}
-                        className="flex items-center justify-between border-b border-border-base py-2.5 text-sm"
+                        key={row.labelKey}
+                        className="flex items-center justify-between gap-3 border-b border-border-base py-2.5 text-sm"
                     >
                         <dt className="font-mono text-[0.68rem] tracking-[0.06em] text-fg-faint uppercase">
-                            {row.label}
+                            {t(row.labelKey)}
                         </dt>
-                        <dd className="text-fg">{row.get(student) || '—'}</dd>
+                        <dd className="truncate text-fg">{row.get(student) || '—'}</dd>
                     </div>
                 ))}
             </dl>

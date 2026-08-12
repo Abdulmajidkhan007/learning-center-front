@@ -1,20 +1,10 @@
 import { useState } from 'react'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
-import { singular } from '@/shared/lib'
+import { useT } from '@/shared/i18n'
 import { GROUP_STATUSES } from '@/shared/types'
-import { titleCase } from '@/shared/lib'
-import {
-    Button,
-    ErrorBox,
-    Eyebrow,
-    Input,
-    Pagination,
-    Panel,
-    Select,
-    ThemeToggle,
-} from '@/shared/ui'
-import { AdminSidebar } from '../components/AdminSidebar'
+import { Button, ErrorBox, Eyebrow, Input, Pagination, Panel, Select } from '@/shared/ui'
+import { AdminSidebar, AdminTabStrip } from '../components/AdminSidebar'
 import { AssignStudentsModal } from '../components/AssignStudentsModal'
 import { EntityFormModal } from '../components/EntityFormModal'
 import { EntityTable } from '../components/EntityTable'
@@ -26,9 +16,8 @@ import { useEntityCounts } from '../hooks/useEntityCounts'
 import { useEntityList } from '../hooks/useEntityList'
 import { useEntityMutations } from '../hooks/useEntityMutations'
 import { useTeacherOptions } from '../hooks/useTeacherOptions'
+import { AppShell } from '@/shared/ui'
 import type { AdminRow, EntityKey, FormValues, ModalMode } from '../types'
-
-const STATUS_OPTIONS = GROUP_STATUSES.map((status) => ({ value: status, label: titleCase(status) }))
 
 interface FormModalState {
     mode: ModalMode
@@ -37,6 +26,7 @@ interface FormModalState {
 }
 
 export function AdminDashboardPage() {
+    const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
 
@@ -51,6 +41,9 @@ export function AdminDashboardPage() {
     const formConfig = FORM_CONFIGS[activeTab]
     const columnConfigs = COLUMN_CONFIGS[activeTab]
 
+    const plural = t(entity.pluralKey)
+    const singular = t(entity.singularKey)
+
     const list = useEntityList(entity, session.token, {
         page,
         search,
@@ -63,8 +56,8 @@ export function AdminDashboardPage() {
 
     const columns = columnConfigs ? columnConfigs.map((column) => column.key) : inferColumns(list.rows)
 
-    /** Tab almashganda sahifalash va filtrlarni tozalaymiz — aks holda
-     *  yangi bo'limda "3-sahifa, qidiruv: Ali" holati qolib ketadi. */
+    /** Tab almashganda sahifalash va filtrlarni tozalaymiz — aks holda yangi
+     *  bo'limda "3-sahifa, qidiruv: Ali" holati qolib ketadi. */
     function changeTab(tab: EntityKey) {
         setActiveTab(tab)
         setPage(0)
@@ -106,102 +99,110 @@ export function AdminDashboardPage() {
     }
 
     function handleDelete(row: AdminRow) {
-        const what = singular(entity.label).toLowerCase()
-        if (!confirm(`Delete this ${what}? This can't be undone.`)) return
+        if (!confirm(t('admin.deleteConfirm', { entity: singular.toLowerCase() }))) return
         remove.mutate(row.id)
     }
 
     return (
         <div className="flex min-h-screen bg-surface">
-            <AdminSidebar activeTab={activeTab} onTabChange={changeTab} onSignOut={signOut} />
+            <AdminSidebar activeTab={activeTab} onTabChange={changeTab} />
 
-            <main className="flex-1 overflow-x-hidden px-6 py-8 pb-16 sm:px-10">
-                <div className="mb-6 flex justify-end">
-                    <ThemeToggle />
-                </div>
+            {/* `min-w-0` shart: busiz keng jadval flex elementni cho'zib yuboradi */}
+            <div className="min-w-0 flex-1">
+                <AppShell
+                    subtitle={t('admin.role')}
+                    onSignOut={signOut}
+                    secondary={<AdminTabStrip activeTab={activeTab} onTabChange={changeTab} />}
+                >
+                    <StatsRow counts={counts} />
 
-                <StatsRow counts={counts} />
+                    <Panel>
+                        <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+                            <div className="min-w-0">
+                                <Eyebrow>{t('admin.records')}</Eyebrow>
+                                <h1 className="mt-1 font-display text-2xl font-semibold text-fg">{plural}</h1>
+                            </div>
 
-                <Panel>
-                    <header className="mb-5 flex flex-wrap items-end justify-between gap-3.5">
-                        <div>
-                            <Eyebrow>Records</Eyebrow>
-                            <h1 className="mt-1 font-display text-2xl font-semibold text-fg">
-                                {entity.label}
-                            </h1>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            {activeTab === 'groups' && (
-                                <Select
-                                    aria-label="Filter by status"
-                                    className="w-auto"
-                                    options={STATUS_OPTIONS}
-                                    value={statusFilter}
+                            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+                                {activeTab === 'groups' && (
+                                    <Select
+                                        aria-label={t('admin.filterStatus')}
+                                        className="w-auto"
+                                        options={GROUP_STATUSES.map((status) => ({
+                                            value: status,
+                                            label: t(`status.${status}`),
+                                        }))}
+                                        value={statusFilter}
+                                        onChange={(event) => {
+                                            setStatusFilter(event.target.value)
+                                            setPage(0)
+                                        }}
+                                    />
+                                )}
+                                <Input
+                                    className="min-w-40 flex-1 sm:w-56 sm:flex-none"
+                                    placeholder={t('admin.search', { entity: plural.toLowerCase() })}
+                                    value={search}
                                     onChange={(event) => {
-                                        setStatusFilter(event.target.value)
+                                        setSearch(event.target.value)
                                         setPage(0)
                                     }}
                                 />
-                            )}
-                            <Input
-                                className="w-full sm:w-56"
-                                placeholder={`Search ${entity.label.toLowerCase()}…`}
-                                value={search}
-                                onChange={(event) => {
-                                    setSearch(event.target.value)
-                                    setPage(0)
-                                }}
+                                <Button variant="primary" onClick={openCreate}>
+                                    {t('admin.new', { entity: singular.toLowerCase() })}
+                                </Button>
+                            </div>
+                        </header>
+
+                        {list.error && (
+                            <div className="mb-4">
+                                <ErrorBox>
+                                    {t('admin.loadFailed', {
+                                        entity: plural.toLowerCase(),
+                                        message: errorMessage(list.error),
+                                    })}
+                                </ErrorBox>
+                            </div>
+                        )}
+
+                        {remove.error && (
+                            <div className="mb-4">
+                                <ErrorBox>
+                                    {t('admin.deleteFailed', { message: errorMessage(remove.error) })}
+                                </ErrorBox>
+                            </div>
+                        )}
+
+                        {!list.error && (
+                            <EntityTable
+                                rows={list.rows}
+                                columns={columns}
+                                columnConfigs={columnConfigs}
+                                isLoading={list.isLoading}
+                                entityLabel={plural.toLowerCase()}
+                                onAssignStudents={activeTab === 'groups' ? setAssignGroup : undefined}
+                                onEdit={openEdit}
+                                onDelete={handleDelete}
                             />
-                            <Button variant="primary" onClick={openCreate}>
-                                + New {singular(entity.label)}
-                            </Button>
-                        </div>
-                    </header>
+                        )}
 
-                    {list.error && (
-                        <div className="mb-4">
-                            <ErrorBox>
-                                Couldn't load {entity.label.toLowerCase()}: {errorMessage(list.error)}
-                            </ErrorBox>
-                        </div>
-                    )}
-
-                    {remove.error && (
-                        <div className="mb-4">
-                            <ErrorBox>Couldn't delete: {errorMessage(remove.error)}</ErrorBox>
-                        </div>
-                    )}
-
-                    {!list.error && (
-                        <EntityTable
-                            rows={list.rows}
-                            columns={columns}
-                            columnConfigs={columnConfigs}
-                            isLoading={list.isLoading}
-                            emptyLabel={entity.label.toLowerCase()}
-                            onAssignStudents={activeTab === 'groups' ? setAssignGroup : undefined}
-                            onEdit={openEdit}
-                            onDelete={handleDelete}
+                        <Pagination
+                            page={page}
+                            totalPages={list.totalPages}
+                            totalElements={list.totalElements}
+                            onPageChange={setPage}
                         />
-                    )}
-
-                    <Pagination
-                        page={page}
-                        totalPages={list.totalPages}
-                        totalElements={list.totalElements}
-                        onPageChange={setPage}
-                    />
-                </Panel>
-            </main>
+                    </Panel>
+                </AppShell>
+            </div>
 
             {formModal && (
                 <EntityFormModal
-                    // `key` — tab yoki qator almashganda forma state'i
-                    // toza boshlanishi uchun (React komponentni qayta yaratadi).
+                    // `key` — tab yoki qator almashganda forma state'i toza
+                    // boshlanishi uchun (React komponentni qayta yaratadi).
                     key={`${activeTab}-${formModal.id ?? 'new'}`}
                     mode={formModal.mode}
-                    entityLabel={entity.label}
+                    entityLabel={singular}
                     initialValues={formModal.values}
                     formConfig={formConfig}
                     fallbackColumns={columns}

@@ -1,10 +1,13 @@
+import type { TranslationKey } from '@/shared/i18n'
 import type { GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
 
 export type EntityKey = 'students' | 'teachers' | 'groups' | 'lessons'
 
 export interface EntityConfig {
     key: EntityKey
-    label: string
+    /** Ko'plik va birlik alohida: rus tilida ular boshqacha turlanadi. */
+    pluralKey: TranslationKey
+    singularKey: TranslationKey
     endpoint: string
 }
 
@@ -39,9 +42,9 @@ export type FormFieldType = 'text' | 'tel' | 'date' | 'time' | 'select' | 'dayPi
 
 export interface FormField {
     key: string
-    label: string
+    labelKey: TranslationKey
     type: FormFieldType
-    options?: { value: string; label: string }[]
+    options?: { value: string; labelKey: TranslationKey }[]
     /** Variantlar serverdan kelsa (masalan o'qituvchilar ro'yxati). */
     optionsSource?: 'teachers'
 }

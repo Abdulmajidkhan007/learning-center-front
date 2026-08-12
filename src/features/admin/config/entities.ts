@@ -1,11 +1,11 @@
 import type { EntityConfig, EntityKey } from '../types'
 
-/** Chap ustundagi bo'limlar va ular tegishli endpoint'lar. */
+/** Chap ustundagi bo'limlar va ularga tegishli endpoint'lar. */
 export const ENTITIES: EntityConfig[] = [
-    { key: 'students', label: 'Students', endpoint: '/student' },
-    { key: 'teachers', label: 'Teachers', endpoint: '/teacher' },
-    { key: 'groups', label: 'Groups', endpoint: '/group' },
-    { key: 'lessons', label: 'Lessons', endpoint: '/lesson' },
+    { key: 'students', pluralKey: 'entity.students.plural', singularKey: 'entity.students.singular', endpoint: '/student' },
+    { key: 'teachers', pluralKey: 'entity.teachers.plural', singularKey: 'entity.teachers.singular', endpoint: '/teacher' },
+    { key: 'groups', pluralKey: 'entity.groups.plural', singularKey: 'entity.groups.singular', endpoint: '/group' },
+    { key: 'lessons', pluralKey: 'entity.lessons.plural', singularKey: 'entity.lessons.singular', endpoint: '/lesson' },
 ]
 
 export function entityByKey(key: EntityKey): EntityConfig {

@@ -1,18 +1,11 @@
+import { useT } from '@/shared/i18n'
 import { formatTime } from '@/shared/lib'
-import type { TimeTableDto, WeekDay } from '@/shared/types'
-
-const DAY_ABBR: Record<WeekDay, string> = {
-    MONDAY: 'Mon',
-    TUESDAY: 'Tue',
-    WEDNESDAY: 'Wed',
-    THURSDAY: 'Thu',
-    FRIDAY: 'Fri',
-    SATURDAY: 'Sat',
-    SUNDAY: 'Sun',
-}
+import type { TimeTableDto } from '@/shared/types'
 
 /** Kunlar chapda ustun bo'lib, vaqt o'ng tomonda — jadval kengaymasin. */
 export function TimetableCell({ timeTable }: { timeTable?: TimeTableDto }) {
+    const { t } = useT()
+
     if (!timeTable) return <span className="text-fg-faint">—</span>
 
     const days = timeTable.days ?? []
@@ -26,9 +19,9 @@ export function TimetableCell({ timeTable }: { timeTable?: TimeTableDto }) {
                     {days.map((day) => (
                         <span
                             key={day}
-                            className="w-fit rounded-full bg-steel-soft px-1.5 py-px font-mono text-[0.63rem] font-medium tracking-[0.04em] text-steel-fg uppercase"
+                            className="w-fit rounded-full bg-steel-soft px-1.5 py-px font-mono text-[0.63rem] font-medium text-steel-fg"
                         >
-                            {DAY_ABBR[day] ?? day.slice(0, 3)}
+                            {t(`day.${day}`)}
                         </span>
                     ))}
                 </div>

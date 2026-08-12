@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api'
+import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input, Modal } from '@/shared/ui'
 
 interface StartLessonModalProps {
@@ -11,6 +12,7 @@ interface StartLessonModalProps {
 }
 
 export function StartLessonModal({ groupName, isPending, error, onSubmit, onClose }: StartLessonModalProps) {
+    const { t } = useT()
     const [lessonName, setLessonName] = useState('')
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -19,13 +21,17 @@ export function StartLessonModal({ groupName, isPending, error, onSubmit, onClos
     }
 
     return (
-        <Modal eyebrow="New lesson" title={`Start lesson for ${groupName ?? ''}`} onClose={onClose}>
+        <Modal
+            eyebrow={t('teacher.newLesson')}
+            title={t('teacher.startLessonFor', { group: groupName ?? '' })}
+            onClose={onClose}
+        >
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-                <Field label="Lesson name (optional)">
+                <Field label={t('teacher.lessonName')}>
                     <Input
                         value={lessonName}
                         onChange={(event) => setLessonName(event.target.value)}
-                        placeholder="e.g. Present Simple — review"
+                        placeholder={t('teacher.lessonNamePlaceholder')}
                         autoFocus
                     />
                 </Field>
@@ -33,9 +39,9 @@ export function StartLessonModal({ groupName, isPending, error, onSubmit, onClos
                 {error != null && <ErrorBox>{errorMessage(error)}</ErrorBox>}
 
                 <div className="mt-1 flex justify-end gap-2.5">
-                    <Button onClick={onClose}>Cancel</Button>
+                    <Button onClick={onClose}>{t('common.cancel')}</Button>
                     <Button type="submit" variant="primary" disabled={isPending}>
-                        {isPending ? 'Starting…' : 'Start lesson'}
+                        {isPending ? t('teacher.starting') : t('teacher.startLesson')}
                     </Button>
                 </div>
             </form>

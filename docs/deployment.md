@@ -27,7 +27,78 @@ brauzer ──HTTPS──> [ Caddy: dist/ + /api proxy ] ──ichki tarmoq─�
                           (ochiq domen)                            (yopiq)         (yopiq)
 ```
 
-## Railway
+## Railway — qadamma-qadam
+
+Repoda hamma narsa tayyor: `Dockerfile`, `Caddyfile`, `railway.json`.
+Railway'dagi bosishlarni siz qilasiz (menda sizning hisobingizga kirish yo'q).
+
+### 0. Tayyorgarlik
+
+Bu branch push qilingan bo'lsin. Railway `railway.json` ni ko'radi va
+`Dockerfile` bilan build qiladi — Nixpacks'ni o'zi o'chiradi.
+
+### 1. Backend xizmati (avval shu)
+
+1. Railway → **New Project** (yoki mavjud loyihaga **+ New**).
+2. **GitHub Repo** → Java repoingizni tanlang.
+3. Xizmat nomini **`backend`** qo'ying (Settings → Service Name).
+   Bu nom ichki manzilga aylanadi: `backend.railway.internal`.
+4. **Ochiq domen BERMANG** (Generate Domain bosmang). Backend faqat
+   frontend orqali kirilishi kerak.
+5. Variables:
+   ```
+   JAVA_TOOL_OPTIONS = -XX:MaxRAMPercentage=75
+   ```
+6. Spring tomonida (`application.properties`):
+   ```properties
+   server.address=::
+   server.port=8080
+   server.forward-headers-strategy=framework
+   ```
+   `server.address=::` **shart** — Railway ichki tarmog'i IPv6, Spring esa
+   sukut bo'yicha faqat IPv4 tinglaydi va proxy unga yeta olmaydi.
+
+### 2. Postgres
+
+1. Loyiha ichida **+ New → Database → PostgreSQL**.
+2. `backend` xizmatining Variables bo'limida `DATABASE_URL` ni ulang
+   (Railway "Variable Reference" taklif qiladi).
+
+### 3. Frontend xizmati
+
+1. **+ New → GitHub Repo** → `learning-center-front`.
+2. Xizmat nomi: **`frontend`**.
+3. Variables:
+   ```
+   BACKEND_URL = http://backend.railway.internal:8080
+   ```
+   `PORT` ni Railway o'zi beradi — qo'lda qo'shmang.
+4. **Settings → Networking → Generate Domain**.
+
+### 4. Tekshirish
+
+Ochilgan domenda:
+
+| Tekshiruv | Kutilgan natija |
+| --- | --- |
+| Bosh sahifa | Kirish sahifasi chiqadi |
+| `/attendance` ni to'g'ridan-to'g'ri ochish | 404 EMAS (SPA fallback) |
+| Login → sahifani yangilash | Qayta login so'ralmaydi |
+| DevTools → Network → `refresh-token` | `200`, `Set-Cookie` bor |
+
+Login'dan keyin yangilashda qayta login so'ralsa — muammo cookie'da:
+backend `SameSite` va `Secure` ni qanday qo'yayotganini tekshiring.
+
+### Nimasi noto'g'ri ketishi mumkin
+
+| Belgi | Sabab |
+| --- | --- |
+| `/api` da 502 | `BACKEND_URL` xato, yoki Spring `server.address=::` qo'yilmagan |
+| Sahifa yangilanganda 404 | SPA fallback ishlamayapti — `Caddyfile` o'rniga boshqa builder ishlatilgan |
+| Har yangilashda login | Cookie cross-site bo'lib qolgan — backendga ochiq domen berilgan va frontend to'g'ridan-to'g'ri unga murojaat qilyapti |
+| Konteyner qayta-qayta o'chadi | JVM xotiraga sig'mayapti — `MaxRAMPercentage` yoki tarifni ko'taring |
+
+## Railway xizmatlari tuzilishi
 
 Bitta loyiha (project) ichida uchta xizmat:
 

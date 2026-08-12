@@ -2,6 +2,8 @@ import type { ReactElement, ReactNode } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+import { LocaleProvider } from '@/app/providers/LocaleProvider'
+import { ThemeProvider } from '@/app/providers/ThemeProvider'
 
 /**
  * Testlar uchun QueryClient: retry o'chirilgan (xato testi 3 marta
@@ -21,14 +23,23 @@ interface Options extends Omit<RenderOptions, 'wrapper'> {
     route?: string
 }
 
-/** Provider'lar bilan render — komponent testlarida shuni ishlating. */
+/**
+ * Provider'lar bilan render.
+ *
+ * Til testlarda sukut bo'yicha o'zbekcha — ilovadagi bilan bir xil, ya'ni
+ * testlar foydalanuvchi ko'radigan matnni tekshiradi.
+ */
 export function renderWithProviders(ui: ReactElement, { route = '/', ...options }: Options = {}) {
     const queryClient = createTestQueryClient()
 
     function Wrapper({ children }: { children: ReactNode }) {
         return (
             <QueryClientProvider client={queryClient}>
-                <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+                <LocaleProvider>
+                    <ThemeProvider>
+                        <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+                    </ThemeProvider>
+                </LocaleProvider>
             </QueryClientProvider>
         )
     }

@@ -3,7 +3,8 @@ import { StudentDashboardPage } from '@/features/student/pages/StudentDashboardP
 import { SuperAdminDashboardPage } from '@/features/super-admin/pages/SuperAdminDashboardPage'
 import { TeacherDashboardPage } from '@/features/teacher/pages/TeacherDashboardPage'
 import { useAuth, useSession } from '@/app/providers/useAuth'
-import { DashboardShell, EmptyState } from '@/shared/ui'
+import { useT } from '@/shared/i18n'
+import { AppShell, EmptyState } from '@/shared/ui'
 
 /**
  * Rolga qarab kerakli dashboardni ko'rsatadi.
@@ -12,6 +13,7 @@ import { DashboardShell, EmptyState } from '@/shared/ui'
  * ekran emas, tushunarli xabar ko'rishi kerak.
  */
 export function RoleDashboard() {
+    const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
 
@@ -26,12 +28,11 @@ export function RoleDashboard() {
             return <SuperAdminDashboardPage />
         default:
             return (
-                <DashboardShell subtitle="Cornerstone" onSignOut={signOut}>
-                    <EmptyState
-                        title={`The ${session.role} dashboard isn't built yet.`}
-                        description="Your account works — this screen just doesn't exist yet."
-                    />
-                </DashboardShell>
+                <AppShell subtitle={session.role} onSignOut={signOut}>
+                    <div className="mx-auto max-w-xl">
+                        <EmptyState title={t('pending.title')} description={t('pending.body')} />
+                    </div>
+                </AppShell>
             )
     }
 }

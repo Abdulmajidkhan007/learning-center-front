@@ -36,9 +36,9 @@ describe('LoginForm', () => {
 
         renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
 
-        await user.type(screen.getByLabelText(/phone number/i), '+998901234567')
-        await user.type(screen.getByLabelText(/password/i), 'secret')
-        await user.click(screen.getByRole('button', { name: /sign in/i }))
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
 
         await waitFor(() => expect(onLoggedIn).toHaveBeenCalledTimes(1))
         expect(onLoggedIn.mock.calls[0][0]).toMatchObject({ role: 'ADMINISTRATOR' })
@@ -50,10 +50,10 @@ describe('LoginForm', () => {
 
         renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
 
-        await user.type(screen.getByLabelText(/phone number/i), '+998901234567')
-        await user.type(screen.getByLabelText(/password/i), 'secret')
-        await user.click(screen.getByLabelText(/keep me signed in/i))
-        await user.click(screen.getByRole('button', { name: /sign in/i }))
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByLabelText(/meni eslab qol/i))
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
 
         await waitFor(() => expect(fetch).toHaveBeenCalled())
         const [, init] = vi.mocked(fetch).mock.calls[0]
@@ -62,16 +62,16 @@ describe('LoginForm', () => {
 
     it('noto’g’ri ma’lumotda xato xabarini ko’rsatadi', async () => {
         const user = userEvent.setup()
-        mockLoginResponse({ message: 'Invalid phone number or password' }, false, 401)
+        mockLoginResponse({ message: "Telefon raqami yoki parol noto'g'ri" }, false, 401)
         const onLoggedIn = vi.fn()
 
         renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
 
-        await user.type(screen.getByLabelText(/phone number/i), '+998900000000')
-        await user.type(screen.getByLabelText(/password/i), 'wrong')
-        await user.click(screen.getByRole('button', { name: /sign in/i }))
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998900000000')
+        await user.type(screen.getByLabelText(/parol/i), 'wrong')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
 
-        expect(await screen.findByRole('alert')).toHaveTextContent(/invalid phone number or password/i)
+        expect(await screen.findByRole('alert')).toHaveTextContent(/noto’g’ri|noto'g'ri/i)
         expect(onLoggedIn).not.toHaveBeenCalled()
     })
 
@@ -84,11 +84,11 @@ describe('LoginForm', () => {
 
         renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
 
-        await user.type(screen.getByLabelText(/phone number/i), '+998901234567')
-        await user.type(screen.getByLabelText(/password/i), 'secret')
-        await user.click(screen.getByRole('button', { name: /sign in/i }))
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
 
-        expect(await screen.findByRole('alert')).toHaveTextContent(/role/i)
+        expect(await screen.findByRole('alert')).toHaveTextContent(/rol/i)
         expect(onLoggedIn).not.toHaveBeenCalled()
     })
 })

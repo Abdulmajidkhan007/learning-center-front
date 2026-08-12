@@ -1,3 +1,4 @@
+import { useT } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
 import type { WeekDay } from '@/shared/types'
 
@@ -17,6 +18,8 @@ interface DayPickerProps {
 }
 
 export function DayPicker({ value, onChange }: DayPickerProps) {
+    const { t } = useT()
+
     function toggle(day: WeekDay) {
         onChange(value.includes(day) ? value.filter((item) => item !== day) : [...value, day])
     }
@@ -32,13 +35,13 @@ export function DayPicker({ value, onChange }: DayPickerProps) {
                         aria-pressed={isSelected}
                         onClick={() => toggle(day)}
                         className={cn(
-                            'cursor-pointer rounded-md border px-2.5 py-1.5 font-mono text-xs tracking-[0.03em] uppercase transition-colors',
+                            'cursor-pointer rounded-md border px-2.5 py-1.5 font-mono text-xs uppercase transition-colors',
                             isSelected
                                 ? 'border-fg bg-fg text-fg-inverted'
                                 : 'border-border-base bg-surface-card text-fg-muted hover:border-border-strong'
                         )}
                     >
-                        {day.slice(0, 3)}
+                        {t(`day.${day}`)}
                     </button>
                 )
             })}

@@ -1,13 +1,15 @@
 import { formatTime } from '@/shared/lib'
 import { GROUP_STATUSES } from '@/shared/types'
-import { titleCase } from '@/shared/lib'
 import type { EntityFormConfig, EntityKey, FormField } from '../types'
 
-const STATUS_OPTIONS = GROUP_STATUSES.map((status) => ({ value: status, label: titleCase(status) }))
+const STATUS_OPTIONS = GROUP_STATUSES.map((status) => ({
+    value: status,
+    labelKey: `status.${status}` as const,
+}))
 
 /**
  * Create/Update DTO'si o'qish DTO'siga MOS KELMAYDIGAN entity'lar uchun
- * forma konfiguratsiyasi. Bu yerda yo'q entity'lar (hozircha `lessons`)
+ * forma konfiguratsiyasi. Bu yerda yo'q entity (hozircha `lessons`)
  * avtomatik — maydonlar mavjud qatorlardan taxmin qilinadi.
  *
  * TAXMIN: shakllar backend javoblariga qarab tiklangan. `*CreateDto` boshqa
@@ -16,10 +18,10 @@ const STATUS_OPTIONS = GROUP_STATUSES.map((status) => ({ value: status, label: t
 export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
     students: {
         fields: [
-            { key: 'fullName', label: 'Full name', type: 'text' },
-            { key: 'phone', label: 'Phone', type: 'tel' },
-            { key: 'birthDate', label: 'Birth date', type: 'date' },
-            { key: 'parentPhone', label: 'Parent phone', type: 'tel' },
+            { key: 'fullName', labelKey: 'field.fullName', type: 'text' },
+            { key: 'phone', labelKey: 'field.phone', type: 'tel' },
+            { key: 'birthDate', labelKey: 'field.birthDate', type: 'date' },
+            { key: 'parentPhone', labelKey: 'field.parentPhone', type: 'tel' },
         ],
         getInitialValues(row) {
             const user = row?.userDto ?? {}
@@ -58,9 +60,9 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
 
     teachers: {
         fields: [
-            { key: 'fullName', label: 'Full name', type: 'text' },
-            { key: 'phone', label: 'Phone', type: 'tel' },
-            { key: 'birthDate', label: 'Birth date', type: 'date' },
+            { key: 'fullName', labelKey: 'field.fullName', type: 'text' },
+            { key: 'phone', labelKey: 'field.phone', type: 'tel' },
+            { key: 'birthDate', labelKey: 'field.birthDate', type: 'date' },
         ],
         getInitialValues(row) {
             const user = row?.userDto ?? {}
@@ -97,15 +99,15 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
         // uni o'zi STARTING qilib qo'yadi).
         fields: (mode) => {
             const base: FormField[] = [
-                { key: 'name', label: 'Group name', type: 'text' },
-                { key: 'room', label: 'Room', type: 'text' },
-                { key: 'teacherId', label: 'Teacher', type: 'select', optionsSource: 'teachers' },
-                { key: 'days', label: 'Days', type: 'dayPicker' },
-                { key: 'startTime', label: 'Start time', type: 'time' },
-                { key: 'endTime', label: 'End time', type: 'time' },
+                { key: 'name', labelKey: 'field.groupName', type: 'text' },
+                { key: 'room', labelKey: 'field.room', type: 'text' },
+                { key: 'teacherId', labelKey: 'field.teacher', type: 'select', optionsSource: 'teachers' },
+                { key: 'days', labelKey: 'field.days', type: 'dayPicker' },
+                { key: 'startTime', labelKey: 'field.startTime', type: 'time' },
+                { key: 'endTime', labelKey: 'field.endTime', type: 'time' },
             ]
             if (mode === 'edit') {
-                base.push({ key: 'status', label: 'Status', type: 'select', options: STATUS_OPTIONS })
+                base.push({ key: 'status', labelKey: 'field.status', type: 'select', options: STATUS_OPTIONS })
             }
             return base
         },

@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
+import type { TranslationKey } from '@/shared/i18n'
 import { GroupStatusBadge } from '../components/GroupStatusBadge'
 import { TimetableCell } from '../components/TimetableCell'
 import type { AdminRow, EntityKey } from '../types'
 
 export interface ColumnConfig {
     key: string
-    label: string
+    labelKey: TranslationKey
     /** Oddiy qiymat — matnga aylantiriladi. */
     get?: (row: AdminRow) => unknown
     /** Murakkab katak — o'zi JSX qaytaradi. */
@@ -21,22 +22,22 @@ export interface ColumnConfig {
  */
 export const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
     students: [
-        { key: 'fullName', label: 'Full name', get: (row) => row.userDto?.fullName },
-        { key: 'phone', label: 'Phone', get: (row) => row.userDto?.phone },
-        { key: 'birthDate', label: 'Birth date', get: (row) => row.userDto?.birthDate },
-        { key: 'parentPhone', label: 'Parent phone', get: (row) => row.parentPhone },
+        { key: 'fullName', labelKey: 'field.fullName', get: (row) => row.userDto?.fullName },
+        { key: 'phone', labelKey: 'field.phone', get: (row) => row.userDto?.phone },
+        { key: 'birthDate', labelKey: 'field.birthDate', get: (row) => row.userDto?.birthDate },
+        { key: 'parentPhone', labelKey: 'field.parentPhone', get: (row) => row.parentPhone },
     ],
     teachers: [
-        { key: 'fullName', label: 'Full name', get: (row) => row.userDto?.fullName },
-        { key: 'phone', label: 'Phone', get: (row) => row.userDto?.phone },
-        { key: 'birthDate', label: 'Birth date', get: (row) => row.userDto?.birthDate },
+        { key: 'fullName', labelKey: 'field.fullName', get: (row) => row.userDto?.fullName },
+        { key: 'phone', labelKey: 'field.phone', get: (row) => row.userDto?.phone },
+        { key: 'birthDate', labelKey: 'field.birthDate', get: (row) => row.userDto?.birthDate },
     ],
     groups: [
-        { key: 'name', label: 'Group name', get: (row) => row.name },
-        { key: 'room', label: 'Room', get: (row) => row.room },
-        { key: 'teacher', label: 'Teacher', get: (row) => row.teacher?.userDto?.fullName },
-        { key: 'timetable', label: 'Timetable', render: (row) => <TimetableCell timeTable={row.timeTable} /> },
-        { key: 'status', label: 'Status', render: (row) => <GroupStatusBadge status={row.status} /> },
+        { key: 'name', labelKey: 'field.groupName', get: (row) => row.name },
+        { key: 'room', labelKey: 'field.room', get: (row) => row.room },
+        { key: 'teacher', labelKey: 'field.teacher', get: (row) => row.teacher?.userDto?.fullName },
+        { key: 'timetable', labelKey: 'field.days', render: (row) => <TimetableCell timeTable={row.timeTable} /> },
+        { key: 'status', labelKey: 'field.status', render: (row) => <GroupStatusBadge status={row.status} /> },
     ],
 }
 

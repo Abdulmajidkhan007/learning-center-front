@@ -1,5 +1,6 @@
 import { useAuth } from '@/app/providers/useAuth'
-import { DashboardShell, EmptyState } from '@/shared/ui'
+import { useT } from '@/shared/i18n'
+import { AppShell, EmptyState, PendingBackend } from '@/shared/ui'
 
 /**
  * O'quvchi paneli hali qurilmagan.
@@ -8,14 +9,17 @@ import { DashboardShell, EmptyState } from '@/shared/ui'
  * bo'layotganini tushunsin va "buzilib qoldi" deb o'ylamasin.
  */
 export function StudentDashboardPage() {
+    const { t } = useT()
     const { signOut } = useAuth()
 
     return (
-        <DashboardShell subtitle="Cornerstone · Student" onSignOut={signOut}>
-            <EmptyState
-                title="Your student dashboard is on the way."
-                description="Your account is active — this screen just hasn't been built yet."
-            />
-        </DashboardShell>
+        <AppShell subtitle={t('entity.students.singular')} onSignOut={signOut}>
+            <div className="mx-auto max-w-xl">
+                <EmptyState title={t('pending.title')} description={t('pending.body')} />
+                <div className="mt-4">
+                    <PendingBackend />
+                </div>
+            </div>
+        </AppShell>
     )
 }

@@ -9,6 +9,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
 | `STUDENT`       | Placeholder ekran (panel hali qurilmagan)                          |
 | `SUPER_ADMIN`   | Placeholder ekran                                                  |
+| hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
 | boshqa          | Tushunarli xabar bilan placeholder                                 |
 
 ## Stack
@@ -21,8 +22,9 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 - **Vitest 4 + Testing Library** — testlar
 - **ESLint 10** (flat config) + `typescript-eslint`
 
-Dark/light rejim bor: barcha ranglar CSS o'zgaruvchilari, tanlov
-`localStorage` da saqlanadi.
+**Uch til:** o'zbekcha (default), ruscha, inglizcha — `src/shared/i18n/`.
+**Dark/light rejim:** barcha ranglar CSS o'zgaruvchilari.
+Ikkalasining tanlovi `localStorage` da, o'zgartirish — **Sozlamalar** sahifasida.
 
 ## Ishga tushirish
 
@@ -80,7 +82,7 @@ src/
     providers/         Theme, Auth, QueryClient
     routes/            AppRoutes, RoleDashboard
   features/            biznes bo'limlari (har biri o'zicha to'liq)
-    auth/  admin/  teacher/  attendance/  student/  super-admin/
+    auth/  admin/  teacher/  attendance/  settings/  student/  super-admin/
       api/         shu bo'lim endpoint'lari
       hooks/       TanStack Query hooklari va holat mantiqi
       components/  shu bo'limga tegishli komponentlar
@@ -91,6 +93,7 @@ src/
     ui/      Button, Modal, Table, Badge, ThemeToggle …
     lib/     format, jwt, cn
     hooks/   useClickOutside
+    i18n/    tarjimalar (uz/ru/en) va `useT`
     types/   backend DTO tiplari
   styles/index.css   Tailwind + rang tokenlari + dark rejim
   test/              test setup va yordamchilari
@@ -115,6 +118,7 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/styling.md](docs/styling.md)                     | Tailwind v4, rang tokenlari, dark rejim           |
 | [docs/state-management.md](docs/state-management.md)   | TanStack Query qoidalari, nega Redux emas         |
 | [docs/typescript.md](docs/typescript.md)               | TS sozlamalari va tip yozish qoidalari            |
+| [docs/i18n.md](docs/i18n.md)                           | Uch tillilik: yangi matn qo'shish, cheklovlar     |
 | [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
 | [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

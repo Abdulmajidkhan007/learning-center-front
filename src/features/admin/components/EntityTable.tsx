@@ -1,3 +1,4 @@
+import { useT } from '@/shared/i18n'
 import { formatCell, formatHeader } from '@/shared/lib'
 import { EditIcon, IconButton, TrashIcon, UserPlusIcon } from '@/shared/ui'
 import type { ColumnConfig } from '../config/columns'
@@ -9,7 +10,8 @@ interface EntityTableProps {
     columns: string[]
     columnConfigs?: ColumnConfig[]
     isLoading: boolean
-    emptyLabel: string
+    /** "… topilmadi" xabarida ishlatiladigan bo'lim nomi. */
+    entityLabel: string
     /** Faqat guruhlar tabida — o'quvchi biriktirish tugmasi. */
     onAssignStudents?: (row: AdminRow) => void
     onEdit: (row: AdminRow) => void
@@ -21,13 +23,17 @@ export function EntityTable({
     columns,
     columnConfigs,
     isLoading,
-    emptyLabel,
+    entityLabel,
     onAssignStudents,
     onEdit,
     onDelete,
 }: EntityTableProps) {
+    const { t } = useT()
+
     function headerLabel(key: string) {
-        return columnConfigs?.find((column) => column.key === key)?.label ?? formatHeader(key)
+        const config = columnConfigs?.find((column) => column.key === key)
+        // Konfiguratsiyasiz rejimda tarjima yo'q — kalitning o'zi ko'rsatiladi.
+        return config ? t(config.labelKey) : formatHeader(key)
     }
 
     function renderCell(row: AdminRow, key: string) {
@@ -50,7 +56,7 @@ export function EntityTable({
                             </th>
                         ))}
                         <th className="border-b border-border-base bg-surface px-4 py-2.5 text-right font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase">
-                            Actions
+                            {t('admin.actions')}
                         </th>
                     </tr>
                 </thead>
@@ -58,7 +64,7 @@ export function EntityTable({
                     {isLoading && (
                         <tr>
                             <td colSpan={columns.length + 1} className="px-4 py-8 text-center text-fg-faint">
-                                Loading…
+                                {t('common.loading')}
                             </td>
                         </tr>
                     )}
@@ -66,7 +72,7 @@ export function EntityTable({
                     {!isLoading && rows.length === 0 && (
                         <tr>
                             <td colSpan={columns.length + 1} className="px-4 py-8 text-center text-fg-faint">
-                                No {emptyLabel} found.
+                                {t('admin.notFound', { entity: entityLabel })}
                             </td>
                         </tr>
                     )}
@@ -86,16 +92,20 @@ export function EntityTable({
                                     <div className="flex justify-end gap-2">
                                         {onAssignStudents && (
                                             <IconButton
-                                                label="Add students"
+                                                label={t('admin.addStudents')}
                                                 onClick={() => onAssignStudents(row)}
                                             >
                                                 <UserPlusIcon />
                                             </IconButton>
                                         )}
-                                        <IconButton label="Edit" onClick={() => onEdit(row)}>
+                                        <IconButton label={t('common.edit')} onClick={() => onEdit(row)}>
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton label="Delete" tone="danger" onClick={() => onDelete(row)}>
+                                        <IconButton
+                                            label={t('common.delete')}
+                                            tone="danger"
+                                            onClick={() => onDelete(row)}
+                                        >
                                             <TrashIcon />
                                         </IconButton>
                                     </div>

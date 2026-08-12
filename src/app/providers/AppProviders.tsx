@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from '@/shared/api'
 import { AuthProvider } from './AuthProvider'
+import { LocaleProvider } from './LocaleProvider'
 import { ThemeProvider } from './ThemeProvider'
 
 /**
@@ -41,11 +42,13 @@ export function AppProviders({ children, router: Router = BrowserRouter }: AppPr
 
     return (
         <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
-                <Router>
-                    <AuthProvider>{children}</AuthProvider>
-                </Router>
-            </ThemeProvider>
+            <LocaleProvider>
+                <ThemeProvider>
+                    <Router>
+                        <AuthProvider>{children}</AuthProvider>
+                    </Router>
+                </ThemeProvider>
+            </LocaleProvider>
         </QueryClientProvider>
     )
 }

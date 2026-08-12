@@ -1,3 +1,4 @@
+import { useT } from '@/shared/i18n'
 import { Button } from './Button'
 
 interface PaginationProps {
@@ -9,16 +10,22 @@ interface PaginationProps {
 
 /** Sahifa raqami 0 dan boshlanadi (Spring Data shunday), ekranda +1 ko'rsatiladi. */
 export function Pagination({ page, totalPages, totalElements, onPageChange }: PaginationProps) {
+    const { t } = useT()
+
     return (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-3">
             <Button size="sm" disabled={page <= 0} onClick={() => onPageChange(Math.max(0, page - 1))}>
-                ← Prev
+                ← {t('common.prev')}
             </Button>
-            <span className="font-mono text-xs text-fg-faint">
-                Page {page + 1} of {Math.max(totalPages, 1)} · {totalElements} total
+            <span className="font-mono text-xs tabular-nums text-fg-faint">
+                {t('common.pageInfo', {
+                    page: page + 1,
+                    total: Math.max(totalPages, 1),
+                    count: totalElements,
+                })}
             </span>
             <Button size="sm" disabled={page + 1 >= totalPages} onClick={() => onPageChange(page + 1)}>
-                Next →
+                {t('common.next')} →
             </Button>
         </div>
     )

@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api'
+import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input } from '@/shared/ui'
 import { useLogin } from '../hooks/useLogin'
 import type { Session } from '@/shared/types'
 
 export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => void }) {
+    const { t } = useT()
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
@@ -17,8 +19,8 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4.5">
-            <Field label="Phone number">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <Field label={t('auth.phone')}>
                 <Input
                     type="tel"
                     required
@@ -29,7 +31,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 />
             </Field>
 
-            <Field label="Password">
+            <Field label={t('auth.password')}>
                 <Input
                     type="password"
                     required
@@ -47,13 +49,13 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                     onChange={(event) => setRememberMe(event.target.checked)}
                     className="size-4 cursor-pointer"
                 />
-                Keep me signed in
+                {t('auth.keepSignedIn')}
             </label>
 
-            {error && <ErrorBox>{errorMessage(error, 'Invalid phone number or password')}</ErrorBox>}
+            {error && <ErrorBox>{errorMessage(error, t('auth.invalidCredentials'))}</ErrorBox>}
 
             <Button type="submit" variant="primary" disabled={isPending} className="mt-2 py-3">
-                {isPending ? 'Signing in…' : 'Sign in'}
+                {isPending ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
         </form>
     )
