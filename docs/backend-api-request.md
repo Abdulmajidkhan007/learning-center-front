@@ -6,6 +6,12 @@ kutayotgani**, **taklif qilinayotgan imzo** va **nega aynan shunday** yozilgan.
 Xatolar va xavfsizlik masalalari alohida faylda:
 [`backend-notes.md`](backend-notes.md).
 
+Ikki qismga bo'lingan:
+
+- **A qism — umumiy ulanish.** Bular ayrim ekranga emas, **butun ilovaga**
+  tegishli: bularsiz frontend backendga to'g'ri ulanolmaydi.
+- **B qism — ayrim ekranlar.** Ekran tayyor, ma'lumot yo'q.
+
 Ustuvorlik:
 
 | Belgi | Ma'nosi |
@@ -15,6 +21,79 @@ Ustuvorlik:
 | **P2** | Keyingi bosqich, hozir shoshilinch emas |
 
 ---
+
+# A qism — umumiy ulanish
+
+## P0-0. Parol hayot sikli — hozir yaratilgan odam tizimga KIRA OLMAYDI
+
+Bu ro'yxatdagi eng katta muammo. Butun `service/` papkasida `setPassword`
+**bitta joyda** chaqiriladi — `AuthService.changePassword` da. Ya'ni:
+
+- `UserCreateDto(fullName, phone, birthDate, role)` — **parol maydoni yo'q**;
+- `UserService.create` mapper'dan kelgan entity'ni shundoq saqlaydi;
+- `StudentService.create` / `TeacherService.create` ham parol qo'ymaydi.
+
+Natija: admin panel orqali o'quvchi yoki o'qituvchi yaratiladi, bazada
+`password = null` bo'lgan `User` paydo bo'ladi va **o'sha odam hech qachon
+login qila olmaydi**. `passwordEncoder.matches(raw, null)` hech qanday xato
+bermaydi — shunchaki `false` qaytaradi, ya'ni ekranda "parol xato" chiqadi
+va sababi ko'rinmaydi.
+
+Parolni keyin qo'yish yo'li ham yo'q: `/auth/change-password` **eski parolni**
+talab qiladi, eski parol esa mavjud emas.
+
+**Kerak (uchalasi ham):**
+
+```java
+// 1. Yaratishda parol
+public record UserCreateDto(String fullName, String phone, LocalDate birthDate,
+                            Role role, String password) {}
+```
+
+Yoki parolni server generatsiya qilib, javobda **bir marta** qaytarsin —
+admin uni o'quvchiga aytadi. Qaysi biri bo'lsa ayting, formani shunga
+moslaymiz.
+
+```java
+// 2. Administrator uchun parolni tiklash (eski parolsiz)
+@PostMapping("/user/{id}/reset-password")
+@PreAuthorize("hasRole('ADMINISTRATOR')")
+public ResponseEntity<Void> resetPassword(@PathVariable String id,
+                                          @RequestBody ResetPasswordDto dto) { … }
+```
+
+```java
+// 3. "Parolni unutdim" — SMS yoki admin orqali
+```
+
+Uchinchisi keyinroq bo'lsa ham bo'ladi, lekin 1 va 2 siz admin paneli
+amalda ishlamaydi: odam qo'shasiz, u kira olmaydi.
+
+## P0-0b. Birinchi administrator qayerdan keladi
+
+`DataInitializer` da `implements CommandLineRunner` izohga olingan
+(20-qator), ya'ni u **hech qachon ishlamaydi**. `POST /api/v1/user` esa
+whitelist'da emas — chaqirish uchun avval login qilish kerak.
+
+Ya'ni **toza bazada hech kim tizimga kira olmaydi va birinchi adminni
+yaratishning yo'li yo'q.** Deploy qilinganda ilova ochilmaydi.
+
+**Kerak:** ishga tushganda admin yo'q bo'lsa, env'dan bittasini yaratish:
+
+```java
+@Component
+@Profile("!test")
+class AdminBootstrap implements CommandLineRunner {
+    public void run(String... args) {
+        if (userRepository.existsByRole(Role.ADMINISTRATOR)) return;
+        // BOOTSTRAP_ADMIN_PHONE / BOOTSTRAP_ADMIN_PASSWORD env'dan
+    }
+}
+```
+
+⚠️ Hozirgi `DataInitializer` dagi parol **kodda ochiq yozilgan** va admin
+telefoni `"1"`. Uni productionda yoqmang — faqat `@Profile("dev")` ostida,
+parol esa env'dan.
 
 ## P0-1. Xatolar uchun yagona javob shakli
 
@@ -143,6 +222,85 @@ public record AttendanceStudentCreateDto(@NotBlank String studentId,
 sabab ko'rinmaydi.
 
 ---
+
+## P1-0. Javob shakllari bir xil bo'lsin
+
+Bir xil ma'noli endpoint'lar har xil javob qaytaradi — frontendda har biriga
+alohida moslashuv yozishga to'g'ri kelyapti.
+
+**`/count` ikki xil:**
+
+| Endpoint | Javob |
+| --- | --- |
+| `GET /group/count` | `5` (sof son) |
+| `GET /attendance/count` | `5` (sof son) |
+| `GET /student/count` | `{"count": 5}` |
+| `GET /teacher/count` | `{"count": 5}` |
+| `GET /lesson/count` | `{"count": 5}` |
+
+Hozir `shared/api` da ikkalasini ham qabul qiladigan moslashuv bor. Bittasini
+tanlang — `{"count": N}` yaxshiroq, chunki keyin maydon qo'shsa bo'ladi.
+
+**Sahifalash parametrlari ham har xil:** `GroupController` `@RequestParam page,
+size` oladi, qolganlari `Pageable`. Ikkalasi ham `?page=&size=` bilan
+ishlagani uchun hozircha muammo yo'q, lekin bittasiga keltirsangiz yaxshi.
+
+**Muhimrog'i — barqaror tartib yo'q.** Hech qaysi ro'yxatda sukut bo'yicha
+`Sort` berilmagan. PostgreSQL `ORDER BY` siz qatorlar tartibini
+kafolatlamaydi, ya'ni 1-sahifadagi yozuv 2-sahifada yana chiqishi yoki
+umuman tushib qolishi mumkin — jadval "sakraydi".
+
+```java
+Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+```
+
+## P1-0b. Refresh cookie'dagi `secure(true)` lokalda va telefonda buzadi
+
+```java
+ResponseCookie.from("refresh_token", tokenValue)
+        .httpOnly(true).secure(true).path("/").sameSite("Lax")
+```
+
+`httpOnly`, `path`, `SameSite=Lax` — hammasi to'g'ri, rahmat. Faqat
+`secure(true)` doimiy yoqilgan: brauzer bunday cookie'ni **faqat HTTPS**
+da saqlaydi.
+
+- `http://localhost` — Chrome va Firefox istisno qiladi, ishlaydi;
+- `http://192.168.x.x:5173` (telefonda yoki boshqa kompyuterda sinash) —
+  **cookie umuman saqlanmaydi**. Login o'tadi, sahifa yangilansa
+  foydalanuvchi chiqib ketadi. Sababi ko'rinmaydi, chunki xato ham bermaydi.
+
+```java
+.secure(cookieSecure)   // ${COOKIE_SECURE:false}, productionda true
+```
+
+## P1-0c. Deploy sozlamalari (Railway)
+
+`application.yaml` da `server` bloki umuman yo'q. Railway'da ikkitasi shart:
+
+```yaml
+server:
+  port: ${PORT:8080}       # Railway PORT ni o'zi beradi
+  address: ${SERVER_ADDRESS:0.0.0.0}
+```
+
+`SERVER_ADDRESS=::` qilib qo'ying: Railway'ning ichki tarmog'i **IPv6**,
+Spring esa sukut bo'yicha faqat IPv4 tinglaydi. Busiz frontend xizmati
+`backend.railway.internal` ga **umuman yeta olmaydi** — biz `/api` ni
+o'sha manzilga uzatamiz.
+
+Yana `spring-boot-starter-actuator` qo'shilsa, Railway healthcheck uchun
+`/actuator/health` bo'ladi (`management.endpoints.web.exposure.include=health`).
+
+Va `frontUrl` env'ga chiqsin — hozir `http://localhost:5173` qattiq yozilgan:
+
+```yaml
+frontUrl: ${FRONT_URL:http://localhost:5173}
+```
+
+---
+
+# B qism — ayrim ekranlar
 
 ## P1-1. O'quvchi paneli — uchta endpoint
 
