@@ -24,76 +24,126 @@ Ustuvorlik:
 
 # A qism — umumiy ulanish
 
-## P0-0. Parol hayot sikli — hozir yaratilgan odam tizimga KIRA OLMAYDI
+## P0-0. Parol hayot sikli — ✅ hal qilinmoqda (avtomatik generatsiya)
 
-Bu ro'yxatdagi eng katta muammo. Butun `service/` papkasida `setPassword`
-**bitta joyda** chaqiriladi — `AuthService.changePassword` da. Ya'ni:
+**Backend javobi: parol avtomatik generatsiya qilinadi.** Muammoni to'g'ri
+tushunilgan — quyida faqat frontend uchun qolgan savollar.
 
-- `UserCreateDto(fullName, phone, birthDate, role)` — **parol maydoni yo'q**;
-- `UserService.create` mapper'dan kelgan entity'ni shundoq saqlaydi;
-- `StudentService.create` / `TeacherService.create` ham parol qo'ymaydi.
+Muammoning o'zi shunday edi: butun `service/` papkasida `setPassword`
+**bitta joyda** chaqiriladi — `AuthService.changePassword` da.
+`UserCreateDto(fullName, phone, birthDate, role)` da parol maydoni yo'q,
+`UserService.create` esa mapper'dan kelgan entity'ni shundoq saqlaydi.
+`User.password` esa `@Column(nullable = false)` — ya'ni panel orqali
+o'quvchi qo'shilganda insert **umuman o'tmaydi** va (xato ushlagichi
+bo'lmagani uchun) 500 qaytadi.
 
-Natija: admin panel orqali o'quvchi yoki o'qituvchi yaratiladi, bazada
-`password = null` bo'lgan `User` paydo bo'ladi va **o'sha odam hech qachon
-login qila olmaydi**. `passwordEncoder.matches(raw, null)` hech qanday xato
-bermaydi — shunchaki `false` qaytaradi, ya'ni ekranda "parol xato" chiqadi
-va sababi ko'rinmaydi.
+Avtomatik generatsiya buni yopadi. Frontend uchun uchta savol qoldi:
 
-Parolni keyin qo'yish yo'li ham yo'q: `/auth/change-password` **eski parolni**
-talab qiladi, eski parol esa mavjud emas.
+**1. Generatsiya qilingan parol qayerga boradi?**
 
-**Kerak (uchalasi ham):**
+Agar u hech qayerga qaytmasa, muammo o'z holicha qoladi: admin o'quvchiga
+aytadigan parolni bilmaydi. Ikki ishlaydigan variant bor:
+
+- **Javobda bir marta qaytariladi** — `POST /student` javobiga
+  `temporaryPassword` qo'shiladi. Biz uni modalda ko'rsatamiz: nusxa olish
+  tugmasi va "bu parol boshqa ko'rsatilmaydi" ogohlantirishi bilan.
+- **SMS orqali yuboriladi** — biz shunchaki "parol SMS orqali yuborildi"
+  deb yozamiz. SMS integratsiyasi bormi?
+
+Qaysi biri bo'lsa ayting — forma shunga qarab yasaladi.
+
+**2. Parol qanday generatsiya qilinadi?**
+
+Telefon raqami, tug'ilgan sana yoki `12345678` kabi qat'iy qiymat
+bo'lmasin — bularning barchasi taxmin qilinadi va bitta odam boshqasining
+hisobiga kiradi. Kamida 10-12 belgi, tasodifiy (`SecureRandom`).
+
+**3. Birinchi kirishda parolni almashtirish majburiymi?**
+
+Agar ha bo'lsa, `/auth/me` javobiga yoki token claim'iga
+`mustChangePassword: true` qo'shing — biz o'sha foydalanuvchini boshqa
+ekranga qo'ymay, to'g'ridan-to'g'ri parol almashtirish formasiga
+yo'naltiramiz.
+
+**Yana kerak:** administrator uchun parolni tiklash (eski parolsiz) —
+o'quvchi parolini unutsa, hozir hech qanday yo'l yo'q, chunki
+`/auth/change-password` eski parolni talab qiladi.
 
 ```java
-// 1. Yaratishda parol
-public record UserCreateDto(String fullName, String phone, LocalDate birthDate,
-                            Role role, String password) {}
-```
-
-Yoki parolni server generatsiya qilib, javobda **bir marta** qaytarsin —
-admin uni o'quvchiga aytadi. Qaysi biri bo'lsa ayting, formani shunga
-moslaymiz.
-
-```java
-// 2. Administrator uchun parolni tiklash (eski parolsiz)
 @PostMapping("/user/{id}/reset-password")
 @PreAuthorize("hasRole('ADMINISTRATOR')")
-public ResponseEntity<Void> resetPassword(@PathVariable String id,
-                                          @RequestBody ResetPasswordDto dto) { … }
+public ResponseEntity<TemporaryPasswordDto> resetPassword(@PathVariable String id) { … }
 ```
 
-```java
-// 3. "Parolni unutdim" — SMS yoki admin orqali
-```
+## P0-0b. Birinchi administrator — ✅ hal qilinmoqda (organization bilan birga)
 
-Uchinchisi keyinroq bo'lsa ham bo'ladi, lekin 1 va 2 siz admin paneli
-amalda ishlamaydi: odam qo'shasiz, u kira olmaydi.
+**Backend javobi: super-admin organization bilan birga yaratiladi.**
 
-## P0-0b. Birinchi administrator qayerdan keladi
+Frontend uchun qolgan savollar:
 
-`DataInitializer` da `implements CommandLineRunner` izohga olingan
-(20-qator), ya'ni u **hech qachon ishlamaydi**. `POST /api/v1/user` esa
-whitelist'da emas — chaqirish uchun avval login qilish kerak.
+**1. Birinchi organization o'zi qanday yaratiladi?**
 
-Ya'ni **toza bazada hech kim tizimga kira olmaydi va birinchi adminni
-yaratishning yo'li yo'q.** Deploy qilinganda ilova ochilmaydi.
+- Ochiq endpoint orqalimi (`POST /organization` — ro'yxatdan o'tish)? Unda
+  bizga **ro'yxatdan o'tish ekrani** kerak: markaz nomi, telefon, email +
+  super-admin ma'lumotlari. Ayting — yasaymiz.
+- Yoki qo'lda / migratsiya orqalimi? Unda ekran kerak emas.
 
-**Kerak:** ishga tushganda admin yo'q bo'lsa, env'dan bittasini yaratish:
+Agar ochiq bo'lsa, u whitelist'ga qo'shilishi va **rate limit** qo'yilishi
+kerak — aks holda istalgan kishi cheksiz organization yaratadi.
 
-```java
-@Component
-@Profile("!test")
-class AdminBootstrap implements CommandLineRunner {
-    public void run(String... args) {
-        if (userRepository.existsByRole(Role.ADMINISTRATOR)) return;
-        // BOOTSTRAP_ADMIN_PHONE / BOOTSTRAP_ADMIN_PASSWORD env'dan
-    }
-}
-```
+**2. Super-admin nimani boshqaradi?** Bitta organization ichidagi
+filiallarnimi, yoki barcha organization'larnimi? Super-admin paneli shunga
+qarab boshqacha bo'ladi.
 
 ⚠️ Hozirgi `DataInitializer` dagi parol **kodda ochiq yozilgan** va admin
 telefoni `"1"`. Uni productionda yoqmang — faqat `@Profile("dev")` ostida,
 parol esa env'dan.
+
+## P0-0c. 🔴 Organization qo'shilsa — ma'lumot ajratilishi SHART
+
+Bu eng muhim band, chunki uni keyin tuzatish qimmatga tushadi.
+
+Model tayyor: `User → Branch → Organization`. Yozishda ham ishlatilyapti —
+`GroupService:83` guruhni `currentUser.getBranch()` bilan yaratadi.
+
+**Lekin o'qishda hech qayerda filtr yo'q.** Tekshirdim:
+
+```java
+// GroupRepository
+@Query(value = "select count(id) from groups where deleted=false", nativeQuery = true)
+Optional<Integer> getCount();
+```
+
+Guruhlar ro'yxati, o'quvchilar, o'qituvchilar, darslar, to'lovlar — hech
+qaysi so'rovda `branch` yoki `organization` sharti yo'q. Hozir bu bilinmaydi,
+chunki tizimda bitta markaz bor.
+
+Organization qo'shilishi bilan ahvol shunday bo'ladi: **"A" markaz
+administratori "B" markazning o'quvchilarini, telefon raqamlarini va
+to'lovlarini ko'radi.** Bitta `GET /student` yetadi.
+
+Buni frontend hal qila olmaydi va qilmasligi ham kerak: mijoz tomonda
+filtrlash — ma'lumot allaqachon brauzerga yuborilgani degani.
+
+**Kerak:** har bir ro'yxat so'rovi kirgan foydalanuvchining branch'i
+(super-admin uchun — organization'i) bo'yicha filtrlansin. Eng ishonchli
+yo'l — Hibernate filtri yoki har so'rovga majburiy shart:
+
+```java
+where g.deleted = false and g.branch.id = :branchId
+```
+
+`getCount()` kabi native so'rovlar ham unutilmasin — ular filtrdan
+o'tmaydi.
+
+Frontend tomondan savol: **`branchId` ni biz yuboramizmi yoki backend
+tokendan oladimi?** Tavsiyamiz — **backend tokendan olsin**. Mijoz
+yuborsa, uni o'zgartirib boshqa markazning ma'lumotini so'rash mumkin
+bo'ladi.
+
+Agar super-admin bir nechta filialni ko'ra olishi kerak bo'lsa, o'shanda
+`?branchId=` **ixtiyoriy** parametr bo'lsin va faqat super-admin uchun
+ishlasin.
 
 ## P0-1. Xatolar uchun yagona javob shakli
 
@@ -389,6 +439,11 @@ Sozlamalardagi "markaz" bloki o'chirilgan.
 Kerak: DTO'lar to'ldirilgan holda + oddiy CRUD
 (`GET/POST/PUT/DELETE /api/v1/branch`). Shundan keyin super-admin paneli
 boshqa tablar bilan bir xil generik jadvalga tushadi.
+
+> Super-admin organization bilan birga yaratiladigan bo'lgani uchun bu band
+> endi P2 emas: super-admin kirgach ko'radigan birinchi ekran — aynan
+> filiallar ro'yxati. `BranchService` va `BranchRepository` allaqachon bor,
+> faqat DTO'lar bo'sh va controller yo'q.
 
 ---
 
