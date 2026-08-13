@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { setRequestLocale } from '@/shared/api/requestLocale'
 import { LocaleContext, LOCALES, type Locale } from '@/shared/i18n'
 import { translate } from '@/shared/i18n'
 import type { TranslationKey } from '@/shared/i18n'
@@ -28,7 +29,12 @@ function resolveInitialLocale(): Locale {
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-    const [locale, setLocaleState] = useState<Locale>(resolveInitialLocale)
+    const [locale, setLocaleState] = useState<Locale>(() => {
+        const initial = resolveInitialLocale()
+        // Birinchi so'rov ham to'g'ri tilda ketsin — effekt kechikadi.
+        setRequestLocale(initial)
+        return initial
+    })
 
     // `<html lang>` — skrinriderlar va brauzerning imlo tekshiruvi uchun.
     useEffect(() => {
@@ -37,6 +43,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
     const setLocale = useCallback((next: Locale) => {
         setLocaleState(next)
+        // Backend xato matnlarini shu sarlavhaga qarab tarjima qiladi.
+        setRequestLocale(next)
         try {
             localStorage.setItem(STORAGE_KEY, next)
         } catch {

@@ -6,6 +6,78 @@ kutayotgani**, **taklif qilinayotgan imzo** va **nega aynan shunday** yozilgan.
 Xatolar va xavfsizlik masalalari alohida faylda:
 [`backend-notes.md`](backend-notes.md).
 
+## O'zgarishlarni bizga qanday yuborish (savolga javob)
+
+**Eng yaxshisi — OpenAPI.** Loyihada `springdoc-openapi-starter-webmvc-ui`
+allaqachon bor va `swagger-ui` yoqilgan. Ya'ni `GET /v3/api-docs` tayyor
+JSON beradi. Shuni bersangiz yetadi:
+
+- u **doim kod bilan bir xil** — qo'lda ko'chirishda unutiladigan maydon
+  bo'lmaydi;
+- undan biz TypeScript tiplarini **avtomatik** generatsiya qilamiz, ya'ni
+  DTO o'zgarsa kompilyator qaysi ekran buzilganini o'zi ko'rsatadi;
+- enum'lar, majburiy/ixtiyoriy maydonlar, status kodlar — hammasi ichida.
+
+Faqat bitta shart: whitelist'dagi `/swagger**` naqshi Spring Boot 4 da
+ishlamaydi (`backend-notes.md`, 2-band). `/v3/api-docs/**` va
+`/swagger-ui/**` deb yozilsa, ochiladi.
+
+Buni CI'da faylga yozib, repo'ga qo'yish ham mumkin — o'shanda bizga URL
+ham kerak bo'lmaydi.
+
+**Ikkinchi variant (hozir qilayotganingiz):** controller imzosi + DTO
+record'lari. Bu ham ishlaydi, faqat ikki narsa bilan:
+
+1. **Enum'ni ham qo'shing.** Masalan oxirgi xabarda `InvoiceType type`
+   keldi, lekin `InvoiceType` ning qiymatlari yo'q — biz uni tipga
+   yozolmaymiz va ekranda ko'rsatolmaymiz.
+2. **Nima O'ZGARGANINI yozing**, butun faylni emas: "InvoiceDto ga `type`
+   qo'shildi, `/invoice/return` paydo bo'ldi" — bitta qator bizga butun
+   controller'dan ko'ra foydaliroq.
+
+**Kerak emas:** matn bilan tushuntirish ("hisobni qaytaradigan endpoint
+qildim"). Nomi, parametri va javobi bo'lmasa, baribir so'rashga to'g'ri
+keladi.
+
+---
+
+## Hal qilinganlar ✅ (commit `0cf0826`, branch `N`)
+
+Backend katta yangilanish qildi. Kodda tekshirildi:
+
+| Nima | Holati |
+| --- | --- |
+| `@RestControllerAdvice` + xato shakli | ✅ `GlobalExceptionHandler`, `{timestamp, errorCode, message, path}` |
+| Xato matnini tarjima qilish | ✅ `Accept-Language` bo'yicha (biz endi shu sarlavhani yuboramiz) |
+| `LessonDto` ga `lessonName` | ✅ `lessonNumber` dan alohida maydon bo'lib qo'shildi |
+| `EnrollmentDto` ga `id` | ✅ guruhdan chiqarish endi mumkin |
+| `BranchController` + to'ldirilgan DTO'lar | ✅ super-admin paneli ochildi |
+| `OrganizationController` | ✅ ro'yxatdan o'tish oqimi mumkin bo'ldi |
+| Parol generatsiyasi (`Generator`) | ✅ qo'shildi |
+
+Frontend tomondan qilingani: `apiFetch` endi `Accept-Language` yuboradi va
+`errorCode` ni `ApiError.code` ga oladi; validatsiya xatolari (maydon →
+xabar xaritasi) ham o'qiladi; darslar jadvali `lessonName` ga o'tdi.
+
+### Shu yangilanishdan keyin qolgan savollar
+
+1. **`InvoiceType` qiymatlari qanday?** `InvoiceDto` ga `type` qo'shilgan,
+   lekin enum berilmagan — tipga yozolmaymiz.
+2. **`POST /invoice/return?studentId=` nima qiladi?** Oxirgi hisobni
+   bekor qiladimi, pul qaytarish yozuvini yaratadimi, yoki balansdan
+   ayiradimi? Javobi qaysi hisob?
+3. **`Student.balance`** paydo bo'ldi va hisob yaratilganda oshyapti.
+   Uni ekranda ko'rsatamizmi? Manfiy balans "qarzdor" degani bo'ladimi?
+4. **`UserCreateDto` ga `branchId` va `organizationId` qo'shildi** —
+   ular majburiymi? Admin panelidan o'quvchi qo'shganda biz ularni qayerdan
+   olamiz? Tavsiyamiz: kirgan foydalanuvchining branch'i tokendan olinsin,
+   mijoz yubormasin.
+5. **`AttendanceStatus` dan `LATE` olib tashlandi.** Bazada eski `LATE`
+   yozuvlari bo'lsa, ularni o'qishda `IllegalArgumentException` chiqadi.
+   Toza bazada muammo yo'q — tekshirib qo'ying.
+
+---
+
 Ikki qismga bo'lingan:
 
 - **A qism — umumiy ulanish.** Bular ayrim ekranga emas, **butun ilovaga**

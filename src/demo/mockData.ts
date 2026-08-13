@@ -78,13 +78,12 @@ export const groupRoster: Record<string, string[]> = {
     g4: ['s4', 's5'],
 }
 
-// `lessonNumber` demo'da son bo'lib qolgan: o'qituvchi panelidagi matn
-// ("{{number}}-dars") sonni kutadi. Haqiqiy backendda bu maydon dars NOMI
-// bo'lishi kerak edi — `docs/backend-notes.md` ga qarang.
+// Backend `lessonName` va `lessonNumber` ni ALOHIDA maydon qilib berdi:
+// jadvalda nom, o'qituvchi panelidagi "{{number}}-dars" matnida esa raqam.
 export const lessons: LessonDto[] = [
-    { id: 'l1', lessonNumber: '12', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
-    { id: 'l2', lessonNumber: '13', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
-    { id: 'l3', lessonNumber: '14', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
+    { id: 'l1', lessonNumber: '12', lessonName: 'Unit 12 — Past perfect', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l2', lessonNumber: '13', lessonName: 'Unit 13 — Reported speech', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l3', lessonNumber: '14', lessonName: 'Unit 14 — Conditionals', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
 ]
 
 export const invoices: InvoiceDto[] = [

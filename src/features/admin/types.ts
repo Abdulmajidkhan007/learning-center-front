@@ -29,6 +29,7 @@ export interface AdminRow {
     timeTable?: TimeTableDto
     status?: GroupStatus
     /** `LessonDto` maydonlari — darslar tabi uchun. */
+    lessonName?: string
     lessonNumber?: string
     lessonDate?: string
     isComplete?: boolean

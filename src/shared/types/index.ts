@@ -146,6 +146,9 @@ export interface FullGroupDto {
 /** `LessonDto` — `lessonNumber` STRING (backend shunday qaytaradi). */
 export interface LessonDto {
     id: string
+    /** O'qituvchi/admin kiritgan nom. */
+    lessonName?: string
+    /** Tartib raqami — nomdan ALOHIDA maydon. */
     lessonNumber?: string
     /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
     lessonDate?: string

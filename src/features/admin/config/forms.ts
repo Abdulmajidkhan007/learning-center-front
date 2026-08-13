@@ -169,10 +169,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
         getInitialValues(row) {
             return {
                 groupId: row?.group?.id ?? '',
-                // `LessonDto` dars nomini qaytarmaydi (`lessonNumber` bo'sh
-                // keladi) — shuning uchun tahrirlashda maydon odatda bo'sh
-                // boshlanadi. Backend tuzatilgach o'zi to'ladi.
-                lessonName: row?.lessonNumber ?? '',
+                lessonName: row?.lessonName ?? '',
             }
         },
         buildCreatePayload(values) {
