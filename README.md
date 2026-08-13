@@ -121,5 +121,6 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/i18n.md](docs/i18n.md)                           | Uch tillilik: yangi matn qo'shish, cheklovlar     |
 | [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
 | [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
-| [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik, xatolar, kerakli endpoint'lar |
+| [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik va topilgan xatolar  |
+| [docs/backend-api-request.md](docs/backend-api-request.md) | Backend jamoasiga: kerakli API'lar, ustuvorlik bo'yicha |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

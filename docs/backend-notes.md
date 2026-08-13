@@ -260,7 +260,42 @@ Kerak bo'ladigan minimum: `GET/POST/PUT/DELETE /api/v1/branch` va DTO'lar
 to'ldirilgan holda. Shundan keyin super-admin paneli boshqa tablar bilan
 bir xil generik jadvalga tushadi — frontendda bir kunlik ish.
 
-### 11. 🟡 `ddl-auto: update`
+### 11. 🔴 `InvoiceMapper` da ism va rasm manzili almashib ketgan
+
+`InvoiceMapper.toDtoFromProjection` — `GET /invoice` ro'yxati **aynan shu
+yo'ldan** o'tadi (`InvoiceService:36` va `:70`):
+
+```java
+new UserDto(
+        projection.getStudentUserId(),
+        projection.getStudentFullName(),    // ← 2-o'rin: UserDto da bu `imageUrl`
+        projection.getStudentImageUrl(),    // ← 3-o'rin: UserDto da bu `fullName`
+        projection.getStudentPhone(),
+        …
+```
+
+`UserDto` esa shunday e'lon qilingan:
+
+```java
+public record UserDto(String id, String imageUrl, String fullName,
+                      String phone, LocalDate birthDate, Role role) {}
+```
+
+Ya'ni to'lovlar ro'yxatida **har bir o'quvchining ismi `imageUrl` maydoniga,
+rasm manzili esa `fullName` ga** tushadi. Ikkalasi ham `String` bo'lgani
+uchun kompilyator hech narsa demaydi — xato faqat ekranda ko'rinadi.
+
+`GET /invoice/{id}` (bitta yozuv) `toDto` dan o'tadi va u to'g'ri, shuning
+uchun ro'yxat bilan kartochka bir-biriga zid ko'rinadi.
+
+**Tuzatish:** ikki qatorni almashtiring. Kelajakda bunday xato bo'lmasligi
+uchun `new UserDto(...)` ni nomlangan qurilishga o'tkazing yoki
+`UserDto` yasashni bitta yordamchi metodga chiqaring.
+
+`TeacherDto` uchun ham shu proyeksiyada `getTeacherFullName` /
+`getTeacherImageUrl` bor — o'sha joyni ham tekshiring.
+
+### 12. 🟡 `ddl-auto: update`
 
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot
@@ -302,16 +337,10 @@ bo'lib qoladi va CORS umuman kerak bo'lmaydi.
 
 ## Kelajakda kerak bo'ladigan endpoint'lar
 
-Frontendda ekran tayyor, ma'lumot yo'q (hozir "endpoint yo'q" deb turibdi):
-
-| Ekran | Nima kerak |
-| --- | --- |
-| O'qituvchi — KPI kartalar | Guruh bo'yicha: faol / yangi / ketgan / xavf ostida / kelmagan / qizil / qora ro'yxat |
-| O'qituvchi — uy vazifasi | Dars bo'yicha bajargan va bajarmaganlar soni |
-| O'qituvchi — ballar | Reference dizaynda dars bo'yicha ball bor; hozir faqat davomat statuslari |
-| O'quvchi — davomat | `GET /attendance/student/{studentId}` — hozirgi `GET /attendance` butun markazni qaytaradi, ya'ni o'quvchiga berib bo'lmaydi |
-| O'quvchi — guruhim | O'quvchi id si bo'yicha guruhini qaytaradigan endpoint |
-| Sozlamalar — markaz | Markaz nomi, logotip, ish vaqti, dam olish kunlari |
+Kerakli API'lar to'liq imzolari bilan alohida faylga chiqarildi:
+[`backend-api-request.md`](backend-api-request.md). Shu fayl "nima
+yozamiz?" degan savolga javob beradi — bu yerdagi ro'yxat esa mavjud
+kodadagi xatolar haqida.
 
 ---
 
