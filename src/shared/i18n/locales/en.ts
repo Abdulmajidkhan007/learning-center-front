@@ -143,6 +143,12 @@ export const en: Translations = {
     'attendance.LATE': 'Late',
     'attendance.EXCUSED': 'Excused',
 
+    'attendance.addExcuse': 'Add a reason for {{name}}',
+    'attendance.excuseReason': 'Reason',
+    'attendance.excusePlaceholder': 'e.g. illness, family reasons',
+    'attendance.excuseNotStored': 'The reason is not stored on the server yet — the backend needs a field.',
+    'attendance.hint': 'Click a square to toggle present/absent. The corner dot marks it excused.',
+
     'settings.title': 'Settings',
     'settings.appearance': 'Appearance',
     'settings.appearanceHint': 'Language and theme are saved on this device.',
@@ -184,6 +190,12 @@ export const en: Translations = {
     'student.groupHint': 'Group, teacher and timetable.',
     'student.notFound': 'No student record found',
     'student.notFoundHint': 'There is no student record for your phone number. Ask an administrator.',
+
+    'admin.addToGroup': 'Add',
+    'admin.alreadyInGroup': 'In group',
+    'admin.removeNotAvailable': 'Removing from a group is not available yet: the backend does not return the enrollment id.',
+    'error.notFound': 'Page not found',
+    'error.notFoundHint': 'The address is wrong or the page has moved.',
 
     'pending.title': 'Backend not ready yet',
     'pending.body':

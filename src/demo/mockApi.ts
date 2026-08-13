@@ -1,4 +1,4 @@
-import { attendance, fullGroup, groups, lessons, students, teachers } from './mockData'
+import { attendance, fullGroup, groupRoster, groups, lessons, students, teachers } from './mockData'
 import type { AttendanceDto, GroupDto, LessonDto, StudentDto, TeacherDto } from '@/shared/types'
 
 /**
@@ -107,6 +107,23 @@ export function installMockApi() {
         if (path === '/auth/change-password') {
             // Demo'da har doim muvaffaqiyatli — haqiqiy tekshiruv backendda.
             return json({ response: 'Password changed successfully' })
+        }
+
+        // --- enrollments: o'quvchi ↔ guruh ko'prigi ---
+        if (path === '/enrollments' && method === 'GET') {
+            const groupId = url.searchParams.get('groupId') ?? ''
+            const ids = groupRoster[groupId] ?? []
+            return json({
+                content: ids.map((studentId) => ({ studentId, groupId })),
+                totalPages: 1,
+                totalElements: ids.length,
+            })
+        }
+        if (path === '/enrollments' && method === 'POST') {
+            const groupId = String(body.groupId)
+            const studentId = String(body.studentId)
+            groupRoster[groupId] = [...(groupRoster[groupId] ?? []), studentId]
+            return json({ studentId, groupId })
         }
 
         // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---

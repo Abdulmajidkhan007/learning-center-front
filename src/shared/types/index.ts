@@ -154,9 +154,20 @@ export interface LessonDto {
     teacherDto?: TeacherDto
 }
 
-/** Davomat statuslari — ro'yxat va tip bitta manbadan chiqadi. */
+/**
+ * Davomat statuslari.
+ *
+ * `LATE` ro'yxatda qoladi, chunki backend enum'ida bor va ESKI yozuvlarda
+ * uchraydi — uni tipdan olib tashlasak, o'sha yozuvlar ko'rsatilmay qoladi.
+ * Lekin yangi davomatda u TANLANMAYDI (pastga qarang): amalda deyarli
+ * ishlatilmagan va o'qituvchini ortiqcha tanlovga majburlagan.
+ */
 export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
+
+/** O'qituvchi yangi davomatda tanlay oladigan statuslar. */
+export const SELECTABLE_ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'EXCUSED'] as const
+export type SelectableAttendanceStatus = (typeof SELECTABLE_ATTENDANCE_STATUSES)[number]
 
 export interface AttendanceStudentDto {
     studentId: string

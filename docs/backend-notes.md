@@ -132,7 +132,50 @@ foydalanadi (o'quvchi paneli), lekin backendda tekshiruv yo'q.
 1-banddagi `@PreAuthorize` ishi qilinganda shu endpoint "o'zi yoki xodim"
 qoidasiga bo'ysunsin.
 
-### 6. 🟡 `ddl-auto: update`
+### 6. 🟠 Davomat izohi: `AttendanceStudentCreateDto` da maydon yo'q
+
+Kelishilganidek davomat interfeysi o'zgartirildi: ochiladigan ro'yxat
+o'rniga bosiladigan kvadrat (yashil = keldi, bosilsa qizil = kelmadi),
+burchagidagi tugma esa **sabab yozish** oynasini ochadi va statusni
+`EXCUSED` qilib qo'yadi.
+
+Muammo: `AttendanceStudentCreateDto` faqat `studentId` va `status` ni
+oladi — **sabab matnini yuboradigan joy yo'q.** Hozir frontend uni yig'adi,
+lekin yubormaydi va foydalanuvchiga "izoh hozircha serverda saqlanmaydi"
+deb ochiq yozib qo'yadi.
+
+**So'rov:**
+
+```java
+public record AttendanceStudentCreateDto(
+        @NotBlank String studentId,
+        @NotNull AttendanceStatus status,
+        String reason          // ← EXCUSED uchun
+) {}
+```
+
+`AttendanceStudentDto` ga ham qaytishi kerak, aks holda eski davomatda
+sabab ko'rinmaydi.
+
+Yana: `LATE` statusi interfeysdan olib tashlandi (amalda ishlatilmagan).
+Enum'da qolaversin — eski yozuvlarda uchraydi va ular ko'rsatilishi kerak.
+
+### 7. 🟠 `EnrollmentDto` da `id` yo'q
+
+Guruhga o'quvchi qo'shish `POST /enrollments` orqali ulandi va ishlaydi.
+
+Lekin **guruhdan chiqarish qilinmadi**: `DELETE /enrollments/{id}` enrollment
+id sini talab qiladi, `EnrollmentDto{studentId, groupId, reason}` esa uni
+qaytarmaydi. Frontend id ni bilmaydi.
+
+```java
+public record EnrollmentDto(String id, String studentId, String groupId, String reason) {}
+```
+
+Ism ham qo'shilsa yaxshi bo'lardi (`studentFullName`) — hozir ro'yxatni
+ko'rsatish uchun o'quvchilar ro'yxati bilan solishtirishga to'g'ri keladi.
+
+### 8. 🟡 `ddl-auto: update`
 
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot
@@ -183,7 +226,6 @@ Frontendda ekran tayyor, ma'lumot yo'q (hozir "endpoint yo'q" deb turibdi):
 | O'qituvchi — ballar | Reference dizaynda dars bo'yicha ball bor; hozir faqat davomat statuslari |
 | O'quvchi — davomat | `GET /attendance/student/{studentId}` — hozirgi `GET /attendance` butun markazni qaytaradi, ya'ni o'quvchiga berib bo'lmaydi |
 | O'quvchi — guruhim | O'quvchi id si bo'yicha guruhini qaytaradigan endpoint |
-| Admin — guruhga o'quvchi biriktirish | `POST /group/{id}/students` yoki shunga o'xshash |
 | Sozlamalar — markaz | Markaz nomi, logotip, ish vaqti, dam olish kunlari |
 
 ---

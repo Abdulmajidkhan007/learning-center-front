@@ -152,6 +152,12 @@ export const ru: Translations = {
     'attendance.LATE': 'Опоздал',
     'attendance.EXCUSED': 'По уважительной',
 
+    'attendance.addExcuse': 'Указать причину для {{name}}',
+    'attendance.excuseReason': 'Причина',
+    'attendance.excusePlaceholder': 'Например: болезнь, семейные обстоятельства',
+    'attendance.excuseNotStored': 'Причина пока не сохраняется на сервере — нужно поле в backend.',
+    'attendance.hint': 'Клик по квадрату переключает был/не был. Точка в углу — уважительная причина.',
+
     'settings.title': 'Настройки',
     'settings.appearance': 'Внешний вид',
     'settings.appearanceHint': 'Язык и тема сохраняются на этом устройстве.',
@@ -193,6 +199,12 @@ export const ru: Translations = {
     'student.groupHint': 'Группа, преподаватель и расписание.',
     'student.notFound': 'Ваша карточка ученика не найдена',
     'student.notFoundHint': 'По вашему номеру телефона нет записи ученика. Обратитесь к администратору.',
+
+    'admin.addToGroup': 'Добавить',
+    'admin.alreadyInGroup': 'В группе',
+    'admin.removeNotAvailable': 'Удаление из группы пока недоступно: backend не возвращает id записи.',
+    'error.notFound': 'Страница не найдена',
+    'error.notFoundHint': 'Неверный адрес или страница перемещена.',
 
     'pending.title': 'Backend ещё не готов',
     'pending.body':

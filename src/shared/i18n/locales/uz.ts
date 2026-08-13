@@ -161,6 +161,12 @@ export const uz = {
     'attendance.EXCUSED': 'Sababli',
 
     // --- sozlamalar ---
+    'attendance.addExcuse': '{{name}} uchun sabab yozish',
+    'attendance.excuseReason': 'Sabab',
+    'attendance.excusePlaceholder': 'Masalan: kasal, oilaviy sabab',
+    'attendance.excuseNotStored': 'Izoh hozircha serverda saqlanmaydi — backendga maydon qo‘shilishi kerak.',
+    'attendance.hint': 'Kvadratni bossangiz keldi/kelmadi almashadi. Burchakdagi nuqta — sababli qilish.',
+
     'settings.title': 'Sozlamalar',
     'settings.appearance': "Ko'rinish",
     'settings.appearanceHint': 'Til va rang rejimi shu qurilmada saqlanadi.',
@@ -203,6 +209,12 @@ export const uz = {
     'student.groupHint': 'Guruh, o‘qituvchi va dars jadvali.',
     'student.notFound': 'O‘quvchi kartangiz topilmadi',
     'student.notFoundHint': 'Telefon raqamingiz bo‘yicha o‘quvchi yozuvi yo‘q. Administratorga murojaat qiling.',
+
+    'admin.addToGroup': 'Qo‘shish',
+    'admin.alreadyInGroup': 'Guruhda',
+    'admin.removeNotAvailable': 'Guruhdan chiqarish hozircha yo‘q: backend enrollment id sini qaytarmaydi.',
+    'error.notFound': 'Bunday sahifa yo‘q',
+    'error.notFoundHint': 'Manzil noto‘g‘ri yoki sahifa ko‘chirilgan.',
 
     'pending.title': 'Backend hali tayyor emas',
     'pending.body':

@@ -62,6 +62,33 @@ describe('useAttendanceDraft', () => {
         expect(result.current.hasDraft).toBe(false)
     })
 
+    it('sababli qilinganda izoh saqlanadi, lekin yuborilmaydi', () => {
+        const { result } = renderHook(() => useAttendanceDraft(students, lesson))
+
+        act(() => result.current.setStatus('s2', 'EXCUSED', 'kasal'))
+
+        expect(result.current.draft?.reasons.s2).toBe('kasal')
+        // Backendda izoh maydoni yo'q — yuboriladigan yukda u bo'lmasligi kerak.
+        expect(result.current.toPayload()?.students[1]).toEqual({
+            studentId: 's2',
+            status: 'EXCUSED',
+        })
+    })
+
+    it('status boshqasiga o’zgarsa izoh tozalanadi', () => {
+        const { result } = renderHook(() => useAttendanceDraft(students, lesson))
+
+        act(() => result.current.setStatus('s2', 'EXCUSED', 'kasal'))
+        act(() => result.current.setStatus('s2', 'PRESENT'))
+
+        expect(result.current.draft?.reasons.s2).toBeUndefined()
+    })
+
+    it('tanlanadigan statuslar ichida LATE yo’q', () => {
+        const { result } = renderHook(() => useAttendanceDraft(students, lesson))
+        expect(result.current.statuses).toEqual(['PRESENT', 'ABSENT', 'EXCUSED'])
+    })
+
     it('yuborish uchun backend kutgan shaklni yasaydi', () => {
         const { result } = renderHook(() => useAttendanceDraft(students, lesson))
 

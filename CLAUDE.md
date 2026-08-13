@@ -130,8 +130,9 @@ git push origin N
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
 - Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
   yuborish o'chirilgan).
-- Guruhga o'quvchi biriktirish endpoint'i yo'q (`AssignStudentsModal` —
-  vaqtinchalik matn).
+- Guruhdan chiqarish yo'q: `EnrollmentDto` enrollment id sini qaytarmaydi.
+- Davomatdagi "sabab" matni serverga yuborilmaydi —
+  `AttendanceStudentCreateDto` da maydon yo'q.
 - `GET /group/groups` faqat `{id, name}` qaytaradi, shuning uchun
   o'qituvchi panelidagi toq/juft filtri proyeksiyaga `dayType` qo'shilmaguncha
   yashirin turadi.

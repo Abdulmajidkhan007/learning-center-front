@@ -5,7 +5,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 
 | Rol             | Nima ko'radi                                                      |
 | --------------- | ----------------------------------------------------------------- |
-| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons bo'yicha to'liq CRUD        |
+| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons CRUD + guruhga o'quvchi biriktirish |
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
 | `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
 | `SUPER_ADMIN`   | Placeholder ekran                                                  |

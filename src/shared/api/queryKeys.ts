@@ -16,6 +16,8 @@ export const queryKeys = {
 
     teacherOptions: () => ['teacher', 'options'] as const,
 
+    groupEnrollments: (groupId: string) => ['enrollments', groupId] as const,
+
     teacherGroups: () => ['teacher', 'groups'] as const,
     groupInfo: (groupId: string) => ['group', 'info', groupId] as const,
 
