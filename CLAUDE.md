@@ -84,6 +84,41 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 26. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
     bundle'ga tushmaydi va unga bog'liqlik qo'shilmaydi.
 
+## Git ish tartibi
+
+Asl repo: `nurulloh-coder-dev/learning-center-front` (asosiy branch — `N`).
+Ish esa fork'da olib boriladi: `Abdulmajidkhan007/learning-center-front`.
+
+**Nega fork, collaborator huquqi bor bo'lsa ham:** kodni ko'p hollarda agent
+yozadi. Fork'da ishlanganda agentda asl repo'ga yozish huquqi umuman
+bo'lmaydi — eng yomon holatda o'z fork'ingizda keraksiz branch paydo
+bo'ladi, xolos. Har bir o'zgarish PR orqali odam ko'zidan o'tadi va asl
+repo tarixiga tasodifan tegib bo'lmaydi.
+
+Tartib:
+
+1. Har bir mantiqiy ish uchun alohida branch (`feature/...`).
+2. Ish tugagach fork'ga push qilinadi.
+3. Odam PR ochadi va merge qiladi:
+   `https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:<branch>`
+4. PR merge bo'lgach fork asl repo bilan sinxronlanadi (pastga qarang).
+
+**PR — har commit uchun emas, tugagan ish uchun.**
+
+### Fork'ni sinxronlash
+
+Asl repo oldinga ketsa, ish boshlashdan oldin:
+
+```bash
+git remote add upstream https://github.com/nurulloh-coder-dev/learning-center-front.git   # bir marta
+git fetch upstream
+git checkout N
+git merge upstream/N
+git push origin N
+```
+
+(GitHub'da "Sync fork" tugmasi ham shuni qiladi.)
+
 ## Hujjatlar
 
 23. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
