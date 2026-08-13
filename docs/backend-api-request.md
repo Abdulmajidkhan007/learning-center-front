@@ -465,3 +465,182 @@ bo'yicha filtr ham bor. Buni yaqin kunda ulaymiz.
 Avatar bo'yicha bitta savol: `POST /image/upload` rasmni saqlaydi, lekin
 uni **foydalanuvchiga bog'laydigan** yo'l ko'rinmadi. `PUT /image/main/{id}`
 nima qilishini ayting yoki `PUT /user/{id}/avatar` qo'shing.
+
+---
+
+# C qism — Telegram, parol yetkazish va audit
+
+Ovozli javoblarda kelishilgan yo'nalish: SMS qimmat, email esa
+foydalanuvchilarda yo'q, shuning uchun **Telegram bot**. Quyida shu
+yo'nalishning ishlaydigan shakli.
+
+## C-1. Parol yetkazish — ikki bosqichli taklif
+
+Muammo aniq: bot orqali yuborish uchun odam avval botga `/start` bosishi
+kerak, bosmagan odamga bot yozolmaydi.
+
+### Bosqich 1 — hoziroq ishlaydi, hech narsaga bog'liq emas
+
+Yaratish javobida vaqtinchalik parol **bir marta** qaytarilsin, biz uni
+modalda ko'rsatamiz:
+
+```java
+public record CreatedUserDto(StudentDto student, String temporaryPassword) {}
+```
+
+Bu "g'alati variant" emas — GitHub, AWS va boshqalar shunday qiladi. Faqat
+uch shart bilan:
+
+- **nusxa olish tugmasi va "bu parol boshqa ko'rsatilmaydi" ogohlantirishi**
+  — buni biz qilamiz;
+- **birinchi kirishda almashtirish majburiy** — `/auth/me` javobiga yoki
+  token claim'iga `mustChangePassword: true`. Biz o'sha odamni boshqa
+  ekranga qo'ymaymiz;
+- **parol hech qayerga yozilmasin**: logga ham, audit jadvaliga ham,
+  Telegram guruhiga ham.
+
+Admin uni o'zi Telegram orqali yuboradi — bu allaqachon ular qilayotgan ish.
+
+### Bosqich 2 — bot tayyor bo'lgach: deep link
+
+`/start` muammosining standart yechimi — **payload'li havola**:
+
+```
+https://t.me/<organization_bot>?start=<bir martalik kod>
+```
+
+Oqim:
+
+1. Admin o'quvchi qo'shadi → server bir martalik kod yaratadi va shu
+   havolani qaytaradi;
+2. Biz uni admin ekranida havola **va QR kod** bilan ko'rsatamiz;
+3. O'quvchi bosadi → Telegram botni ochadi va `/start <kod>` ni **o'zi
+   yuboradi** (bosish shart emas — havolaning o'zi shu);
+4. Bot kodni tekshiradi, `chat_id` ni foydalanuvchiga bog'laydi va parolni
+   o'sha yerda yuboradi.
+
+Kod bir martalik va muddatli bo'lsin (masalan 72 soat). Bog'langandan keyin
+o'sha `chat_id` **keyingi hamma bildirishnomalar** uchun ishlaydi: davomat,
+to'lov eslatmasi, parol tiklash. Ya'ni bu ishni bir marta qilib, keyin
+hamma joyda foydalanamiz.
+
+```java
+POST /student            → { student, temporaryPassword, telegramLinkUrl }
+POST /user/{id}/reset-password → { temporaryPassword, telegramLinkUrl }
+```
+
+## C-2. Har organization uchun bot — token bu SECRET
+
+Kelishuv: egalar panelida bot token kiritiladi va bot ishga tushadi.
+Backend tomondan uchta qat'iy qoida:
+
+**1. Token hech qachon frontendga qaytmasin.** U — parol bilan bir xil
+darajadagi maxfiy ma'lumot: qo'lga tushgan token bilan begona odam o'sha
+markazning barcha yozishmalarini o'qiy va nomidan yozа oladi.
+
+```java
+// GET javobida token YO'Q
+public record BotStatusDto(boolean configured, String botUsername,
+                           String linkedChatId, LocalDateTime updatedAt) {}
+```
+
+Biz ekranda `@markaz_bot · ulangan ✓` va "almashtirish" tugmasini
+ko'rsatamiz. Kiritilgan tokenni qayta o'qish imkoni bo'lmaydi — faqat
+almashtirish.
+
+**2. Bazada shifrlangan holda saqlansin** (`AES`, kalit env'da), logga
+tushmasin.
+
+**3. Saqlashdan oldin tekshirilsin.** `PUT` kelganda server `getMe` ni
+chaqirsin: token yaroqsiz bo'lsa darrov xato qaytsin, yaroqli bo'lsa
+`botUsername` javobda kelsin — biz uni ko'rsatamiz.
+
+```java
+PUT    /branch/{id}/bot   { token }   → BotStatusDto
+GET    /branch/{id}/bot               → BotStatusDto   (tokensiz)
+DELETE /branch/{id}/bot               → webhook ham o'chirilsin
+```
+
+**Webhook va polling.** Har organization uchun alohida token bo'lgani uchun
+webhook qulayroq:
+
+```
+POST https://<backend>/telegram/webhook/{organizationId}
+```
+
+Telegram `setWebhook` da `secret_token` ni qo'llab-quvvatlaydi — u har
+so'rovda `X-Telegram-Bot-Api-Secret-Token` sarlavhasida keladi. Shuni
+ishlating, aks holda o'sha URL ni topgan istalgan kishi soxta xabar
+yuboradi.
+
+## C-3. "Barcha amallar" Telegram guruhiga — muhim cheklovlar
+
+Egalar uchun forum-guruh (topic'lar bilan) yaxshi fikr. Uchta narsa
+oldindan hal qilinmasa, u ishlamay qoladi:
+
+**1. Telegram — kanal, haqiqat manbai emas.** Guruh xabarlari o'chiriladi,
+qidirib bo'lmaydi, filtr yo'q. Amallar **bazadagi audit jadvalda** saqlansin,
+Telegram esa faqat xabar bersin.
+
+Yaxshi xabar: `BaseEntity` da `createdBy`/`updatedBy` bor va
+`@EnableJpaAuditing` + `SpringSecurityAuditorAware` allaqachon ulangan.
+Ya'ni "kim qildi" ma'lumoti hozirning o'zida yozilyapti — audit jadval
+uchun poydevor tayyor.
+
+Bizga panelda ko'rsatish uchun ham kerak:
+
+```java
+GET /audit?page=&size=&from=&to=&actorId=&entity=   → Page<AuditEntryDto>
+```
+
+**2. Telegram rate limit.** Bitta guruhga taxminan **daqiqasiga 20 xabar**.
+"Har bir amal" degani davomat belgilanganda 30 ta xabar degani — ular
+jimgina tashlab yuboriladi. Shuning uchun:
+
+- faqat muhim hodisalar (yaratish/o'chirish, to'lov, rol o'zgarishi,
+  muvaffaqiyatsiz login urinishlari), yoki
+- to'plab, davriy xulosa (masalan 5 daqiqada bir marta).
+
+Topic'ga yuborish — `sendMessage` da `message_thread_id`.
+
+**3. Guruhga shaxsiy ma'lumot tushmasin.** Guruhdagi har bir odam hammasini
+ko'radi va Telegram serverlarida qoladi. **Parol hech qachon**; telefon
+raqami — kerak bo'lsa oxirgi 4 raqami; ism o'rniga id yetarli bo'lsa, id.
+
+## C-4. Super-admin avtomatik yaratilishi — bitta ochiq savol
+
+Organization yaratilganda super-admin o'zi yaratilishi va uning ismi
+`<organization> + 5 tasodifiy katta harf` bo'lishi — tushunarli, ismni keyin
+o'zgartirish uchun `PUT /user/{id}` allaqachon bor.
+
+Ochiq qolgan savol: **u nima bilan login qiladi?**
+
+`AuthService` telefon bo'yicha qidiradi (`findByPhoneAndDeletedFalse`), va
+`User.phone` — `@Column(unique = true)`. Ya'ni:
+
+- super-admin uchun telefon **shart**. Formadagi markaz telefoni
+  ishlatiladimi?
+- agar shunday bo'lsa: ikki organization bir xil telefon kiritsa, insert
+  yiqiladi (unique constraint) va foydalanuvchi sababini tushunmaydi;
+- bir odam bitta markazda administrator, boshqasida super-admin bo'lolmaydi
+  — telefon bitta.
+
+Javobingizga qarab ro'yxatdan o'tish formasini yasaymiz. Telefon alohida
+so'ralsa, xato xabarini ham oldindan tayyorlaymiz ("bu raqam band").
+
+## C-5. "Make a payment" tugmasi
+
+Payme/Click hozircha yo'q, to'lov Telegram orqali karta raqamiga —
+tushunarli va mavjud API bunga to'liq mos keladi: hisob `PENDING` bo'lib
+yaratiladi, admin pulni ko'rgach `PUT /invoice/{id}` bilan `PAID` qiladi.
+Kim tasdiqlagani `updatedBy` da o'zi yozilib qoladi.
+
+Faqat bitta maydon yetishmaydi — tugma qayerga olib borishi:
+
+```java
+// Organization yoki Branch ichida
+private String paymentTelegramUrl;   // https://t.me/…
+private String paymentNote;          // "Karta: … , izohda ism-familiya"
+```
+
+Har markazniki har xil bo'lgani uchun uni kodga yozib bo'lmaydi.
