@@ -15,6 +15,7 @@ import { FORM_CONFIGS } from '../config/forms'
 import { useEntityCounts } from '../hooks/useEntityCounts'
 import { useEntityList } from '../hooks/useEntityList'
 import { useEntityMutations } from '../hooks/useEntityMutations'
+import { useGroupOptions } from '../hooks/useGroupOptions'
 import { useTeacherOptions } from '../hooks/useTeacherOptions'
 import { AppShell } from '@/shared/ui'
 import type { AdminRow, EntityKey, FormValues, ModalMode } from '../types'
@@ -52,6 +53,7 @@ export function AdminDashboardPage() {
     })
     const counts = useEntityCounts(session.token)
     const teacherOptions = useTeacherOptions(session.token)
+    const groupOptions = useGroupOptions(session.token)
     const { save, remove } = useEntityMutations(entity, session.token)
 
     const columns = columnConfigs ? columnConfigs.map((column) => column.key) : inferColumns(list.rows)
@@ -207,6 +209,7 @@ export function AdminDashboardPage() {
                     formConfig={formConfig}
                     fallbackColumns={columns}
                     teacherOptions={teacherOptions}
+                    groupOptions={groupOptions}
                     isSaving={save.isPending}
                     error={save.error}
                     onSubmit={handleSubmit}

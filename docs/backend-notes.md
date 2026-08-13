@@ -175,7 +175,92 @@ public record EnrollmentDto(String id, String studentId, String groupId, String 
 Ism ham qo'shilsa yaxshi bo'lardi (`studentFullName`) — hozir ro'yxatni
 ko'rsatish uchun o'quvchilar ro'yxati bilan solishtirishga to'g'ri keladi.
 
-### 8. 🟡 `ddl-auto: update`
+### 8. 🔴 `LessonDto` dars haqidagi asosiy ma'lumotni qaytarmaydi
+
+Admin panelida "Darslar" tabi ulandi (`POST /lesson`, `PUT /lesson/{id}`,
+ro'yxat va o'chirish). Ulash paytida uchta muammo chiqdi — uchalasi ham
+`LessonMapper` da.
+
+```java
+@Mapper(componentModel = "spring", uses = {TeacherMapper.class, GroupMapper.class})
+public interface LessonMapper {
+    @Mapping(source = "createdAt", target = "lessonDate")
+    LessonDto toDto(Lesson lesson);
+}
+```
+
+`Lesson` entity'sida `lessonName` va `isCompleted` bor, `LessonDto` da esa
+`lessonNumber` va `isComplete`. Nomlar mos kelmagani uchun MapStruct ularni
+**umuman to'ldirmaydi** (`unmappedTargetPolicy` sukut bo'yicha WARN, ya'ni
+kompilyatsiya o'tadi, maydon esa `null` qoladi):
+
+| Maydon | Hozir | Natija |
+| --- | --- | --- |
+| `lessonNumber` | manba yo'q | doim `null` |
+| `isComplete` | entity'da `isCompleted` | doim `null` |
+| dars nomi | `lessonName` DTO'da umuman yo'q | foydalanuvchi kiritgan nom qaytmaydi |
+
+Ya'ni `POST /lesson` ga yuborilgan `lessonName` saqlanadi, lekin uni
+qaytarib o'qib bo'lmaydi — admin jadvalida va tahrirlash formasida ustun
+bo'sh turadi.
+
+**So'rov:**
+
+```java
+public record LessonDto(String id, String lessonName, LocalDateTime lessonDate,
+                        Boolean isComplete, GroupDto group, TeacherDto teacherDto) {}
+```
+
+```java
+@Mapping(source = "createdAt", target = "lessonDate")
+@Mapping(source = "isCompleted", target = "isComplete")
+LessonDto toDto(Lesson lesson);
+```
+
+Nom `lessonNumber` bo'lib qolsa ham mayli, muhimi — ichida qiymat bo'lsin;
+frontend maydon nomini bir qatorda moslashtiradi. Faqat ayting, chunki
+o'qituvchi panelida matn hozir "{{number}}-dars" ko'rinishida — nom kelsa
+uni oddiy sarlavhaga almashtiramiz.
+
+Yana: `@Mapper` ga `unmappedTargetPolicy = ReportingPolicy.ERROR` qo'ysangiz,
+bunday xatolar kompilyatsiyada tutiladi.
+
+### 9. 🟠 Darsni administrator yaratsa, o'qituvchisiz qoladi
+
+```java
+teacherRepository.findTeacherByUser_Id(userService.getCurrentUser().getId())
+```
+
+`LessonService.toEntity` o'qituvchini **kirgan foydalanuvchidan** oladi.
+Administrator dars yaratsa, uning `Teacher` yozuvi yo'q — `findTeacherByUser_Id`
+`null` qaytaradi va dars o'qituvchisiz saqlanadi (`teacher` ustuni
+`optional = true`, shuning uchun xato ham bermaydi).
+
+Admin panelida dars yaratish endi bor, ya'ni bu holat amalda uchraydi.
+Yechim ikkitadan biri:
+
+- `LessonCreateDto` ga ixtiyoriy `teacherId` qo'shish va berilgan bo'lsa
+  o'shani ishlatish (guruhning o'qituvchisi sukut bo'yicha), yoki
+- o'qituvchini guruhdan olish: `group.getTeacher()`.
+
+Ikkinchisi soddaroq va deyarli har doim to'g'ri.
+
+### 10. 🟠 `Branch` uchun API yo'q — super-admin paneli shu sababdan qilinmadi
+
+Frontendda super-admin uchun placeholder ekran turibdi. Uni haqiqiy qilish
+uchun filiallar (branch) API si kerak, hozir esa:
+
+- `BranchController` **yo'q**;
+- `BranchDto`, `BranchCreateDto`, `BranchUpdateDto` — uchalasi ham **bo'sh
+  record** (`public record BranchDto() {}`);
+- `Branch` entity'sida esa maydonlar bor: `organization`, `name`, `address`,
+  `email`, `phone`, `chargeForMonth`, `googlePlaceId`, `latitude`, `longitude`.
+
+Kerak bo'ladigan minimum: `GET/POST/PUT/DELETE /api/v1/branch` va DTO'lar
+to'ldirilgan holda. Shundan keyin super-admin paneli boshqa tablar bilan
+bir xil generik jadvalga tushadi — frontendda bir kunlik ish.
+
+### 11. 🟡 `ddl-auto: update`
 
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot

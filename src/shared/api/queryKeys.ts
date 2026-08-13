@@ -15,6 +15,7 @@ export const queryKeys = {
     myStudentRecord: (phone: string) => ['student', 'byPhone', phone] as const,
 
     teacherOptions: () => ['teacher', 'options'] as const,
+    groupOptions: () => ['group', 'options'] as const,
 
     groupEnrollments: (groupId: string) => ['enrollments', groupId] as const,
 

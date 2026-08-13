@@ -15,11 +15,11 @@ const DAY_TYPE_OPTIONS = DAY_TYPES.map((dayType) => ({
 
 /**
  * Create/Update DTO'si o'qish DTO'siga MOS KELMAYDIGAN entity'lar uchun
- * forma konfiguratsiyasi. Bu yerda yo'q entity (hozircha `lessons`)
- * avtomatik — maydonlar mavjud qatorlardan taxmin qilinadi.
+ * forma konfiguratsiyasi. Bu yerda yo'q entity avtomatik ishlaydi —
+ * maydonlar mavjud qatorlardan taxmin qilinadi.
  *
- * TAXMIN: shakllar backend javoblariga qarab tiklangan. `*CreateDto` boshqa
- * ko'rinishda bo'lsa, o'zgartirish faqat SHU faylda bo'ladi.
+ * Shakllar `goodman113/learning_center` dagi `*CreateDto` / `*UpdateDto`
+ * record'laridan olingan. Backend o'zgarsa, o'zgartirish faqat SHU faylda.
  */
 export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
     students: {
@@ -152,6 +152,37 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
                 },
                 status: values.status,
             }
+        },
+    },
+
+    lessons: {
+        // `LessonCreateDto{groupId, lessonName}` va `LessonUpdateDto{lessonName}`:
+        // guruh faqat yaratishda tanlanadi, keyin uni almashtirib bo'lmaydi.
+        fields: (mode) => {
+            const name: FormField = { key: 'lessonName', labelKey: 'field.lessonName', type: 'text' }
+            if (mode === 'edit') return [name]
+            return [
+                { key: 'groupId', labelKey: 'field.groupName', type: 'select', optionsSource: 'groups' },
+                name,
+            ]
+        },
+        getInitialValues(row) {
+            return {
+                groupId: row?.group?.id ?? '',
+                // `LessonDto` dars nomini qaytarmaydi (`lessonNumber` bo'sh
+                // keladi) — shuning uchun tahrirlashda maydon odatda bo'sh
+                // boshlanadi. Backend tuzatilgach o'zi to'ladi.
+                lessonName: row?.lessonNumber ?? '',
+            }
+        },
+        buildCreatePayload(values) {
+            return {
+                groupId: values.groupId,
+                lessonName: values.lessonName,
+            }
+        },
+        buildUpdatePayload(values) {
+            return { lessonName: values.lessonName }
         },
     },
 }

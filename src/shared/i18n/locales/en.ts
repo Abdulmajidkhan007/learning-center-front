@@ -78,6 +78,12 @@ export const en: Translations = {
     'field.endTime': 'End time',
     'field.status': 'Status',
     'field.select': '— Select —',
+    'field.lessonName': 'Lesson name',
+    'field.lessonDate': 'Date',
+    'field.lessonStatus': 'State',
+
+    'lesson.complete': 'Completed',
+    'lesson.ongoing': 'Ongoing',
 
     'status.STARTING': 'Starting',
     'status.ONGOING': 'Ongoing',

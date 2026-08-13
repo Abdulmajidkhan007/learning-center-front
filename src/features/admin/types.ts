@@ -1,5 +1,5 @@
 import type { TranslationKey } from '@/shared/i18n'
-import type { GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
+import type { GroupDto, GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
 
 export type EntityKey = 'students' | 'teachers' | 'groups' | 'lessons'
 
@@ -28,6 +28,13 @@ export interface AdminRow {
     teacher?: TeacherDto
     timeTable?: TimeTableDto
     status?: GroupStatus
+    /** `LessonDto` maydonlari — darslar tabi uchun. */
+    lessonNumber?: string
+    lessonDate?: string
+    isComplete?: boolean
+    group?: GroupDto
+    /** Darsda o'qituvchi `teacher` emas, `teacherDto` deb keladi. */
+    teacherDto?: TeacherDto
     [key: string]: unknown
 }
 
@@ -45,8 +52,8 @@ export interface FormField {
     labelKey: TranslationKey
     type: FormFieldType
     options?: { value: string; labelKey: TranslationKey }[]
-    /** Variantlar serverdan kelsa (masalan o'qituvchilar ro'yxati). */
-    optionsSource?: 'teachers'
+    /** Variantlar serverdan kelsa (masalan o'qituvchilar yoki guruhlar ro'yxati). */
+    optionsSource?: 'teachers' | 'groups'
 }
 
 export type ModalMode = 'create' | 'edit'

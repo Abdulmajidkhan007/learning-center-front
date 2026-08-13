@@ -8,7 +8,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 | `ADMINISTRATOR` | Students / Teachers / Groups / Lessons CRUD + guruhga o'quvchi biriktirish |
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
 | `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
-| `SUPER_ADMIN`   | Placeholder ekran                                                  |
+| `SUPER_ADMIN`   | Placeholder: filial (branch) API si backendda hali yo'q             |
 | hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
 | boshqa          | Tushunarli xabar bilan placeholder                                 |
 

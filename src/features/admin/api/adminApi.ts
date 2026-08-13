@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { Page, TeacherDto } from '@/shared/types'
+import type { GroupDto, Page, TeacherDto } from '@/shared/types'
 import type { AdminRow } from '../types'
 
 export interface EntityListParams {
@@ -44,5 +44,21 @@ export async function fetchTeacherOptions(token: string) {
     return (data?.content ?? []).map((teacher) => ({
         value: teacher.id,
         label: teacher.userDto?.fullName || teacher.id,
+    }))
+}
+
+/**
+ * Dars formasidagi "Guruh" ro'yxati uchun.
+ *
+ * Ataylab `/group/groups` EMAS: u kirgan foydalanuvchining o'z guruhlarini
+ * qaytaradi (backendda `authenticateAndGetId()` bilan filtrlangan), ya'ni
+ * administratorda ro'yxat bo'sh chiqadi. Sahifalangan `/group` esa hammasini
+ * beradi.
+ */
+export async function fetchGroupOptions(token: string) {
+    const data = await apiFetch<Page<GroupDto>>('/group', { token, params: { page: 0, size: 200 } })
+    return (data?.content ?? []).map((group) => ({
+        value: group.id,
+        label: group.name || group.id,
     }))
 }

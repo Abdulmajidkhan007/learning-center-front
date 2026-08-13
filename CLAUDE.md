@@ -131,6 +131,11 @@ git push origin N
 - Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
   yuborish o'chirilgan).
 - Guruhdan chiqarish yo'q: `EnrollmentDto` enrollment id sini qaytarmaydi.
+- Admin "Darslar" tabi ulangan, lekin `LessonDto` dars nomini va
+  `isComplete` ni qaytarmaydi (MapStruct mapping'i to'liq emas) — jadvalda
+  bu ustunlar bo'sh turadi.
+- Super-admin paneli placeholder bo'lib qolyapti: backendda `BranchController`
+  yo'q va `Branch*Dto` lar bo'sh record.
 - Davomatdagi "sabab" matni serverga yuborilmaydi —
   `AttendanceStudentCreateDto` da maydon yo'q.
 - `GET /group/groups` faqat `{id, name}` qaytaradi, shuning uchun

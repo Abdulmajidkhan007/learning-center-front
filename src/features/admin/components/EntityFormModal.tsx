@@ -14,6 +14,7 @@ interface EntityFormModalProps {
     /** Konfiguratsiyasiz rejimda maydonlar shu kalitlardan yasaladi. */
     fallbackColumns: string[]
     teacherOptions: SelectOption[]
+    groupOptions: SelectOption[]
     isSaving: boolean
     error: unknown
     onSubmit: (values: FormValues) => void
@@ -33,6 +34,7 @@ export function EntityFormModal({
     formConfig,
     fallbackColumns,
     teacherOptions,
+    groupOptions,
     isSaving,
     error,
     onSubmit,
@@ -52,6 +54,12 @@ export function EntityFormModal({
             ? formConfig.fields(mode)
             : formConfig.fields
         : []
+
+    /** `optionsSource` → tayyor ro'yxat. Yangi manba qo'shish bir qator. */
+    const SERVER_OPTIONS: Record<NonNullable<FormField['optionsSource']>, SelectOption[]> = {
+        teachers: teacherOptions,
+        groups: groupOptions,
+    }
 
     function setValue(key: string, value: unknown) {
         setValues((current) => ({ ...current, [key]: value }))
@@ -104,13 +112,14 @@ export function EntityFormModal({
 
     function renderControl(field: FormField) {
         if (field.type === 'select') {
-            const options: SelectOption[] =
-                field.optionsSource === 'teachers'
-                    ? teacherOptions
-                    : (field.options ?? []).map((option) => ({
-                          value: option.value,
-                          label: t(option.labelKey),
-                      }))
+            const options: SelectOption[] = field.optionsSource
+                ? // Serverdan kelgan nomlar tarjima qilinmaydi — ular
+                  // foydalanuvchi kiritgan ma'lumot.
+                  SERVER_OPTIONS[field.optionsSource]
+                : (field.options ?? []).map((option) => ({
+                      value: option.value,
+                      label: t(option.labelKey),
+                  }))
             return (
                 <Select
                     placeholder={t('field.select')}

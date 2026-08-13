@@ -90,6 +90,13 @@ export const uz = {
     'field.endTime': 'Tugash vaqti',
     'field.status': 'Status',
     'field.select': '— Tanlang —',
+    'field.lessonName': 'Dars nomi',
+    'field.lessonDate': 'Sana',
+    'field.lessonStatus': 'Holati',
+
+    // --- dars holati ---
+    'lesson.complete': 'Tugagan',
+    'lesson.ongoing': 'Davom etmoqda',
 
     // --- guruh statuslari ---
     'status.STARTING': 'Boshlanmoqda',

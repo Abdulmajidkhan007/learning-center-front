@@ -87,6 +87,12 @@ export const ru: Translations = {
     'field.endTime': 'Окончание',
     'field.status': 'Статус',
     'field.select': '— Выберите —',
+    'field.lessonName': 'Название занятия',
+    'field.lessonDate': 'Дата',
+    'field.lessonStatus': 'Состояние',
+
+    'lesson.complete': 'Завершено',
+    'lesson.ongoing': 'Идёт',
 
     'status.STARTING': 'Начинается',
     'status.ONGOING': 'Идёт',

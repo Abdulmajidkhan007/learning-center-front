@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/shared/api'
 import { createEntity, deleteEntity, updateEntity } from '../api/adminApi'
-import type { EntityConfig, ModalMode } from '../types'
+import type { EntityConfig, EntityKey, ModalMode } from '../types'
 
 interface SaveArgs {
     mode: ModalMode
@@ -18,8 +19,18 @@ interface SaveArgs {
 export function useEntityMutations(entity: EntityConfig, token: string) {
     const queryClient = useQueryClient()
 
-    function invalidate() {
-        return queryClient.invalidateQueries({ queryKey: ['entity', entity.key] })
+    // Boshqa formalardagi tanlagichlar shu ro'yxatlardan oziqlanadi va
+    // `staleTime` uzun — yangi guruh/o'qituvchi darrov ko'rinishi uchun
+    // ularni ham bekor qilamiz.
+    const DEPENDENT_OPTIONS: Partial<Record<EntityKey, readonly unknown[]>> = {
+        groups: queryKeys.groupOptions(),
+        teachers: queryKeys.teacherOptions(),
+    }
+
+    async function invalidate() {
+        await queryClient.invalidateQueries({ queryKey: ['entity', entity.key] })
+        const optionsKey = DEPENDENT_OPTIONS[entity.key]
+        if (optionsKey) await queryClient.invalidateQueries({ queryKey: optionsKey })
     }
 
     const save = useMutation({

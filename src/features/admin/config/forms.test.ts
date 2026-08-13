@@ -109,3 +109,44 @@ describe('groups form config', () => {
         })
     })
 })
+
+describe('lessons form config', () => {
+    const config = FORM_CONFIGS.lessons!
+
+    function fieldsFor(mode: 'create' | 'edit') {
+        return typeof config.fields === 'function' ? config.fields(mode) : config.fields
+    }
+
+    it('yaratishda guruh serverdan kelgan ro’yxatdan tanlanadi', () => {
+        const groupField = fieldsFor('create').find((field) => field.key === 'groupId')
+        expect(groupField?.type).toBe('select')
+        expect(groupField?.optionsSource).toBe('groups')
+    })
+
+    // LessonUpdateDto faqat `lessonName` ni oladi — guruhni almashtirib bo'lmaydi.
+    it('tahrirlashda guruh maydoni ko’rsatilmaydi', () => {
+        expect(fieldsFor('edit').map((field) => field.key)).toEqual(['lessonName'])
+    })
+
+    it('create payload LessonCreateDto shaklida', () => {
+        expect(config.buildCreatePayload({ groupId: 'g1', lessonName: 'Unit 3' })).toEqual({
+            groupId: 'g1',
+            lessonName: 'Unit 3',
+        })
+    })
+
+    it('update payload faqat nomni yuboradi', () => {
+        expect(config.buildUpdatePayload({ groupId: 'g1', lessonName: 'Unit 3' })).toEqual({
+            lessonName: 'Unit 3',
+        })
+    })
+
+    it('tahrirlashda guruh id si qatordan olinadi', () => {
+        const row: AdminRow = { id: 'l1', group: { id: 'g7', name: 'Beginners A' } }
+        expect(config.getInitialValues(row)).toEqual({ groupId: 'g7', lessonName: '' })
+    })
+
+    it('yangi dars uchun bo’sh forma beradi', () => {
+        expect(config.getInitialValues(null)).toEqual({ groupId: '', lessonName: '' })
+    })
+})

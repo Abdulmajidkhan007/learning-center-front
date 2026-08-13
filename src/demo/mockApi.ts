@@ -177,11 +177,14 @@ export function installMockApi() {
         if (method === 'POST') {
             // Dars boshlash: o'qituvchi paneli LessonDto kutadi.
             if (table === 'lessons') {
+                const group = db.groups.find((item) => item.id === String(body.groupId))
                 const lesson: LessonDto = {
                     id: nextId('l'),
                     lessonNumber: String(db.lessons.length + 12),
                     lessonDate: new Date().toISOString().slice(0, 19),
                     isComplete: false,
+                    group,
+                    teacherDto: group?.teacher,
                 }
                 db.lessons = [...db.lessons, lesson]
                 return json(lesson)
