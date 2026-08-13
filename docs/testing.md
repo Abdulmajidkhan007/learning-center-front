@@ -78,7 +78,14 @@ bu ham skrinriderlar, ham testlar uchun ishlaydi.
 
 ## CI
 
-Hozircha CI sozlanmagan. Sozlanganda ishga tushadigan buyruq:
+GitHub Actions har push va har PR'da to'rtta tekshiruvni ishga tushiradi:
+`typecheck → lint → test → build` (`.github/workflows/ci.yml`).
+
+Qadamlar ataylab alohida — yiqilganda qaysi biri ekani darhol ko'rinadi.
+CI'da lokal buyruqlardan boshqa narsa ishlatilmaydi, shuning uchun
+"menda ishlayapti, CI'da yiqilyapti" holati bo'lmaydi.
+
+Lokal tekshiruv:
 
 ```bash
 npm run typecheck && npm run lint && npm test && npm run build

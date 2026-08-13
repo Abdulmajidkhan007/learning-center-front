@@ -177,6 +177,14 @@ export const en: Translations = {
     'teacher.month': 'Month {{current}}',
     'teacher.lessonsCount': 'Lessons held',
 
+    'student.role': 'Student',
+    'student.attendance': 'My attendance',
+    'student.attendanceHint': 'Lessons you attended and missed.',
+    'student.group': 'My group',
+    'student.groupHint': 'Group, teacher and timetable.',
+    'student.notFound': 'No student record found',
+    'student.notFoundHint': 'There is no student record for your phone number. Ask an administrator.',
+
     'pending.title': 'Backend not ready yet',
     'pending.body':
         "There's no endpoint for this block yet. The screen is built — data will appear here once the endpoint exists.",

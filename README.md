@@ -7,7 +7,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 | --------------- | ----------------------------------------------------------------- |
 | `ADMINISTRATOR` | Students / Teachers / Groups / Lessons bo'yicha to'liq CRUD        |
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
-| `STUDENT`       | Placeholder ekran (panel hali qurilmagan)                          |
+| `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
 | `SUPER_ADMIN`   | Placeholder ekran                                                  |
 | hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
 | boshqa          | Tushunarli xabar bilan placeholder                                 |

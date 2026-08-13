@@ -142,6 +142,16 @@ ma'lumot yuboradi — shart tuzatilishi bilan ishlab ketadi.
 
 ---
 
+## 4b. 🟠 `/student/phone` ham himoyalanishi kerak
+
+`GET /student/phone?phone=...` istalgan raqam bo'yicha o'quvchi kartasini
+qaytaradi. Frontend undan faqat kirgan foydalanuvchining O'Z raqami bilan
+foydalanadi, lekin backendda tekshiruv yo'q — ya'ni bir o'quvchi boshqasining
+ma'lumotini so'rasa ham oladi.
+
+2-banddagi `@PreAuthorize` masalasi hal bo'lganda shu endpoint ham
+"o'zi yoki xodim" qoidasiga bo'ysunishi kerak.
+
 ## 5. 🟢 Kichik so'rov: `GroupNameProjection` ga `dayType`
 
 **Fayl:** `projection/GroupNameProjection.java`
@@ -213,6 +223,8 @@ turibdi):
 | O'qituvchi paneli — KPI kartalar | Guruh bo'yicha: faol / yangi / ketgan / xavf ostida / kelmagan / qizil / qora ro'yxat |
 | O'qituvchi paneli — uy vazifasi | Dars bo'yicha bajargan va bajarmaganlar soni |
 | Admin — guruhga o'quvchi biriktirish | `POST /group/{id}/students` yoki shunga o'xshash |
+| **O'quvchi paneli — davomat** | `GET /attendance/student/{studentId}` — hozir `GET /attendance` butun markazning yozuvlarini qaytaradi, ya'ni o'quvchiga uni berish boshqalarning ma'lumotini ochib qo'yish demak |
+| **O'quvchi paneli — guruhim** | O'quvchi id si bo'yicha guruhini qaytaradigan endpoint |
 | Sozlamalar — markaz sozlamalari | Markaz nomi, logotip, ish vaqti, dam olish kunlari |
 
 Ballar (`82`, `100`) ham reference dizaynda bor edi — hozir backendda

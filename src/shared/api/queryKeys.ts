@@ -12,6 +12,7 @@ export const queryKeys = {
     entityCount: (entity: string) => ['entity', entity, 'count'] as const,
 
     me: () => ['auth', 'me'] as const,
+    myStudentRecord: (phone: string) => ['student', 'byPhone', phone] as const,
 
     teacherOptions: () => ['teacher', 'options'] as const,
 

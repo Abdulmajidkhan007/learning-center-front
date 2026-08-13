@@ -186,6 +186,14 @@ export const ru: Translations = {
     'teacher.month': 'Месяц {{current}}',
     'teacher.lessonsCount': 'Проведено занятий',
 
+    'student.role': 'Ученик',
+    'student.attendance': 'Моя посещаемость',
+    'student.attendanceHint': 'Посещённые и пропущенные занятия.',
+    'student.group': 'Моя группа',
+    'student.groupHint': 'Группа, преподаватель и расписание.',
+    'student.notFound': 'Ваша карточка ученика не найдена',
+    'student.notFoundHint': 'По вашему номеру телефона нет записи ученика. Обратитесь к администратору.',
+
     'pending.title': 'Backend ещё не готов',
     'pending.body':
         'Для этого блока пока нет endpoint. Интерфейс готов — как только endpoint появится, данные отобразятся здесь.',

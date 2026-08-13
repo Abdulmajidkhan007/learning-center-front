@@ -196,6 +196,14 @@ export const uz = {
     'teacher.month': '{{current}}-oy',
     'teacher.lessonsCount': 'O‘tilgan darslar',
 
+    'student.role': 'O‘quvchi',
+    'student.attendance': 'Mening davomatim',
+    'student.attendanceHint': 'Qatnashgan va qoldirgan darslaringiz.',
+    'student.group': 'Mening guruhim',
+    'student.groupHint': 'Guruh, o‘qituvchi va dars jadvali.',
+    'student.notFound': 'O‘quvchi kartangiz topilmadi',
+    'student.notFoundHint': 'Telefon raqamingiz bo‘yicha o‘quvchi yozuvi yo‘q. Administratorga murojaat qiling.',
+
     'pending.title': 'Backend hali tayyor emas',
     'pending.body':
         "Bu blok uchun endpoint hali yo'q. Ko'rinish tayyor — endpoint qo'shilgach, ma'lumot shu yerda chiqadi.",

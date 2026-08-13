@@ -15,7 +15,7 @@ type Row = Record<string, unknown> & { id: string }
 const demoUser = {
     id: 'u-demo',
     fullName: 'Demo Foydalanuvchi',
-    phone: '+998 90 000 00 00',
+    phone: '+998 93 100 10 01',
     birthDate: '1995-06-15',
     imageUrl: undefined,
     role: 'ADMINISTRATOR',
@@ -107,6 +107,12 @@ export function installMockApi() {
         if (path === '/auth/change-password') {
             // Demo'da har doim muvaffaqiyatli — haqiqiy tekshiruv backendda.
             return json({ response: 'Password changed successfully' })
+        }
+
+        // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---
+        if (path === '/student/phone') {
+            const phone = url.searchParams.get('phone') ?? ''
+            return json(db.students.filter((student) => student.userDto?.phone === phone))
         }
 
         // --- o'qituvchi paneli ---

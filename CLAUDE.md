@@ -138,6 +138,5 @@ git push origin N
 - Backendda tuzatilishi kerak bo'lgan narsalar — `docs/backend-notes.md`.
 - Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
   bunday endpoint yo'q (`useAttendanceRecords`).
-- CI sozlanmagan.
 - `Dockerfile` build qilib sinalmagan (bu muhitda Docker demoni yo'q edi);
   `Caddyfile` haqiqiy `dist/` ustida tekshirilgan.
