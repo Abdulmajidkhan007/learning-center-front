@@ -10,6 +10,7 @@ import {
     Button,
     ErrorBox,
     Eyebrow,
+    Field,
     IconButton,
     Input,
     Pagination,
@@ -39,9 +40,17 @@ export function PaymentsPage() {
     const [page, setPage] = useState(0)
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState<InvoiceStatus | ''>('')
+    const [from, setFrom] = useState('')
+    const [to, setTo] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const list = useInvoices(session.token, { page, search, status })
+    const list = useInvoices(session.token, { page, search, status, from, to })
+
+    /** Har qanday filtr o'zgarsa birinchi sahifaga qaytamiz. */
+    function applyFilter(apply: () => void) {
+        apply()
+        setPage(0)
+    }
     const studentOptions = useStudentOptions(session.token)
     const { create, changeStatus, remove } = useInvoiceMutations(session.token)
 
@@ -96,22 +105,50 @@ export function PaymentsPage() {
                                 })),
                             ]}
                             value={status}
-                            onChange={(event) => {
-                                setStatus(event.target.value as InvoiceStatus | '')
-                                setPage(0)
-                            }}
+                            onChange={(event) =>
+                                applyFilter(() => setStatus(event.target.value as InvoiceStatus | ''))
+                            }
                         />
                         <Input
                             className="min-w-40 flex-1 sm:w-56 sm:flex-none"
                             placeholder={t('invoice.search')}
                             value={search}
-                            onChange={(event) => {
-                                setSearch(event.target.value)
-                                setPage(0)
-                            }}
+                            onChange={(event) => applyFilter(() => setSearch(event.target.value))}
                         />
                     </div>
                 </header>
+
+                <div className="mb-4 flex flex-wrap items-end gap-2">
+                    <Field label={t('invoice.from')}>
+                        <Input
+                            type="date"
+                            className="sm:w-44"
+                            value={from}
+                            onChange={(event) => applyFilter(() => setFrom(event.target.value))}
+                        />
+                    </Field>
+                    <Field label={t('invoice.to')}>
+                        <Input
+                            type="date"
+                            className="sm:w-44"
+                            value={to}
+                            onChange={(event) => applyFilter(() => setTo(event.target.value))}
+                        />
+                    </Field>
+                    {(from || to) && (
+                        <Button
+                            size="sm"
+                            onClick={() =>
+                                applyFilter(() => {
+                                    setFrom('')
+                                    setTo('')
+                                })
+                            }
+                        >
+                            {t('invoice.clearDates')}
+                        </Button>
+                    )}
+                </div>
 
                 {list.error && (
                     <div className="mb-4">

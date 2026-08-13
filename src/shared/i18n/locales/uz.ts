@@ -111,7 +111,10 @@ export const uz = {
     'invoice.createHint':
         'Hisob “kutilmoqda” holatida yaratiladi. Pul kelgach uni “to‘landi” qilib belgilaysiz.',
     'invoice.markPaid': 'To‘landi',
-    'invoice.search': 'hisoblar ichidan qidirish…',
+    'invoice.search': 'raqam, ism yoki telefon…',
+    'invoice.from': 'Sanadan',
+    'invoice.to': 'Sanagacha',
+    'invoice.clearDates': 'Sanani tozalash',
     'invoice.allStatuses': 'Barcha holatlar',
     'invoice.empty': 'Hisob topilmadi',
     'invoice.loadFailed': 'To‘lovlarni yuklab bo‘lmadi: {{message}}',

@@ -97,7 +97,10 @@ export const en: Translations = {
     'invoice.createHint':
         'The invoice is created as pending. Mark it paid once the money arrives.',
     'invoice.markPaid': 'Mark paid',
-    'invoice.search': 'search invoices…',
+    'invoice.search': 'number, name or phone…',
+    'invoice.from': 'From',
+    'invoice.to': 'To',
+    'invoice.clearDates': 'Clear dates',
     'invoice.allStatuses': 'All statuses',
     'invoice.empty': 'No invoices found',
     'invoice.loadFailed': 'Could not load payments: {{message}}',

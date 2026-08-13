@@ -106,7 +106,10 @@ export const ru: Translations = {
     'invoice.createHint':
         'Счёт создаётся со статусом «ожидает». Когда деньги придут, отметите его как оплаченный.',
     'invoice.markPaid': 'Оплачено',
-    'invoice.search': 'поиск по счетам…',
+    'invoice.search': 'номер, имя или телефон…',
+    'invoice.from': 'С даты',
+    'invoice.to': 'По дату',
+    'invoice.clearDates': 'Сбросить даты',
     'invoice.allStatuses': 'Все статусы',
     'invoice.empty': 'Счета не найдены',
     'invoice.loadFailed': 'Не удалось загрузить платежи: {{message}}',
