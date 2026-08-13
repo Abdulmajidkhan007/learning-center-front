@@ -1,5 +1,22 @@
-import { attendance, fullGroup, groupRoster, groups, lessons, students, teachers } from './mockData'
-import type { AttendanceDto, GroupDto, LessonDto, StudentDto, TeacherDto } from '@/shared/types'
+import {
+    attendance,
+    fullGroup,
+    groupRoster,
+    groups,
+    invoices,
+    lessons,
+    students,
+    teachers,
+} from './mockData'
+import type {
+    AttendanceDto,
+    GroupDto,
+    InvoiceDto,
+    InvoiceStatus,
+    LessonDto,
+    StudentDto,
+    TeacherDto,
+} from '@/shared/types'
 
 /**
  * Demo uchun soxta backend.
@@ -27,6 +44,7 @@ const db = {
     groups: [...groups] as GroupDto[],
     lessons: [...lessons] as LessonDto[],
     attendance: [...attendance] as AttendanceDto[],
+    invoices: [...invoices] as InvoiceDto[],
 }
 
 /** Imzosiz, lekin to'g'ri tuzilgan JWT (ilova faqat payload'ni o'qiydi). */
@@ -151,6 +169,41 @@ export function installMockApi() {
             }
             db.attendance = [...db.attendance, record]
             return json(record)
+        }
+
+        // --- to'lovlar ---
+        if (path === '/invoice' && method === 'GET') {
+            const status = url.searchParams.get('status')
+            const rows = status
+                ? db.invoices.filter((invoice) => invoice.status === status)
+                : db.invoices
+            return page(rows as unknown as Row[], url)
+        }
+        if (path === '/invoice' && method === 'POST') {
+            const student = db.students.find((item) => item.id === String(body.studentId))
+            const invoice: InvoiceDto = {
+                id: nextId('i'),
+                invoiceNumber: `INV-${String(db.invoices.length + 1).padStart(3, '0')}`,
+                student,
+                amount: Number(body.amount),
+                issuedAt: new Date().toISOString().slice(0, 19),
+                // Backend ham shunday qiladi: yangi hisob doim kutilmoqda.
+                status: 'PENDING',
+            }
+            db.invoices = [...db.invoices, invoice]
+            return json(invoice)
+        }
+        if (path.startsWith('/invoice/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.invoices = db.invoices.map((invoice) =>
+                invoice.id === id ? { ...invoice, status: body.status as InvoiceStatus } : invoice
+            )
+            return json(db.invoices.find((invoice) => invoice.id === id))
+        }
+        if (path.startsWith('/invoice/') && method === 'DELETE') {
+            const id = path.split('/')[2]
+            db.invoices = db.invoices.filter((invoice) => invoice.id !== id)
+            return json(null, 204)
         }
 
         // --- generik CRUD: /student, /teacher, /group, /lesson ---

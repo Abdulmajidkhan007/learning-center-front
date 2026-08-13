@@ -5,7 +5,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 
 | Rol             | Nima ko'radi                                                      |
 | --------------- | ----------------------------------------------------------------- |
-| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons CRUD + guruhga o'quvchi biriktirish |
+| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons CRUD + guruhga o'quvchi biriktirish + **To'lovlar** |
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
 | `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
 | `SUPER_ADMIN`   | Placeholder: filial (branch) API si backendda hali yo'q             |
@@ -82,7 +82,7 @@ src/
     providers/         Theme, Auth, QueryClient
     routes/            AppRoutes, RoleDashboard
   features/            biznes bo'limlari (har biri o'zicha to'liq)
-    auth/  admin/  teacher/  attendance/  settings/  student/  super-admin/
+    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/
       api/         shu bo'lim endpoint'lari
       hooks/       TanStack Query hooklari va holat mantiqi
       components/  shu bo'limga tegishli komponentlar

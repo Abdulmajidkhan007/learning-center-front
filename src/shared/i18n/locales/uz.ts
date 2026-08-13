@@ -22,6 +22,7 @@ export const uz = {
     'common.next': 'Keyingi',
     'common.pageInfo': '{{page}} / {{total}}-sahifa · jami {{count}}',
     'common.somethingWrong': 'Nimadir xato ketdi. Qaytadan urinib ko’ring.',
+    'common.back': 'Orqaga',
     'common.notConnected': 'Ulanmagan',
 
     // --- navigatsiya ---
@@ -97,6 +98,27 @@ export const uz = {
     // --- dars holati ---
     'lesson.complete': 'Tugagan',
     'lesson.ongoing': 'Davom etmoqda',
+
+    // --- to'lovlar ---
+    'invoice.title': 'To‘lovlar',
+    'invoice.eyebrow': 'Hisoblar',
+    'invoice.number': 'Hisob raqami',
+    'invoice.student': 'O‘quvchi',
+    'invoice.amount': 'Summa',
+    'invoice.issuedAt': 'Berilgan sana',
+    'invoice.new': '+ Yangi hisob',
+    'invoice.newTitle': 'Yangi hisob',
+    'invoice.createHint':
+        'Hisob “kutilmoqda” holatida yaratiladi. Pul kelgach uni “to‘landi” qilib belgilaysiz.',
+    'invoice.markPaid': 'To‘landi',
+    'invoice.search': 'hisoblar ichidan qidirish…',
+    'invoice.allStatuses': 'Barcha holatlar',
+    'invoice.empty': 'Hisob topilmadi',
+    'invoice.loadFailed': 'To‘lovlarni yuklab bo‘lmadi: {{message}}',
+    'invoice.deleteConfirm': '{{number}} hisobi o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
+    'invoice.status.PAID': 'To‘langan',
+    'invoice.status.PENDING': 'Kutilmoqda',
+    'invoice.status.OVERDUE': 'Muddati o‘tgan',
 
     // --- guruh statuslari ---
     'status.STARTING': 'Boshlanmoqda',

@@ -2,6 +2,7 @@ import type {
     AttendanceDto,
     FullGroupDto,
     GroupDto,
+    InvoiceDto,
     LessonDto,
     StudentDto,
     TeacherDto,
@@ -84,6 +85,13 @@ export const lessons: LessonDto[] = [
     { id: 'l1', lessonNumber: '12', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
     { id: 'l2', lessonNumber: '13', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
     { id: 'l3', lessonNumber: '14', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
+]
+
+export const invoices: InvoiceDto[] = [
+    { id: 'i1', invoiceNumber: 'INV-001', student: students[0], amount: 450000, issuedAt: '2026-07-01T09:00:00', status: 'PAID' },
+    { id: 'i2', invoiceNumber: 'INV-002', student: students[1], amount: 450000, issuedAt: '2026-08-01T09:00:00', status: 'PENDING' },
+    { id: 'i3', invoiceNumber: 'INV-003', student: students[2], amount: 600000, issuedAt: '2026-06-01T09:00:00', status: 'OVERDUE' },
+    { id: 'i4', invoiceNumber: 'INV-004', student: students[3], amount: 450000, issuedAt: '2026-08-05T09:00:00', status: 'PENDING' },
 ]
 
 export const attendance: AttendanceDto[] = [

@@ -23,4 +23,6 @@ export const queryKeys = {
     groupInfo: (groupId: string) => ['group', 'info', groupId] as const,
 
     attendance: () => ['attendance', 'list'] as const,
+
+    invoices: (params: Record<string, unknown>) => ['invoice', 'list', params] as const,
 } as const

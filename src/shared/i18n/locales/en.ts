@@ -15,6 +15,7 @@ export const en: Translations = {
     'common.next': 'Next',
     'common.pageInfo': 'Page {{page}} of {{total}} · {{count}} total',
     'common.somethingWrong': 'Something went wrong. Try again.',
+    'common.back': 'Back',
     'common.notConnected': 'Not connected',
 
     'nav.home': 'Home',
@@ -84,6 +85,26 @@ export const en: Translations = {
 
     'lesson.complete': 'Completed',
     'lesson.ongoing': 'Ongoing',
+
+    'invoice.title': 'Payments',
+    'invoice.eyebrow': 'Invoices',
+    'invoice.number': 'Invoice no.',
+    'invoice.student': 'Student',
+    'invoice.amount': 'Amount',
+    'invoice.issuedAt': 'Issued',
+    'invoice.new': '+ New invoice',
+    'invoice.newTitle': 'New invoice',
+    'invoice.createHint':
+        'The invoice is created as pending. Mark it paid once the money arrives.',
+    'invoice.markPaid': 'Mark paid',
+    'invoice.search': 'search invoices…',
+    'invoice.allStatuses': 'All statuses',
+    'invoice.empty': 'No invoices found',
+    'invoice.loadFailed': 'Could not load payments: {{message}}',
+    'invoice.deleteConfirm': 'Delete invoice {{number}}? This cannot be undone.',
+    'invoice.status.PAID': 'Paid',
+    'invoice.status.PENDING': 'Pending',
+    'invoice.status.OVERDUE': 'Overdue',
 
     'status.STARTING': 'Starting',
     'status.ONGOING': 'Ongoing',

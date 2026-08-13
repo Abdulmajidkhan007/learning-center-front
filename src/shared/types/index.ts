@@ -183,6 +183,27 @@ export interface AttendanceDto {
     attendanceStudents?: AttendanceStudentDto[]
 }
 
+export const INVOICE_STATUSES = ['PAID', 'PENDING', 'OVERDUE'] as const
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
+
+/**
+ * `InvoiceDto` — to'lov hisobi.
+ *
+ * Diqqat: entity'da maydon `paymentStatus`, DTO'da esa `status`.
+ * `amount` `BigDecimal` — JSON'da son bo'lib keladi, lekin tiyin/so'm
+ * aniqligini yo'qotmaslik uchun biz uni HISOBLASHDA ishlatmaymiz, faqat
+ * ko'rsatamiz.
+ */
+export interface InvoiceDto {
+    id: string
+    invoiceNumber?: string
+    student?: StudentDto
+    amount?: number
+    /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
+    issuedAt?: string
+    status?: InvoiceStatus
+}
+
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
 export const WEEK_DAYS = [
     'MONDAY',

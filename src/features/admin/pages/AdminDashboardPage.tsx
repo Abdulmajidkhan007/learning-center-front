@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
@@ -30,6 +31,7 @@ export function AdminDashboardPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const navigate = useNavigate()
 
     const [activeTab, setActiveTab] = useState<EntityKey>('students')
     const [page, setPage] = useState(0)
@@ -114,6 +116,11 @@ export function AdminDashboardPage() {
                 <AppShell
                     subtitle={t('admin.role')}
                     onSignOut={signOut}
+                    actions={
+                        <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
+                            {t('invoice.title')}
+                        </Button>
+                    }
                     secondary={<AdminTabStrip activeTab={activeTab} onTabChange={changeTab} />}
                 >
                     <StatsRow counts={counts} />
