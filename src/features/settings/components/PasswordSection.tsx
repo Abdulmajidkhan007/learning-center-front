@@ -1,29 +1,44 @@
 import { useState, type FormEvent } from 'react'
+import { useSession } from '@/app/providers/useAuth'
+import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { Button, ErrorBox, Field, Input, PendingBackend, PendingTag } from '@/shared/ui'
-import { validatePasswordChange } from '../lib/validatePassword'
+import { Button, ErrorBox, Field, Input } from '@/shared/ui'
+import { useChangePassword } from '../hooks/useChangePassword'
+import { validatePasswordChange, type PasswordIssue } from '../lib/validatePassword'
 import { SettingsSection } from './SettingsSection'
 
 export function PasswordSection() {
     const { t } = useT()
+    const session = useSession()
+
     const [current, setCurrent] = useState('')
     const [next, setNext] = useState('')
     const [repeat, setRepeat] = useState('')
-    const [issue, setIssue] = useState<string | null>(null)
+    const [issue, setIssue] = useState<PasswordIssue>(null)
 
-    // Tekshiruv haqiqiy ishlaydi — yuborish esa endpoint kelguncha o'chirilgan.
+    const change = useChangePassword(session.token)
+
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        const result = validatePasswordChange({ current, next, repeat })
-        setIssue(result === 'mismatch' ? t('settings.passwordMismatch') : null)
+
+        const problem = validatePasswordChange({ current, next, repeat })
+        setIssue(problem)
+        if (problem) return
+
+        change.mutate(
+            { oldPassword: current, newPassword: next, confirmPassword: repeat },
+            {
+                onSuccess: () => {
+                    setCurrent('')
+                    setNext('')
+                    setRepeat('')
+                },
+            }
+        )
     }
 
     return (
-        <SettingsSection
-            title={t('settings.password')}
-            description={t('settings.passwordHint')}
-            tag={<PendingTag />}
-        >
+        <SettingsSection title={t('settings.password')} description={t('settings.passwordHint')}>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <Field label={t('settings.currentPassword')}>
                     <Input
@@ -50,13 +65,18 @@ export function PasswordSection() {
                     />
                 </Field>
 
-                {issue && <ErrorBox>{issue}</ErrorBox>}
+                {issue === 'empty' && <ErrorBox>{t('settings.passwordEmpty')}</ErrorBox>}
+                {issue === 'tooShort' && <ErrorBox>{t('settings.passwordTooShort')}</ErrorBox>}
+                {issue === 'mismatch' && <ErrorBox>{t('settings.passwordMismatch')}</ErrorBox>}
 
-                <PendingBackend />
+                {change.error != null && <ErrorBox>{errorMessage(change.error)}</ErrorBox>}
+                {change.isSuccess && (
+                    <p className="text-sm text-success-fg">{t('settings.passwordChanged')}</p>
+                )}
 
                 <div className="flex justify-end">
-                    <Button type="submit" variant="primary" disabled>
-                        {t('common.save')}
+                    <Button type="submit" variant="primary" disabled={change.isPending}>
+                        {change.isPending ? t('common.saving') : t('common.save')}
                     </Button>
                 </div>
             </form>

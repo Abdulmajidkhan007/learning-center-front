@@ -175,6 +175,17 @@ export const ru: Translations = {
     'settings.workEnd': 'Конец работы',
     'settings.weekend': 'Выходные дни',
 
+    'settings.profileSaved': 'Профиль сохранён.',
+    'settings.passwordChanged': 'Пароль изменён.',
+    'settings.passwordEmpty': 'Заполните все поля.',
+    'settings.passwordTooShort': 'Новый пароль должен быть не короче 8 символов.',
+    'group.dayType.ODD': 'Нечётные дни',
+    'group.dayType.EVEN': 'Чётные дни',
+    'field.dayType': 'Тип расписания',
+    'teacher.level': 'Уровень',
+    'teacher.month': 'Месяц {{current}}',
+    'teacher.lessonsCount': 'Проведено занятий',
+
     'pending.title': 'Backend ещё не готов',
     'pending.body':
         'Для этого блока пока нет endpoint. Интерфейс готов — как только endpoint появится, данные отобразятся здесь.',

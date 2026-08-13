@@ -12,7 +12,7 @@ import { LessonBanner } from '../components/LessonBanner'
 import { LessonStrip } from '../components/LessonStrip'
 import { StartLessonModal } from '../components/StartLessonModal'
 import { StudentDetailModal } from '../components/StudentDetailModal'
-import { groupMatchesFilter, type DayFilter } from '../lib/dayParity'
+import { canFilterByDayType, groupMatchesFilter, type DayFilter } from '../lib/dayParity'
 import { useGroupInfo } from '../hooks/useGroupInfo'
 import { useStartLesson } from '../hooks/useStartLesson'
 import { useTeacherGroups } from '../hooks/useTeacherGroups'
@@ -34,9 +34,13 @@ export function TeacherDashboardPage() {
     const groupsQuery = useTeacherGroups(session.token)
     const allGroups = useMemo(() => groupsQuery.data ?? [], [groupsQuery.data])
 
+    // Filtr faqat backend `dayType` bergandagina foydali — aks holda u
+    // hamma guruhni yashirib qo'yardi, shuning uchun umuman ko'rsatilmaydi.
+    const showDayFilter = canFilterByDayType(allGroups)
+
     const visibleGroups = useMemo(
-        () => allGroups.filter((group) => groupMatchesFilter(group, dayFilter)),
-        [allGroups, dayFilter]
+        () => (showDayFilter ? allGroups.filter((group) => groupMatchesFilter(group, dayFilter)) : allGroups),
+        [allGroups, dayFilter, showDayFilter]
     )
 
     // Tanlangan guruh filtrdan tushib qolsa, birinchisiga o'tamiz — aks holda
@@ -95,16 +99,18 @@ export function TeacherDashboardPage() {
                     >
                         ▶ {t('teacher.startLesson')}
                     </Button>
-                    <SegmentedControl<DayFilter>
-                        label={t('teacher.allDays')}
-                        value={dayFilter}
-                        onChange={setDayFilter}
-                        options={[
-                            { value: 'all', label: t('teacher.allDays') },
-                            { value: 'odd', label: t('teacher.oddDays') },
-                            { value: 'even', label: t('teacher.evenDays') },
-                        ]}
-                    />
+                    {showDayFilter && (
+                        <SegmentedControl<DayFilter>
+                            label={t('teacher.allDays')}
+                            value={dayFilter}
+                            onChange={setDayFilter}
+                            options={[
+                                { value: 'all', label: t('teacher.allDays') },
+                                { value: 'ODD', label: t('group.dayType.ODD') },
+                                { value: 'EVEN', label: t('group.dayType.EVEN') },
+                            ]}
+                        />
+                    )}
                 </>
             }
         >
@@ -112,7 +118,7 @@ export function TeacherDashboardPage() {
 
             <GroupTabs groups={visibleGroups} selectedId={selectedGroupId} onSelect={switchGroup} />
 
-            <LessonStrip />
+            <LessonStrip group={group} />
 
             {activeLesson && <LessonBanner lesson={activeLesson} onMarkAttendance={openAttendance} />}
 

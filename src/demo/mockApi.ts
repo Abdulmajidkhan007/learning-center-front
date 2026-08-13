@@ -11,6 +11,16 @@ import type { AttendanceDto, GroupDto, LessonDto, StudentDto, TeacherDto } from 
 
 type Row = Record<string, unknown> & { id: string }
 
+/** `GET /auth/me` javobi — demo foydalanuvchisi. */
+const demoUser = {
+    id: 'u-demo',
+    fullName: 'Demo Foydalanuvchi',
+    phone: '+998 90 000 00 00',
+    birthDate: '1995-06-15',
+    imageUrl: undefined,
+    role: 'ADMINISTRATOR',
+}
+
 const db = {
     students: [...students] as StudentDto[],
     teachers: [...teachers] as TeacherDto[],
@@ -91,6 +101,13 @@ export function installMockApi() {
         if (path === '/auth/refresh-token' || path === '/auth/login') {
             return json({ token: makeToken(currentRole), expiry: '2099-01-01T00:00:00Z' })
         }
+        if (path === '/auth/me') {
+            return json(demoUser)
+        }
+        if (path === '/auth/change-password') {
+            // Demo'da har doim muvaffaqiyatli — haqiqiy tekshiruv backendda.
+            return json({ response: 'Password changed successfully' })
+        }
 
         // --- o'qituvchi paneli ---
         if (path === '/group/groups') {
@@ -139,9 +156,9 @@ export function installMockApi() {
             if (table === 'lessons') {
                 const lesson: LessonDto = {
                     id: nextId('l'),
-                    lessonNumber: db.lessons.length + 12,
-                    lessonDate: new Date().toISOString().slice(0, 10),
-                    lessonName: String(body.lessonName ?? ''),
+                    lessonNumber: String(db.lessons.length + 12),
+                    lessonDate: new Date().toISOString().slice(0, 19),
+                    isComplete: false,
                 }
                 db.lessons = [...db.lessons, lesson]
                 return json(lesson)
@@ -149,6 +166,13 @@ export function installMockApi() {
             const created = { id: nextId(resource[0]), ...flatten(body) } as Row
             ;(db[table] as unknown as Row[]).push(created)
             return json(created)
+        }
+
+        // Profil saqlash `PUT /user/{id}` orqali ketadi — demo'da shunchaki
+        // yangi qiymatni qaytaramiz.
+        if (resource === 'user' && method === 'PUT') {
+            Object.assign(demoUser, body)
+            return json(demoUser)
         }
 
         if (method === 'PUT' && tail) {

@@ -166,6 +166,17 @@ export const en: Translations = {
     'settings.workEnd': 'Closing time',
     'settings.weekend': 'Weekend days',
 
+    'settings.profileSaved': 'Profile saved.',
+    'settings.passwordChanged': 'Password changed.',
+    'settings.passwordEmpty': 'Fill in every field.',
+    'settings.passwordTooShort': 'The new password must be at least 8 characters.',
+    'group.dayType.ODD': 'Odd days',
+    'group.dayType.EVEN': 'Even days',
+    'field.dayType': 'Schedule type',
+    'teacher.level': 'Level',
+    'teacher.month': 'Month {{current}}',
+    'teacher.lessonsCount': 'Lessons held',
+
     'pending.title': 'Backend not ready yet',
     'pending.body':
         "There's no endpoint for this block yet. The screen is built — data will appear here once the endpoint exists.",

@@ -9,7 +9,7 @@ const students: StudentDto[] = [
     { id: 's3', userDto: { fullName: 'Dilnoza Yusupova' } },
 ]
 
-const lesson: LessonDto = { id: 'l1', lessonNumber: 4, lessonDate: '2026-03-14' }
+const lesson: LessonDto = { id: 'l1', lessonNumber: '4', lessonDate: '2026-03-14T09:00:00' }
 
 describe('useAttendanceDraft', () => {
     it('faol dars bo’lmasa qoralama yo’q', () => {
@@ -47,7 +47,7 @@ describe('useAttendanceDraft', () => {
         act(() => result.current.setStatus('s1', 'LATE'))
         expect(result.current.draft?.statuses.s1).toBe('LATE')
 
-        rerender({ activeLesson: { id: 'l2', lessonNumber: 5 } })
+        rerender({ activeLesson: { id: 'l2', lessonNumber: '5' } })
 
         expect(result.current.draft?.lesson.id).toBe('l2')
         expect(result.current.draft?.statuses.s1).toBe('PRESENT')

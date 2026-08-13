@@ -1,10 +1,16 @@
 import { formatTime } from '@/shared/lib'
-import { GROUP_STATUSES } from '@/shared/types'
+import { DAY_TYPES, GROUP_STATUSES } from '@/shared/types'
 import type { EntityFormConfig, EntityKey, FormField } from '../types'
 
 const STATUS_OPTIONS = GROUP_STATUSES.map((status) => ({
     value: status,
     labelKey: `status.${status}` as const,
+}))
+
+/** Backend kunlar ro'yxatini emas, ODD/EVEN ni saqlaydi. */
+const DAY_TYPE_OPTIONS = DAY_TYPES.map((dayType) => ({
+    value: dayType,
+    labelKey: `group.dayType.${dayType}` as const,
 }))
 
 /**
@@ -102,7 +108,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
                 { key: 'name', labelKey: 'field.groupName', type: 'text' },
                 { key: 'room', labelKey: 'field.room', type: 'text' },
                 { key: 'teacherId', labelKey: 'field.teacher', type: 'select', optionsSource: 'teachers' },
-                { key: 'days', labelKey: 'field.days', type: 'dayPicker' },
+                { key: 'dayType', labelKey: 'field.dayType', type: 'select', options: DAY_TYPE_OPTIONS },
                 { key: 'startTime', labelKey: 'field.startTime', type: 'time' },
                 { key: 'endTime', labelKey: 'field.endTime', type: 'time' },
             ]
@@ -116,7 +122,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
                 name: row?.name ?? '',
                 room: row?.room ?? '',
                 teacherId: row?.teacher?.id ?? '',
-                days: row?.timeTable?.days ?? [],
+                dayType: row?.timeTable?.dayType ?? 'ODD',
                 startTime: formatTime(row?.timeTable?.startTime),
                 endTime: formatTime(row?.timeTable?.endTime),
                 status: row?.status ?? 'STARTING',
@@ -128,7 +134,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
                 room: values.room,
                 teacherId: values.teacherId,
                 timeTable: {
-                    days: values.days,
+                    dayType: values.dayType,
                     startTime: values.startTime,
                     endTime: values.endTime,
                 },
@@ -140,7 +146,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
                 room: values.room,
                 teacherId: values.teacherId,
                 timeTable: {
-                    days: values.days,
+                    dayType: values.dayType,
                     startTime: values.startTime,
                     endTime: values.endTime,
                 },

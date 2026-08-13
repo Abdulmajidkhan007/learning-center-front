@@ -185,6 +185,17 @@ export const uz = {
     'settings.weekend': 'Dam olish kunlari',
 
     // --- backend hali tayyor emas ---
+    'settings.profileSaved': 'Profil saqlandi.',
+    'settings.passwordChanged': 'Parol o‘zgartirildi.',
+    'settings.passwordEmpty': 'Hamma maydonni to‘ldiring.',
+    'settings.passwordTooShort': 'Yangi parol kamida 8 belgidan iborat bo‘lsin.',
+    'group.dayType.ODD': 'Toq kunlar',
+    'group.dayType.EVEN': 'Juft kunlar',
+    'field.dayType': 'Jadval turi',
+    'teacher.level': 'Daraja',
+    'teacher.month': '{{current}}-oy',
+    'teacher.lessonsCount': 'O‘tilgan darslar',
+
     'pending.title': 'Backend hali tayyor emas',
     'pending.body':
         "Bu blok uchun endpoint hali yo'q. Ko'rinish tayyor — endpoint qo'shilgach, ma'lumot shu yerda chiqadi.",

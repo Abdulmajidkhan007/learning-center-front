@@ -1,9 +1,9 @@
 import { useT } from '@/shared/i18n'
-import { cn, formatTime } from '@/shared/lib'
-import type { GroupDto } from '@/shared/types'
+import { cn } from '@/shared/lib'
+import type { GroupNameDto } from '@/shared/types'
 
 interface GroupTabsProps {
-    groups: GroupDto[]
+    groups: GroupNameDto[]
     selectedId: string
     onSelect: (groupId: string) => void
 }
@@ -11,9 +11,10 @@ interface GroupTabsProps {
 /**
  * Guruhlar tasmasi.
  *
- * Ochiladigan ro'yxat (dropdown) o'rniga tab'lar: o'qituvchida odatda 2–6 ta
- * guruh bo'ladi va ularni bir qarashda ko'rish, bir bosishda almashtirish
- * qulayroq. Tor ekranda tasma gorizontal siljiydi.
+ * Ochiladigan ro'yxat o'rniga tab'lar: o'qituvchida odatda 2–6 ta guruh
+ * bo'ladi va ularni bir qarashda ko'rish qulayroq. Tor ekranda siljiydi.
+ *
+ * Vaqt ko'rsatilmaydi — `GET /group/groups` faqat `id` va `name` beradi.
  */
 export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
     const { t } = useT()
@@ -36,21 +37,23 @@ export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
                         aria-selected={isActive}
                         onClick={() => onSelect(group.id)}
                         className={cn(
-                            'shrink-0 cursor-pointer rounded-md px-4 py-2 text-left transition-colors',
+                            'flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-4 py-2 transition-colors',
                             isActive ? 'bg-purple-soft' : 'hover:bg-surface-hover'
                         )}
                     >
                         <span
                             className={cn(
-                                'block text-sm font-semibold whitespace-nowrap',
+                                'text-sm font-semibold whitespace-nowrap',
                                 isActive ? 'text-purple-fg' : 'text-fg'
                             )}
                         >
                             {group.name}
                         </span>
-                        <span className="block font-mono text-[0.65rem] whitespace-nowrap text-fg-faint tabular-nums">
-                            {formatTime(group.timeTable?.startTime) || '—'}
-                        </span>
+                        {group.dayType && (
+                            <span className="rounded-full bg-steel-soft px-2 py-0.5 font-mono text-[0.58rem] text-steel-fg uppercase">
+                                {t(`group.dayType.${group.dayType}`)}
+                            </span>
+                        )}
                     </button>
                 )
             })}

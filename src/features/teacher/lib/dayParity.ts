@@ -1,33 +1,23 @@
-import type { GroupDto, WeekDay } from '@/shared/types'
+import type { DayType, GroupNameDto } from '@/shared/types'
 
-/** Dushanba = 1 … Yakshanba = 7. */
-const DAY_INDEX: Record<WeekDay, number> = {
-    MONDAY: 1,
-    TUESDAY: 2,
-    WEDNESDAY: 3,
-    THURSDAY: 4,
-    FRIDAY: 5,
-    SATURDAY: 6,
-    SUNDAY: 7,
-}
-
-export type DayFilter = 'all' | 'odd' | 'even'
+export type DayFilter = 'all' | DayType
 
 /**
- * O'quv markazlarida guruhlar odatda "toq kunlar" (Du/Cho/Ju) yoki "juft
- * kunlar" (Se/Pay/Sha) jadvaliga bo'linadi. O'qituvchida ikkala turdagi
- * guruh bo'lsa, bugungisini tez topish uchun filtr kerak.
+ * Guruhlarni jadval turi bo'yicha filtrlash.
+ *
+ * Backend guruhga `ODD` (Du/Cho/Ju) yoki `EVEN` (Se/Pay/Sha) turini
+ * biriktiradi — bizda hisoblash kerak emas, tayyor qiymat keladi.
+ *
+ * MUHIM: `GET /group/groups` hozircha `GroupNameProjection` qaytaradi,
+ * ya'ni faqat `id` va `name`. Proyeksiyaga `getDayType()` qo'shilsa,
+ * filtr o'zi ishlab ketadi — shuning uchun `dayType` optional.
  */
-export function dayParity(day: WeekDay): 'odd' | 'even' {
-    return DAY_INDEX[day] % 2 === 1 ? 'odd' : 'even'
+export function groupMatchesFilter(group: GroupNameDto, filter: DayFilter): boolean {
+    if (filter === 'all') return true
+    return group.dayType === filter
 }
 
-/** Guruh jadvalida shu turdagi kun bormi. */
-export function groupMatchesFilter(group: GroupDto, filter: DayFilter): boolean {
-    if (filter === 'all') return true
-    const days = group.timeTable?.days ?? []
-    // Jadvali yo'q guruh hech qanday filtrga tushmasin — aks holda u
-    // ikkala ro'yxatda ham paydo bo'lib chalkashtiradi.
-    if (days.length === 0) return false
-    return days.some((day) => dayParity(day) === filter)
+/** Filtr foydali bo'lishi uchun kamida bitta guruhda `dayType` bo'lishi kerak. */
+export function canFilterByDayType(groups: GroupNameDto[]): boolean {
+    return groups.some((group) => group.dayType !== undefined)
 }

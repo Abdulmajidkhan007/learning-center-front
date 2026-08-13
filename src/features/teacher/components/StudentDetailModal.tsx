@@ -16,7 +16,7 @@ export function StudentDetailModal({ student, onClose }: { student: StudentDto; 
         <Modal
             title={
                 <span className="flex items-center gap-3">
-                    <Avatar name={student.userDto?.fullName} src={student.userDto?.imgUrl} size="lg" />
+                    <Avatar name={student.userDto?.fullName} src={student.userDto?.imageUrl} size="lg" />
                     <span className="min-w-0 truncate">{student.userDto?.fullName || '—'}</span>
                 </span>
             }

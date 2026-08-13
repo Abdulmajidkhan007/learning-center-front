@@ -11,6 +11,8 @@ export const queryKeys = {
         ['entity', entity, 'list', params] as const,
     entityCount: (entity: string) => ['entity', entity, 'count'] as const,
 
+    me: () => ['auth', 'me'] as const,
+
     teacherOptions: () => ['teacher', 'options'] as const,
 
     teacherGroups: () => ['teacher', 'groups'] as const,

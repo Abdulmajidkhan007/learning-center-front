@@ -47,12 +47,21 @@ bo'lishi shart: `vite.config.ts` (`resolve.alias`) va `tsconfig.app.json`
 **Backend DTO'lari — `src/shared/types/`.** Bitta `StudentDto` bor, hamma
 shuni import qiladi.
 
-Deyarli hamma maydon optional (`?`). Bu dangasalik emas: shakllar `fetch`
-chaqiruvlaridan teskari tiklangan, real Java DTO'lari tasdiqlanmagan.
-Kompilyator "bu maydon bor" deb yolg'on kafolat bermasligi kerak.
+Shakllar `goodman113/learning_center` repo'sidagi haqiqiy Java
+record'laridan olingan (2026-08-13). Ilgari ular `fetch` chaqiruvlaridan
+taxmin qilingan edi; farq chiqqan uchta joy tuzatildi:
 
-**DTO'lar tasdiqlangach faqat shu papka qattiqlashtiriladi** — qaysi sahifa
-noto'g'ri taxmin qilgan bo'lsa, kompilyator o'zi ko'rsatadi.
+| Frontend taxmin qilgan | Haqiqatda |
+| --- | --- |
+| `UserDto.imgUrl` | `UserDto.imageUrl` |
+| `TimeTableDto.days: WeekDay[]` | `TimeTableDto.dayType: 'ODD' \| 'EVEN'` |
+| `LessonDto.lessonNumber: number` | `lessonNumber: string` |
+
+Maydonlar baribir optional: Java record'i `null` qaytarmasligini
+kafolatlamaydi.
+
+**Shakl o'zgarsa — faqat shu papka o'zgaradi**, qaysi sahifa noto'g'ri
+taxmin qilgan bo'lsa kompilyator o'zi ko'rsatadi.
 
 Bo'limga xos tiplar (masalan `AdminRow`) o'sha bo'lim ichida
 (`features/admin/types.ts`).

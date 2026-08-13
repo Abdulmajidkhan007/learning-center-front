@@ -37,8 +37,11 @@ export const groups: GroupDto[] = [
         name: 'Beginners A',
         room: '12',
         status: 'ONGOING',
+        level: 'A2',
+        currentMonth: 2,
+        lessonsCount: 14,
         teacher: teachers[0],
-        timeTable: { days: ['MONDAY', 'WEDNESDAY', 'FRIDAY'], startTime: '09:00:00', endTime: '10:30:00' },
+        timeTable: { id: 'tt1', dayType: 'ODD', startTime: '09:00:00', endTime: '10:30:00' },
     },
     {
         id: 'g2',
@@ -46,7 +49,7 @@ export const groups: GroupDto[] = [
         room: '7',
         status: 'ONGOING',
         teacher: teachers[0],
-        timeTable: { days: ['TUESDAY', 'THURSDAY'], startTime: '15:00:00', endTime: '16:30:00' },
+        timeTable: { id: 'tt2', dayType: 'EVEN', startTime: '15:00:00', endTime: '16:30:00' },
     },
     {
         id: 'g3',
@@ -54,7 +57,7 @@ export const groups: GroupDto[] = [
         room: '3',
         status: 'STARTING',
         teacher: teachers[1],
-        timeTable: { days: ['MONDAY', 'THURSDAY', 'SATURDAY'], startTime: '18:00:00', endTime: '20:00:00' },
+        timeTable: { id: 'tt3', dayType: 'ODD', startTime: '18:00:00', endTime: '20:00:00' },
     },
     {
         id: 'g4',
@@ -62,7 +65,7 @@ export const groups: GroupDto[] = [
         room: '1',
         status: 'ENDED',
         teacher: teachers[2],
-        timeTable: { days: ['SATURDAY'], startTime: '11:00:00', endTime: '12:00:00' },
+        timeTable: { id: 'tt4', dayType: 'EVEN', startTime: '11:00:00', endTime: '12:00:00' },
     },
 ]
 
@@ -75,9 +78,9 @@ export const groupRoster: Record<string, string[]> = {
 }
 
 export const lessons: LessonDto[] = [
-    { id: 'l1', lessonNumber: 12, lessonDate: '2026-08-03', lessonName: 'Present Perfect — review' },
-    { id: 'l2', lessonNumber: 13, lessonDate: '2026-08-05', lessonName: 'Listening practice' },
-    { id: 'l3', lessonNumber: 14, lessonDate: '2026-08-07', lessonName: 'Speaking: part 2' },
+    { id: 'l1', lessonNumber: '12', lessonDate: '2026-08-03T09:00:00', isComplete: true },
+    { id: 'l2', lessonNumber: '13', lessonDate: '2026-08-05T09:00:00', isComplete: true },
+    { id: 'l3', lessonNumber: '14', lessonDate: '2026-08-07T09:00:00', isComplete: false },
 ]
 
 export const attendance: AttendanceDto[] = [

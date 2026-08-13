@@ -24,7 +24,7 @@ export function RosterList({ students, onSelect }: RosterListProps) {
                         <span className="w-5.5 shrink-0 text-center font-mono text-sm font-bold text-accent-fg">
                             {index + 1}
                         </span>
-                        <Avatar name={student.userDto?.fullName} src={student.userDto?.imgUrl} />
+                        <Avatar name={student.userDto?.fullName} src={student.userDto?.imageUrl} />
                         <span className="font-display text-base font-semibold text-fg">
                             {student.userDto?.fullName || '—'}
                         </span>

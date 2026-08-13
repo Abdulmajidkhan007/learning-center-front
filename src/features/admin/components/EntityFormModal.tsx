@@ -3,8 +3,6 @@ import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { formatHeader } from '@/shared/lib'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
-import type { WeekDay } from '@/shared/types'
-import { DayPicker } from './DayPicker'
 import type { EntityFormConfig, FormField, FormValues, ModalMode } from '../types'
 
 interface EntityFormModalProps {
@@ -119,15 +117,6 @@ export function EntityFormModal({
                     options={options}
                     value={(values[field.key] as string | undefined) ?? ''}
                     onChange={(event) => setValue(field.key, event.target.value)}
-                />
-            )
-        }
-
-        if (field.type === 'dayPicker') {
-            return (
-                <DayPicker
-                    value={(values[field.key] as WeekDay[] | undefined) ?? []}
-                    onChange={(days) => setValue(field.key, days)}
                 />
             )
         }

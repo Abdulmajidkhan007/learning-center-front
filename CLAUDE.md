@@ -32,8 +32,9 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 5. **Server ma'lumoti `useState` da saqlanmaydi** — TanStack Query.
    Mutatsiyadan keyin `invalidateQueries`, qo'lda `setState` emas.
 6. **Query kalitlari** faqat `shared/api/queryKeys.ts` dan.
-7. **DTO tiplari** faqat `shared/types/` da. Backend DTO'si tasdiqlanmaguncha
-   maydonlar optional qoladi.
+7. **DTO tiplari** faqat `shared/types/` da. Ular `goodman113/learning_center`
+   dagi haqiqiy Java record'laridan olingan — o'zgartirishdan oldin o'sha
+   repo bilan solishtiring.
 
 ## Stil qoidalari
 
@@ -94,10 +95,12 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
 - Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
   yuborish o'chirilgan).
-- Backend DTO'lari tasdiqlanmagan — `features/admin/config/forms.ts` va
-  `shared/types/` dagi shakllar taxminiy.
 - Guruhga o'quvchi biriktirish endpoint'i yo'q (`AssignStudentsModal` —
   vaqtinchalik matn).
+- `GET /group/groups` faqat `{id, name}` qaytaradi, shuning uchun
+  o'qituvchi panelidagi toq/juft filtri proyeksiyaga `dayType` qo'shilmaguncha
+  yashirin turadi.
+- Backendda tuzatilishi kerak bo'lgan narsalar — `docs/backend-notes.md`.
 - Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
   bunday endpoint yo'q (`useAttendanceRecords`).
 - CI sozlanmagan.

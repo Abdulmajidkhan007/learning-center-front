@@ -1,12 +1,12 @@
 /**
- * Backenddan keladigan DTO shakllari — bitta joyda.
+ * Backend DTO shakllari — bitta joyda.
  *
- * Nega deyarli hamma maydon optional (`?`): bu shakllar `fetch` chaqiruvlaridan
- * teskari qayta tiklangan, real Java DTO'lari hali tasdiqlanmagan. Kompilyator
- * "bu maydon bor" deb yolg'on kafolat bermasligi kerak.
+ * Bu shakllar `goodman113/learning_center` repo'sidagi haqiqiy Java
+ * record'laridan olingan (2026-08-13 holatiga). Ilgari ular fetch
+ * chaqiruvlaridan taxmin qilingan edi; farq bo'lgan joylar tuzatildi.
  *
- * DTO'lar tasdiqlangach FAQAT shu fayl qattiqlashtiriladi — qaysi sahifa
- * noto'g'ri taxmin qilgan bo'lsa, kompilyator o'zi ko'rsatib beradi.
+ * Maydonlar hamon optional: backend `null` qaytarishi mumkin va Java
+ * record'i buni ko'rsatmaydi.
  */
 
 /** Spring Data `Page<T>` javobi. */
@@ -32,12 +32,15 @@ export interface Session {
     claims: JwtClaims
 }
 
-/** `POST /auth/login` va `/auth/refresh-token` javobi. */
+/**
+ * `POST /auth/login` va `/auth/refresh-token` javobi.
+ *
+ * Refresh token javob TANASIDA kelmaydi — backend uni httpOnly
+ * `refresh_token` cookie'siga yozadi (`AuthService.setRefreshCookie`).
+ */
 export interface AuthResponse {
     token: string
     expiry?: string
-    refreshToken?: string
-    refreshExpiry?: string
 }
 
 export interface LoginCredentials {
@@ -46,13 +49,31 @@ export interface LoginCredentials {
     rememberMe: boolean
 }
 
+export type Role = 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'
+
+/** `UserDto` — diqqat: maydon nomi `imageUrl` (`imgUrl` emas). */
 export interface UserDto {
     id?: string
+    imageUrl?: string
     fullName?: string
     phone?: string
+    /** `LocalDate` — "yyyy-MM-dd". */
     birthDate?: string
-    imgUrl?: string
-    role?: string
+    role?: Role
+}
+
+/** `PUT /user/{id}` uchun. */
+export interface UserUpdatePayload {
+    fullName: string
+    phone: string
+    birthDate: string
+}
+
+/** `POST /auth/change-password` uchun. */
+export interface ChangePasswordPayload {
+    oldPassword: string
+    newPassword: string
+    confirmPassword: string
 }
 
 export interface StudentDto {
@@ -66,6 +87,92 @@ export interface TeacherDto {
     userDto?: UserDto
 }
 
+/**
+ * Guruh jadvali turi.
+ *
+ * Backend kunlar ro'yxatini emas, shu ikki qiymatdan birini saqlaydi:
+ * toq kunlar (Du/Cho/Ju) yoki juft kunlar (Se/Pay/Sha).
+ */
+export const DAY_TYPES = ['ODD', 'EVEN'] as const
+export type DayType = (typeof DAY_TYPES)[number]
+
+export interface TimeTableDto {
+    id?: string
+    dayType?: DayType
+    /** `LocalTime` — "HH:mm:ss". */
+    startTime?: string
+    endTime?: string
+}
+
+export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'ENDED'] as const
+export type GroupStatus = (typeof GROUP_STATUSES)[number]
+
+export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
+export type GroupLevel = (typeof GROUP_LEVELS)[number]
+
+export interface GroupDto {
+    id: string
+    name?: string
+    room?: string
+    teacher?: TeacherDto
+    timeTable?: TimeTableDto
+    status?: GroupStatus
+    level?: GroupLevel
+    /** Kurs boshlanganidan beri nechanchi oy. */
+    currentMonth?: number
+    /** Guruhda o'tilgan darslar soni. */
+    lessonsCount?: number
+}
+
+/**
+ * `GET /group/groups` (o'qituvchining guruhlari) javobi.
+ *
+ * Bu TO'LIQ `GroupDto` emas — backend `GroupNameProjection` qaytaradi,
+ * ya'ni faqat `id` va `name`. `dayType` optional: proyeksiyaga qo'shilsa
+ * o'qituvchi panelidagi toq/juft filtri o'zi ishlab ketadi.
+ */
+export interface GroupNameDto {
+    id: string
+    name?: string
+    dayType?: DayType
+}
+
+/** `GET /group/groupInfo` javobi: guruh + uning ro'yxati. */
+export interface FullGroupDto {
+    groupDto?: GroupDto
+    studentDto?: StudentDto[]
+}
+
+/** `LessonDto` — `lessonNumber` STRING (backend shunday qaytaradi). */
+export interface LessonDto {
+    id: string
+    lessonNumber?: string
+    /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
+    lessonDate?: string
+    isComplete?: boolean
+    group?: GroupDto
+    teacherDto?: TeacherDto
+}
+
+/** Davomat statuslari — ro'yxat va tip bitta manbadan chiqadi. */
+export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
+export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
+
+export interface AttendanceStudentDto {
+    studentId: string
+    studentFullName?: string
+    status: AttendanceStatus
+}
+
+export interface AttendanceDto {
+    id?: string
+    lessonId: string
+    /** `LocalDateTime`; jadvaldagi ustun sanasi shundan olinadi. */
+    createdAt?: string
+    attendanceStudents?: AttendanceStudentDto[]
+}
+
+/** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
 export const WEEK_DAYS = [
     'MONDAY',
     'TUESDAY',
@@ -76,53 +183,3 @@ export const WEEK_DAYS = [
     'SUNDAY',
 ] as const
 export type WeekDay = (typeof WEEK_DAYS)[number]
-
-export interface TimeTableDto {
-    days?: WeekDay[]
-    /** `LocalTime`, "HH:mm:ss" ko'rinishida keladi. */
-    startTime?: string
-    endTime?: string
-}
-
-export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'ENDED'] as const
-export type GroupStatus = (typeof GROUP_STATUSES)[number]
-
-export interface GroupDto {
-    id: string
-    name?: string
-    room?: string
-    teacher?: TeacherDto
-    timeTable?: TimeTableDto
-    status?: GroupStatus
-}
-
-/** `GET /group/groupInfo` javobi: guruh + uning ro'yxati. */
-export interface FullGroupDto {
-    groupDto?: GroupDto
-    studentDto?: StudentDto[]
-}
-
-export interface LessonDto {
-    id: string
-    lessonNumber?: number
-    /** `LocalDate` — "yyyy-MM-dd". */
-    lessonDate?: string
-    lessonName?: string
-}
-
-/** Davomat statuslari — ro'yxat va tip bitta manbadan chiqadi. */
-export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
-export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
-
-export interface AttendanceStudentDto {
-    studentId: string
-    status: AttendanceStatus
-}
-
-export interface AttendanceDto {
-    id?: string
-    lessonId: string
-    /** ISO datetime; jadvaldagi ustun sanasi shundan olinadi. */
-    createdAt?: string
-    attendanceStudents?: AttendanceStudentDto[]
-}
