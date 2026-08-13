@@ -1,16 +1,125 @@
-# React + Vite
+# Cornerstone Learning Centre — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+O'quv markazi uchun veb-mijoz. Spring backend bilan `/api/v1/**` orqali
+ishlaydi va rolga qarab har xil panel ko'rsatadi:
 
-Currently, two official plugins are available:
+| Rol             | Nima ko'radi                                                      |
+| --------------- | ----------------------------------------------------------------- |
+| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons bo'yicha to'liq CRUD        |
+| `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
+| `STUDENT`       | Placeholder ekran (panel hali qurilmagan)                          |
+| `SUPER_ADMIN`   | Placeholder ekran                                                  |
+| hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
+| boshqa          | Tushunarli xabar bilan placeholder                                 |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- **React 19** + **React Router 7**
+- **TypeScript 6** (`strict`) — butun `src/` `.ts`/`.tsx`
+- **Vite 8** — dev server va build
+- **Tailwind CSS 4** — `tailwind.config.js` YO'Q, sozlama `src/styles/index.css` ichida
+- **TanStack Query 5** — server ma'lumoti (cache, loading, xato, invalidatsiya)
+- **Vitest 4 + Testing Library** — testlar
+- **ESLint 10** (flat config) + `typescript-eslint`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Uch til:** o'zbekcha (default), ruscha, inglizcha — `src/shared/i18n/`.
+**Dark/light rejim:** barcha ranglar CSS o'zgaruvchilari.
+Ikkalasining tanlovi `localStorage` da, o'zgartirish — **Sozlamalar** sahifasida.
 
-## Expanding the ESLint configuration
+## Ishga tushirish
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev      # http://localhost:5173
+```
+
+Dev server `/api` ni `http://localhost:8080` ga uzatadi, ya'ni backend o'sha
+yerda turishi kerak. Boshqa manzil kerak bo'lsa — `vite.config.ts` dagi
+`server.proxy.target`.
+
+Productionda Vite yo'q, shuning uchun `/api` ni frontend xizmatining o'zi
+uzatadi — ildizdagi `Dockerfile` + `Caddyfile` shuning uchun.
+Batafsil: [`docs/deployment.md`](docs/deployment.md).
+
+## Backendsiz demo
+
+```bash
+npm run build:demo    # → dist-demo/cornerstone-demo.html
+```
+
+Bitta o'zi yetarli HTML fayl: soxta API, soxta ma'lumot, shriftlar ham
+ichida. Dizaynni ko'rsatish yoki backend tayyor bo'lmaganda ekranlarni
+muhokama qilish uchun. Kod `src/demo/` da va production bundle'ga tushmaydi.
+
+Muhit o'zgaruvchilari (`.env`) loyihada ishlatilmaydi, shuning uchun
+`.env.example` ham yo'q. Kalit/token kodda saqlanmaydi.
+
+## Buyruqlar
+
+| Buyruq                  | Nima qiladi                                     |
+| ----------------------- | ----------------------------------------------- |
+| `npm run dev`           | Dev server (port 5173, `/api` proxy)            |
+| `npm run typecheck`     | `tsc -b` — faqat tiplarni tekshiradi            |
+| `npm test`              | Vitest, bir marta                               |
+| `npm run test:watch`    | Vitest, kuzatuv rejimida                        |
+| `npm run test:coverage` | Qamrov hisoboti                                 |
+| `npm run lint`          | ESLint                                          |
+| `npm run build`         | `tsc -b && vite build` → `dist/`                |
+| `npm run build:demo`    | Backendsiz demo: bitta HTML fayl → `dist-demo/`  |
+| `npm run preview`       | Tayyor `dist/` ni lokal ko'rish                 |
+
+Kodni topshirishdan oldin: `npm run typecheck && npm run lint && npm test && npm run build`.
+
+## Papka tuzilishi
+
+Qatlamli tuzilma: **`app` → `features` → `shared`**. O'q faqat pastga
+qaraydi — `shared` hech qachon `features` dan import qilmaydi.
+
+```
+src/
+  app/                 ilova karkasi
+    App.tsx            provider'lar + marshrutlar
+    providers/         Theme, Auth, QueryClient
+    routes/            AppRoutes, RoleDashboard
+  features/            biznes bo'limlari (har biri o'zicha to'liq)
+    auth/  admin/  teacher/  attendance/  settings/  student/  super-admin/
+      api/         shu bo'lim endpoint'lari
+      hooks/       TanStack Query hooklari va holat mantiqi
+      components/  shu bo'limga tegishli komponentlar
+      config/      jadval/forma konfiguratsiyasi (admin)
+      pages/       ekran
+  shared/            bo'limlarga bog'liq bo'lmagan hamma narsa
+    api/     apiFetch, ApiError, queryKeys
+    ui/      Button, Modal, Table, Badge, ThemeToggle …
+    lib/     format, jwt, cn
+    hooks/   useClickOutside
+    i18n/    tarjimalar (uz/ru/en) va `useT`
+    types/   backend DTO tiplari
+  styles/index.css   Tailwind + rang tokenlari + dark rejim
+  test/              test setup va yordamchilari
+```
+
+Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
+
+## Auth oqimi
+
+1. Sahifa ochilganda `AuthProvider` `/auth/refresh-token` ga POST yuboradi
+   (`credentials: 'include'`) — httpOnly refresh cookie yangi access token beradi.
+2. Access token payload'i **imzo tekshirilmasdan** ochiladi (`shared/lib/jwt.ts`),
+   faqat `role` ni bilib kerakli panelni ko'rsatish uchun. Avtorizatsiya —
+   backendning ishi.
+3. Token faqat React state'da yashaydi, `localStorage` da **emas**.
+
+## Hujjatlar
+
+| Fayl                                                   | Nima haqida                                       |
+| ------------------------------------------------------ | ------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)           | Papka tuzilishi, qatlam qoidalari, yangi bo'lim qo'shish |
+| [docs/styling.md](docs/styling.md)                     | Tailwind v4, rang tokenlari, dark rejim           |
+| [docs/state-management.md](docs/state-management.md)   | TanStack Query qoidalari, nega Redux emas         |
+| [docs/typescript.md](docs/typescript.md)               | TS sozlamalari va tip yozish qoidalari            |
+| [docs/i18n.md](docs/i18n.md)                           | Uch tillilik: yangi matn qo'shish, cheklovlar     |
+| [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
+| [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
+| [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik, xatolar, kerakli endpoint'lar |
+| [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

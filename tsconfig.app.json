@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+
+    /* Vite har bir faylni alohida transpilyatsiya qiladi, shuning uchun
+       tip-importlar o'zi turganda ham o'chirilishi mumkin bo'lishi kerak. */
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    /* `@/...` aliasi — vite.config.ts dagi resolve.alias bilan bir xil.
+       `baseUrl` yo'q: TS 6 da u eskirgan, `paths` esa tsconfig joylashgan
+       papkaga nisbatan hisoblanadi. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    /* strict — migratsiyaning butun ma'nosi shu: DTO'lar backenddan keladi,
+       ular yo'q bo'lishi mumkin, buni kompilyator aytsin. */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

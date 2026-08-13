@@ -1,0 +1,80 @@
+import { useT } from '@/shared/i18n'
+import { cn } from '@/shared/lib'
+import { ENTITIES } from '../config/entities'
+import type { EntityKey } from '../types'
+
+interface AdminNavProps {
+    activeTab: EntityKey
+    onTabChange: (tab: EntityKey) => void
+}
+
+/**
+ * Bo'limlar navigatsiyasi.
+ *
+ * Kompyuterda chap ustun, mobil ekranda gorizontal siljiydigan tasma.
+ * Ikkita alohida komponent — bitta komponentni CSS bilan ikki xil qilishdan
+ * ko'ra shu tushunarliroq va har biri o'z holatida to'g'ri ishlaydi.
+ */
+export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
+    const { t } = useT()
+
+    return (
+        <aside className="hidden w-55 shrink-0 flex-col bg-sidebar py-6 text-sidebar-fg lg:flex">
+            <div className="mb-3 flex items-center gap-2 border-b border-white/10 px-5 pb-6">
+                <span className="rounded-sm bg-brand px-1.5 py-0.5 font-mono text-xs tracking-[0.1em] text-brand-fg">
+                    CLC
+                </span>
+                <span className="font-display text-base font-semibold">Cornerstone</span>
+            </div>
+
+            <nav className="flex flex-1 flex-col">
+                {ENTITIES.map((entity) => (
+                    <button
+                        key={entity.key}
+                        type="button"
+                        onClick={() => onTabChange(entity.key)}
+                        className={cn(
+                            'cursor-pointer border-l-3 px-5 py-3 text-left text-sm transition-colors',
+                            activeTab === entity.key
+                                ? 'border-l-brand bg-white/6 font-medium text-sidebar-fg'
+                                : 'border-l-transparent text-sidebar-fg/65 hover:bg-white/5 hover:text-sidebar-fg'
+                        )}
+                    >
+                        {t(entity.pluralKey)}
+                    </button>
+                ))}
+            </nav>
+
+            <div className="border-t border-white/10 px-5 pt-4">
+                <div className="font-mono text-[0.68rem] tracking-[0.06em] text-sidebar-fg/45 uppercase">
+                    {t('admin.role')}
+                </div>
+            </div>
+        </aside>
+    )
+}
+
+/** Mobil variant — sarlavha ostidagi tasma. */
+export function AdminTabStrip({ activeTab, onTabChange }: AdminNavProps) {
+    const { t } = useT()
+
+    return (
+        <div className="flex gap-2 overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {ENTITIES.map((entity) => (
+                <button
+                    key={entity.key}
+                    type="button"
+                    onClick={() => onTabChange(entity.key)}
+                    className={cn(
+                        'shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs whitespace-nowrap transition-colors',
+                        activeTab === entity.key
+                            ? 'bg-fg font-semibold text-fg-inverted'
+                            : 'border border-border-base text-fg-muted hover:bg-surface-hover'
+                    )}
+                >
+                    {t(entity.pluralKey)}
+                </button>
+            ))}
+        </div>
+    )
+}

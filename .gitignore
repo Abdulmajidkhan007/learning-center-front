@@ -9,8 +9,12 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-demo
 dist-ssr
 *.local
+
+# TypeScript incremental build info (tsc -b)
+*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
