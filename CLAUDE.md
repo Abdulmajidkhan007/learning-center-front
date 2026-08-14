@@ -86,43 +86,73 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 
 ## Git ish tartibi
 
-Asl repo: `nurulloh-coder-dev/learning-center-front` (asosiy branch — `N`).
-Ish esa fork'da olib boriladi: `Abdulmajidkhan007/learning-center-front`.
+Asl repo: `nurulloh-coder-dev/learning-center-front`, asosiy branch — **`N`**.
 
-**Nega fork, collaborator huquqi bor bo'lsa ham:** kodni ko'p hollarda agent
-yozadi. Fork'da ishlanganda agentda asl repo'ga yozish huquqi umuman
-bo'lmaydi — eng yomon holatda o'z fork'ingizda keraksiz branch paydo
-bo'ladi, xolos. Har bir o'zgarish PR orqali odam ko'zidan o'tadi va asl
-repo tarixiga tasodifan tegib bo'lmaydi.
+Ish to'g'ridan-to'g'ri shu repoda, lekin **hech qachon `N` ga push qilinmaydi**.
+Har bir ish alohida branchda ketadi va `N` ga faqat **PR orqali** qo'shiladi —
+odam ko'rib, merge qiladi.
 
-Tartib:
-
-1. Har bir mantiqiy ish uchun alohida branch (`feature/...`).
-2. Ish tugagach fork'ga push qilinadi.
-3. Odam PR ochadi va merge qiladi:
-   `https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:<branch>`
-4. PR merge bo'lgach fork asl repo bilan sinxronlanadi (pastga qarang).
-
-**PR — har commit uchun emas, tugagan ish uchun.**
-
-### Fork'ni sinxronlash
-
-Asl repo oldinga ketsa, ish boshlashdan oldin:
-
-```bash
-git remote add upstream https://github.com/nurulloh-coder-dev/learning-center-front.git   # bir marta
-git fetch upstream
-git checkout N
-git merge upstream/N
-git push origin N
+```
+agent/<qisqa-nom>      masalan: agent/payments, agent/super-admin
 ```
 
-(GitHub'da "Sync fork" tugmasi ham shuni qiladi.)
+Bitta uzun "hamma narsa" branchi EMAS: uzoq yashagan branch qancha kutsa,
+konflikt ehtimoli shuncha oshadi. Bitta ish tugadi — PR, merge, keyingisi
+yangi branchdan.
+
+Ish boshlashdan oldin **doim**:
+
+```bash
+git fetch origin N
+git checkout -b agent/<nom> origin/N
+```
+
+PR ochishdan oldin `N` oldinga ketgan bo'lsa:
+
+```bash
+git fetch origin N && git merge origin/N     # konflikt bo'lsa shu yerda yechiladi
+```
+
+### Konfliktdan qochish
+
+Uch kishi bir vaqtda ishlaganda eng ko'p to'qnashadigan joylar:
+
+1. **`src/shared/i18n/locales/*.ts`** — hamma yangi kalit qo'shadi va hammasi
+   faylning bir joyiga tushadi. Kalitni **o'z bo'liming blokiga** qo'ying
+   (`// --- to'lovlar ---` kabi), faylning oxiriga emas.
+2. **`src/shared/types/index.ts`** — DTO qo'shganda ham shunday: mavjud
+   bloklarga tegmang, yangisini alohida qo'shing.
+3. **`shared/ui/`** — umumiy komponentni o'zgartirish hammaga ta'sir qiladi.
+   Tegishdan oldin kelishing.
+
+Qolgan hamma narsa `features/<bo'lim>/` ichida — u yerda har kim o'z
+papkasida ishlagani uchun to'qnashuv bo'lmaydi. Shuning uchun **yangi ish
+imkon qadar o'z bo'lim papkasida** yozilsin.
+
+### Eskirgan: fork orqali ishlash
+
+Ilgari ish `Abdulmajidkhan007/learning-center-front` fork'ida olib borilardi
+(agentda asl repoga yozish huquqi bo'lmasin degan maqsadda). Endi ish asl
+repoda, lekin himoya saqlanib qoladi: `N` ga to'g'ridan-to'g'ri push yo'q,
+faqat PR.
 
 ## Hujjatlar
 
 23. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
     `README.md` va tegishli `docs/` fayli yangilanadi.
+
+## Hozirgi holat (qisqacha)
+
+Tayyor va ulangan: kirish, admin paneli (o'quvchi/o'qituvchi/guruh/dars CRUD,
+guruhga o'quvchi qo'shish va chiqarish), o'qituvchi paneli va davomat,
+o'quvchi paneli, sozlamalar, **to'lovlar** (`/payments`), **super-admin**
+(tashkilotlar va filiallar).
+
+Backend bilan bog'liq ochiq savollar va so'rovlar —
+[`docs/backend-api-request.md`](docs/backend-api-request.md), topilgan
+xatolar — [`docs/backend-notes.md`](docs/backend-notes.md). Yangi ish
+boshlashdan oldin shu ikkisiga qarang: ko'p ekran aynan o'sha bandlar
+tuzatilmagani uchun cheklangan.
 
 ## Hali yechilmagan narsalar
 
