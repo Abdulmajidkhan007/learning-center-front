@@ -66,6 +66,17 @@ function json(body: unknown, status = 200): Response {
     })
 }
 
+/**
+ * Tanasiz javob (`DELETE` uchun).
+ *
+ * `new Response(body, { status: 204 })` — brauzer buni rad etadi:
+ * "Response with null body status cannot have body". Backend ham
+ * `noContent()` qaytaradi, ya'ni shakl ham to'g'ri bo'ladi.
+ */
+function noContent(): Response {
+    return new Response(null, { status: 204 })
+}
+
 /** Spring Data `Page` ko'rinishida qaytaradi. */
 function page<T extends Row>(rows: T[], url: URL) {
     const size = Number(url.searchParams.get('size') ?? 10)
@@ -132,7 +143,9 @@ export function installMockApi() {
             const groupId = url.searchParams.get('groupId') ?? ''
             const ids = groupRoster[groupId] ?? []
             return json({
-                content: ids.map((studentId) => ({ studentId, groupId })),
+                // Enrollment id si demo'da guruh+o'quvchidan yasaladi —
+                // haqiqiy backendda u alohida yozuvning id si.
+                content: ids.map((studentId) => ({ id: `e-${groupId}-${studentId}`, studentId, groupId })),
                 totalPages: 1,
                 totalElements: ids.length,
             })
@@ -141,7 +154,13 @@ export function installMockApi() {
             const groupId = String(body.groupId)
             const studentId = String(body.studentId)
             groupRoster[groupId] = [...(groupRoster[groupId] ?? []), studentId]
-            return json({ studentId, groupId })
+            return json({ id: `e-${groupId}-${studentId}`, studentId, groupId })
+        }
+        if (path.startsWith('/enrollments/') && method === 'DELETE') {
+            // `e-<groupId>-<studentId>` ni teskari yechamiz.
+            const [, groupId, studentId] = path.split('/')[2].split('-')
+            groupRoster[groupId] = (groupRoster[groupId] ?? []).filter((id) => id !== studentId)
+            return noContent()
         }
 
         // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---
@@ -203,7 +222,7 @@ export function installMockApi() {
         if (path.startsWith('/invoice/') && method === 'DELETE') {
             const id = path.split('/')[2]
             db.invoices = db.invoices.filter((invoice) => invoice.id !== id)
-            return json(null, 204)
+            return noContent()
         }
 
         // --- generik CRUD: /student, /teacher, /group, /lesson ---

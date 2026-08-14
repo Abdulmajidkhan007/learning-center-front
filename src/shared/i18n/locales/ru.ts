@@ -232,7 +232,10 @@ export const ru: Translations = {
 
     'admin.addToGroup': 'Добавить',
     'admin.alreadyInGroup': 'В группе',
-    'admin.removeNotAvailable': 'Удаление из группы пока недоступно: backend не возвращает id записи.',
+    'admin.removeFromGroup': 'Убрать',
+    'admin.removeConfirm': 'Убрать',
+    'admin.removeReason': 'Причина исключения',
+    'admin.removeReasonPlaceholder': 'причина (обязательно)',
     'error.notFound': 'Страница не найдена',
     'error.notFoundHint': 'Неверный адрес или страница перемещена.',
 

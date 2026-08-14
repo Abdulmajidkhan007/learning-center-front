@@ -223,7 +223,10 @@ export const en: Translations = {
 
     'admin.addToGroup': 'Add',
     'admin.alreadyInGroup': 'In group',
-    'admin.removeNotAvailable': 'Removing from a group is not available yet: the backend does not return the enrollment id.',
+    'admin.removeFromGroup': 'Remove',
+    'admin.removeConfirm': 'Remove',
+    'admin.removeReason': 'Reason for removal',
+    'admin.removeReasonPlaceholder': 'reason (required)',
     'error.notFound': 'Page not found',
     'error.notFoundHint': 'The address is wrong or the page has moved.',
 

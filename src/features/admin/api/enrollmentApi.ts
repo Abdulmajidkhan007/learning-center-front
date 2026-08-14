@@ -10,6 +10,8 @@ import type { Page } from '@/shared/types'
  * "ilgari shu yerda o'qigan" degani.
  */
 export interface EnrollmentDto {
+    /** Guruhdan chiqarish shu id bo'yicha ketadi. */
+    id?: string
     studentId?: string
     groupId?: string
     reason?: string
@@ -28,4 +30,15 @@ export async function fetchGroupEnrollments(token: string, groupId: string) {
 
 export function createEnrollment(token: string, body: { studentId: string; groupId: string; reason?: string }) {
     return apiFetch<EnrollmentDto>(ENDPOINT, { method: 'POST', token, body })
+}
+
+/**
+ * Guruhdan chiqarish.
+ *
+ * `reason` — backendda MAJBURIY `@RequestParam`, shuning uchun interfeysda
+ * ham uni so'ramasdan chiqarib bo'lmaydi. Yozuv butunlay o'chmaydi
+ * (soft-delete), ya'ni "ilgari shu guruhda o'qigan" ma'lumoti saqlanadi.
+ */
+export function deleteEnrollment(token: string, id: string, reason: string) {
+    return apiFetch(`${ENDPOINT}/${id}`, { method: 'DELETE', token, params: { reason } })
 }

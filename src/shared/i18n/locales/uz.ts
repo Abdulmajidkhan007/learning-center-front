@@ -244,7 +244,10 @@ export const uz = {
 
     'admin.addToGroup': 'Qo‘shish',
     'admin.alreadyInGroup': 'Guruhda',
-    'admin.removeNotAvailable': 'Guruhdan chiqarish hozircha yo‘q: backend enrollment id sini qaytarmaydi.',
+    'admin.removeFromGroup': 'Chiqarish',
+    'admin.removeConfirm': 'Chiqarish',
+    'admin.removeReason': 'Chiqarish sababi',
+    'admin.removeReasonPlaceholder': 'sabab (majburiy)',
     'error.notFound': 'Bunday sahifa yo‘q',
     'error.notFoundHint': 'Manzil noto‘g‘ri yoki sahifa ko‘chirilgan.',
 

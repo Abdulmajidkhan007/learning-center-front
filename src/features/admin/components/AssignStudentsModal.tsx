@@ -4,34 +4,47 @@ import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Input, Modal } from '@/shared/ui'
 import { useEntityList } from '../hooks/useEntityList'
-import { useAddEnrollment, useGroupEnrollments } from '../hooks/useGroupEnrollments'
+import {
+    useAddEnrollment,
+    useGroupEnrollments,
+    useRemoveEnrollment,
+} from '../hooks/useGroupEnrollments'
 import { entityByKey } from '../config/entities'
+import { RemoveFromGroupForm } from './RemoveFromGroupForm'
 import type { AdminRow } from '../types'
 
 /**
- * Guruhga o'quvchi biriktirish.
+ * Guruhga o'quvchi biriktirish va guruhdan chiqarish.
  *
  * Backendda guruh ichida ro'yxat yo'q — `enrollment` ko'prigi orqali
  * bog'lanadi (`api/enrollmentApi.ts` ga qarang).
- *
- * O'chirish (guruhdan chiqarish) hozircha yo'q: `DELETE /enrollments/{id}`
- * enrollment id sini talab qiladi, `EnrollmentDto` esa uni qaytarmaydi.
  */
 export function AssignStudentsModal({ group, onClose }: { group: AdminRow; onClose: () => void }) {
     const { t } = useT()
     const session = useSession()
     const [search, setSearch] = useState('')
+    // Sabab so'ralayotgan o'quvchi; bo'sh bo'lsa forma ochilmagan.
+    const [removingStudentId, setRemovingStudentId] = useState('')
 
     const students = useEntityList(entityByKey('students'), session.token, { page: 0, search })
     const enrollments = useGroupEnrollments(session.token, group.id)
     const add = useAddEnrollment(session.token, group.id)
+    const remove = useRemoveEnrollment(session.token, group.id)
 
-    const enrolledIds = useMemo(
-        () => new Set((enrollments.data ?? []).map((item) => item.studentId)),
-        [enrollments.data]
-    )
+    /** studentId → enrollment id: chiqarish o'sha id bo'yicha ketadi. */
+    const enrollmentByStudent = useMemo(() => {
+        const map = new Map<string, string | undefined>()
+        for (const item of enrollments.data ?? []) {
+            if (item.studentId) map.set(item.studentId, item.id)
+        }
+        return map
+    }, [enrollments.data])
 
-    const failure = students.error ?? enrollments.error ?? add.error
+    function handleRemove(enrollmentId: string, reason: string) {
+        remove.mutate({ id: enrollmentId, reason }, { onSuccess: () => setRemovingStudentId('') })
+    }
+
+    const failure = students.error ?? enrollments.error ?? add.error ?? remove.error
 
     return (
         <Modal
@@ -53,34 +66,60 @@ export function AssignStudentsModal({ group, onClose }: { group: AdminRow; onClo
 
                 <ul className="flex max-h-72 flex-col overflow-y-auto">
                     {students.rows.map((student) => {
-                        const isEnrolled = enrolledIds.has(student.id)
+                        const isEnrolled = enrollmentByStudent.has(student.id)
+                        const enrollmentId = enrollmentByStudent.get(student.id)
+                        const name = student.userDto?.fullName || '—'
+
                         return (
                             <li
                                 key={student.id}
-                                className="flex items-center justify-between gap-3 border-b border-border-base py-2.5 last:border-b-0"
+                                className="border-b border-border-base py-2.5 last:border-b-0"
                             >
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-medium text-fg">
-                                        {student.userDto?.fullName || '—'}
-                                    </p>
-                                    <p className="truncate font-mono text-xs text-fg-faint">
-                                        {student.userDto?.phone || '—'}
-                                    </p>
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium text-fg">{name}</p>
+                                        <p className="truncate font-mono text-xs text-fg-faint">
+                                            {student.userDto?.phone || '—'}
+                                        </p>
+                                    </div>
+
+                                    {!isEnrolled && (
+                                        <Button
+                                            size="sm"
+                                            variant="primary"
+                                            disabled={add.isPending}
+                                            onClick={() => add.mutate(student.id)}
+                                        >
+                                            {t('admin.addToGroup')}
+                                        </Button>
+                                    )}
+
+                                    {isEnrolled && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <span className="text-sm text-success-fg">
+                                                ✓ {t('admin.alreadyInGroup')}
+                                            </span>
+                                            {/* Eski yozuvlarda `id` bo'lmasligi mumkin — o'shanda
+                                                chiqarish tugmasi ko'rsatilmaydi. */}
+                                            {enrollmentId && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="danger"
+                                                    onClick={() => setRemovingStudentId(student.id)}
+                                                >
+                                                    {t('admin.removeFromGroup')}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {isEnrolled ? (
-                                    <span className="shrink-0 text-sm text-success-fg">
-                                        ✓ {t('admin.alreadyInGroup')}
-                                    </span>
-                                ) : (
-                                    <Button
-                                        size="sm"
-                                        variant="primary"
-                                        disabled={add.isPending}
-                                        onClick={() => add.mutate(student.id)}
-                                    >
-                                        {t('admin.addToGroup')}
-                                    </Button>
+                                {removingStudentId === student.id && enrollmentId && (
+                                    <RemoveFromGroupForm
+                                        isPending={remove.isPending}
+                                        onSubmit={(reason) => handleRemove(enrollmentId, reason)}
+                                        onCancel={() => setRemovingStudentId('')}
+                                    />
                                 )}
                             </li>
                         )
@@ -92,8 +131,6 @@ export function AssignStudentsModal({ group, onClose }: { group: AdminRow; onClo
                         </li>
                     )}
                 </ul>
-
-                <p className="text-[0.72rem] leading-snug text-fg-faint">{t('admin.removeNotAvailable')}</p>
             </div>
         </Modal>
     )
