@@ -1,8 +1,10 @@
 import type {
     AttendanceDto,
+    BranchDto,
     FullGroupDto,
     GroupDto,
     InvoiceDto,
+    OrganizationDto,
     LessonDto,
     StudentDto,
     TeacherDto,
@@ -91,6 +93,17 @@ export const invoices: InvoiceDto[] = [
     { id: 'i2', invoiceNumber: 'INV-002', student: students[1], amount: 450000, issuedAt: '2026-08-01T09:00:00', status: 'PENDING' },
     { id: 'i3', invoiceNumber: 'INV-003', student: students[2], amount: 600000, issuedAt: '2026-06-01T09:00:00', status: 'OVERDUE' },
     { id: 'i4', invoiceNumber: 'INV-004', student: students[3], amount: 450000, issuedAt: '2026-08-05T09:00:00', status: 'PENDING' },
+]
+
+export const organizations: OrganizationDto[] = [
+    { id: 'o1', name: 'Cornerstone Education', phone: '+998 71 200 10 10', email: 'info@cornerstone.uz', website: 'cornerstone.uz' },
+    { id: 'o2', name: 'Bright Minds', phone: '+998 71 200 20 20', email: 'hello@brightminds.uz' },
+]
+
+export const branches: BranchDto[] = [
+    { id: 'b1', name: 'Chilonzor', address: 'Chilonzor 9, Toshkent', chargeForMonth: 450000 },
+    { id: 'b2', name: 'Yunusobod', address: 'Amir Temur 108, Toshkent', chargeForMonth: 500000 },
+    { id: 'b3', name: 'Samarqand', address: 'Registon 4, Samarqand', chargeForMonth: 380000 },
 ]
 
 export const attendance: AttendanceDto[] = [

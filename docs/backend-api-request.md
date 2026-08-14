@@ -59,6 +59,80 @@ Frontend tomondan qilingani: `apiFetch` endi `Accept-Language` yuboradi va
 `errorCode` ni `ApiError.code` ga oladi; validatsiya xatolari (maydon →
 xabar xaritasi) ham o'qiladi; darslar jadvali `lessonName` ga o'tdi.
 
+### Super-admin panelini ulaganda topilganlar (P0)
+
+Panel yozildi va `GET/POST/PUT /organizations` hamda `/branch` CRUD ulandi.
+Ulash paytida to'rtta muammo chiqdi.
+
+**1. 🔴 `Generator.generatePassword()` ochiq parolni YO'QOTADI**
+
+```java
+public String generatePassword() {
+    …
+    return passwordEncoder.encode(sb);   // ← faqat hash qaytadi
+}
+```
+
+Ochiq matn `sb` metod ichida qolib ketadi va hech qayerga chiqmaydi.
+Ya'ni generatsiya qilingan parolni **hech kim hech qachon bila olmaydi** —
+na foydalanuvchiga aytish, na Telegramga yuborish mumkin. Bu bilan
+"avtomatik generatsiya" g'oyasining o'zi ishlamaydi.
+
+Kerak: metod **ochiq matnni** qaytarsin, saqlashda esa alohida
+`passwordEncoder.encode(...)` chaqirilsin. Ochiq matn faqat javobga
+(bir marta) va logdan tashqariga chiqsin.
+
+Yana: parol UUID satridan olinadi, ya'ni alifbosi faqat `0-9a-f` va
+uzunligi 8 — bu kutilganidan ancha zaif. `SecureRandom` + kengroq alifbo,
+10-12 belgi bo'lsin (`Random` ham `SecureRandom` ga almashtirilsin).
+
+**2. 🔴 `OrganizationService.delete` bo'sh, lekin 204 qaytadi**
+
+```java
+@Override
+public void delete(String id) {
+}
+```
+
+`DELETE /api/v1/organizations/{id}` hech narsa qilmay `204 No Content`
+qaytaradi. Frontend uchun bu "muvaffaqiyatli o'chirildi" degani.
+
+Shu sababli **panelda tashkilotni o'chirish tugmasi ataylab qo'yilmadi** —
+aks holda foydalanuvchi "o'chdi" deb o'ylab, sahifani yangilaganda yozuvni
+joyida ko'rardi. Metod to'ldirilgach (boshqa entity'lardagi kabi
+`setDeleted(true)`) tugmani qo'shamiz.
+
+**3. 🟠 `OrganizationService.create` super-admin YARATMAYDI**
+
+Kelishuvga ko'ra tashkilot bilan birga super-admin yaratilishi kerak edi.
+`OrganizationService` ga `UserService` va `Generator` inject qilingan,
+lekin `create` da ular **umuman ishlatilmagan** — faqat `Organization`
+saqlanadi.
+
+Ya'ni hozir tashkilot yaratilsa, unga kira oladigan odam paydo bo'lmaydi.
+(Bu ish boshqa branchda bo'lsa, ayting — `N` da yo'q.)
+
+Yaratilganda javobda **vaqtinchalik parol** qaytarilishi ham kerak
+(C-1 bandi), aks holda 1-banddagi muammoga qaytamiz.
+
+**4. 🟠 `BranchDto` da tashkilot ham, aloqa ma'lumoti ham yo'q**
+
+```java
+public record BranchDto(
+//        OrganizationDto organization,     ← izohga olingan
+        String id, BigDecimal chargeForMonth, String name, String address, …
+```
+
+- **`organization` izohda** — filial qaysi tashkilotga tegishli ekanini
+  ro'yxatdan bilib bo'lmaydi. Super-admin panelida filiallar bitta yassi
+  ro'yxat bo'lib turibdi, tashkilot bo'yicha guruhlab ham, filtrlab ham
+  bo'lmaydi. Kamida `organizationId` (yoki `organizationName`) kerak.
+- **`GET /branch` da `organizationId` filtri yo'q** — yuqoridagi bilan bir
+  masala.
+- `Branch` entity'sida **`email` va `phone` bor**, lekin `BranchDto`,
+  `BranchCreateDto`, `BranchUpdateDto` — uchalasida ham yo'q. Ya'ni
+  filialning telefoni va emailini na kiritib, na o'qib bo'ladi.
+
 ### Shu yangilanishdan keyin qolgan savollar
 
 1. **`InvoiceType` qiymatlari qanday?** `InvoiceDto` ga `type` qo'shilgan,

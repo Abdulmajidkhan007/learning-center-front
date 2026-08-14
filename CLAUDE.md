@@ -130,12 +130,12 @@ git push origin N
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
 - Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
   yuborish o'chirilgan).
-- Guruhdan chiqarish yo'q: `EnrollmentDto` enrollment id sini qaytarmaydi.
-- Admin "Darslar" tabi ulangan, lekin `LessonDto` dars nomini va
-  `isComplete` ni qaytarmaydi (MapStruct mapping'i to'liq emas) — jadvalda
-  bu ustunlar bo'sh turadi.
-- Super-admin paneli placeholder bo'lib qolyapti: backendda `BranchController`
-  yo'q va `Branch*Dto` lar bo'sh record.
+- Tashkilotni o'chirish yo'q: backendda `OrganizationService.delete` bo'sh
+  metod, lekin 204 qaytaradi — tugma qo'ysak yolg'on bo'lardi.
+- Filial qaysi tashkilotga tegishli ekani ko'rinmaydi: `BranchDto` da
+  `organization` izohga olingan.
+- Avtomatik parol generatsiyasi ishlamaydi: `Generator.generatePassword()`
+  ochiq matnni emas, hash'ni qaytaradi — parolni hech kim bilolmaydi.
 - Davomatdagi "sabab" matni serverga yuborilmaydi —
   `AttendanceStudentCreateDto` da maydon yo'q.
 - `GET /group/groups` faqat `{id, name}` qaytaradi, shuning uchun

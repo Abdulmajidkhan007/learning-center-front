@@ -1,19 +1,23 @@
 import {
     attendance,
+    branches,
     fullGroup,
     groupRoster,
     groups,
     invoices,
     lessons,
+    organizations,
     students,
     teachers,
 } from './mockData'
 import type {
     AttendanceDto,
+    BranchDto,
     GroupDto,
     InvoiceDto,
     InvoiceStatus,
     LessonDto,
+    OrganizationDto,
     StudentDto,
     TeacherDto,
 } from '@/shared/types'
@@ -45,6 +49,8 @@ const db = {
     lessons: [...lessons] as LessonDto[],
     attendance: [...attendance] as AttendanceDto[],
     invoices: [...invoices] as InvoiceDto[],
+    organizations: [...organizations] as OrganizationDto[],
+    branches: [...branches] as BranchDto[],
 }
 
 /** Imzosiz, lekin to'g'ri tuzilgan JWT (ilova faqat payload'ni o'qiydi). */
@@ -188,6 +194,49 @@ export function installMockApi() {
             }
             db.attendance = [...db.attendance, record]
             return json(record)
+        }
+
+        // --- super-admin: tashkilotlar va filiallar ---
+        if (path === '/organizations' && method === 'GET') {
+            return page(db.organizations as unknown as Row[], url)
+        }
+        if (path === '/organizations' && method === 'POST') {
+            const org = { id: nextId('o'), ...body } as OrganizationDto
+            db.organizations = [...db.organizations, org]
+            return json(org)
+        }
+        if (path.startsWith('/organizations/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.organizations = db.organizations.map((org) =>
+                org.id === id ? { ...org, ...body } : org
+            )
+            return json(db.organizations.find((org) => org.id === id))
+        }
+
+        if (path === '/branch' && method === 'GET') {
+            return page(db.branches as unknown as Row[], url)
+        }
+        if (path === '/branch' && method === 'POST') {
+            // `organizationId` javobda qaytmaydi — backendda ham `BranchDto`
+            // da tashkilot yo'q (izohga olingan).
+            const branch = {
+                id: nextId('b'),
+                name: body.name,
+                address: body.address,
+                chargeForMonth: body.chargeForMonth,
+            } as BranchDto
+            db.branches = [...db.branches, branch]
+            return json(branch)
+        }
+        if (path.startsWith('/branch/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.branches = db.branches.map((b) => (b.id === id ? { ...b, ...body } : b))
+            return json(db.branches.find((b) => b.id === id))
+        }
+        if (path.startsWith('/branch/') && method === 'DELETE') {
+            const id = path.split('/')[2]
+            db.branches = db.branches.filter((b) => b.id !== id)
+            return noContent()
         }
 
         // --- to'lovlar ---

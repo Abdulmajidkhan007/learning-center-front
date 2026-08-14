@@ -186,6 +186,33 @@ export interface AttendanceDto {
     attendanceStudents?: AttendanceStudentDto[]
 }
 
+/** `OrganizationDto` — o'quv markazi (tashkilot) darajasi. */
+export interface OrganizationDto {
+    id: string
+    name?: string
+    email?: string
+    phone?: string
+    website?: string
+}
+
+/**
+ * `BranchDto` — filial.
+ *
+ * Diqqat: DTO'da `organization` YO'Q (backendda izohga olingan), shuning
+ * uchun filial qaysi tashkilotga tegishli ekanini ro'yxatdan bilib
+ * bo'lmaydi. `email`/`phone` ham entity'da bor, lekin DTO'ga chiqmagan.
+ */
+export interface BranchDto {
+    id: string
+    name?: string
+    address?: string
+    chargeForMonth?: number
+    googlePlaceId?: string
+    latitude?: number
+    longitude?: number
+    googleMapsUrl?: string
+}
+
 export const INVOICE_STATUSES = ['PAID', 'PENDING', 'OVERDUE'] as const
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
