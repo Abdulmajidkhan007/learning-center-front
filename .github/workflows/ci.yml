@@ -1,0 +1,40 @@
+name: CI
+
+# Har push va har PR'da to'rtta tekshiruv. Ular lokal `npm run …`
+# buyruqlari bilan bir xil — CI'da boshqa narsa tekshirilmaydi, shuning
+# uchun "menda ishlayapti, CI'da yiqilyapti" holati bo'lmaydi.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json dagi `engines` yo'q, shuning uchun versiya shu yerda
+          # qadab qo'yilgan — lokal va CI bir xil Node'da ishlasin.
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` — `npm install` emas: u package-lock.json ga aynan amal
+      # qiladi va lock faylni o'zgartirmaydi.
+      - run: npm ci
+
+      # Qadamlar alohida: yiqilganda qaysi biri ekani darhol ko'rinadi.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build

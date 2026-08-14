@@ -146,6 +146,9 @@ export interface FullGroupDto {
 /** `LessonDto` — `lessonNumber` STRING (backend shunday qaytaradi). */
 export interface LessonDto {
     id: string
+    /** O'qituvchi/admin kiritgan nom. */
+    lessonName?: string
+    /** Tartib raqami — nomdan ALOHIDA maydon. */
     lessonNumber?: string
     /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
     lessonDate?: string
@@ -154,9 +157,20 @@ export interface LessonDto {
     teacherDto?: TeacherDto
 }
 
-/** Davomat statuslari — ro'yxat va tip bitta manbadan chiqadi. */
+/**
+ * Davomat statuslari.
+ *
+ * `LATE` ro'yxatda qoladi, chunki backend enum'ida bor va ESKI yozuvlarda
+ * uchraydi — uni tipdan olib tashlasak, o'sha yozuvlar ko'rsatilmay qoladi.
+ * Lekin yangi davomatda u TANLANMAYDI (pastga qarang): amalda deyarli
+ * ishlatilmagan va o'qituvchini ortiqcha tanlovga majburlagan.
+ */
 export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
+
+/** O'qituvchi yangi davomatda tanlay oladigan statuslar. */
+export const SELECTABLE_ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'EXCUSED'] as const
+export type SelectableAttendanceStatus = (typeof SELECTABLE_ATTENDANCE_STATUSES)[number]
 
 export interface AttendanceStudentDto {
     studentId: string
@@ -170,6 +184,54 @@ export interface AttendanceDto {
     /** `LocalDateTime`; jadvaldagi ustun sanasi shundan olinadi. */
     createdAt?: string
     attendanceStudents?: AttendanceStudentDto[]
+}
+
+/** `OrganizationDto` — o'quv markazi (tashkilot) darajasi. */
+export interface OrganizationDto {
+    id: string
+    name?: string
+    email?: string
+    phone?: string
+    website?: string
+}
+
+/**
+ * `BranchDto` — filial.
+ *
+ * Diqqat: DTO'da `organization` YO'Q (backendda izohga olingan), shuning
+ * uchun filial qaysi tashkilotga tegishli ekanini ro'yxatdan bilib
+ * bo'lmaydi. `email`/`phone` ham entity'da bor, lekin DTO'ga chiqmagan.
+ */
+export interface BranchDto {
+    id: string
+    name?: string
+    address?: string
+    chargeForMonth?: number
+    googlePlaceId?: string
+    latitude?: number
+    longitude?: number
+    googleMapsUrl?: string
+}
+
+export const INVOICE_STATUSES = ['PAID', 'PENDING', 'OVERDUE'] as const
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
+
+/**
+ * `InvoiceDto` — to'lov hisobi.
+ *
+ * Diqqat: entity'da maydon `paymentStatus`, DTO'da esa `status`.
+ * `amount` `BigDecimal` — JSON'da son bo'lib keladi, lekin tiyin/so'm
+ * aniqligini yo'qotmaslik uchun biz uni HISOBLASHDA ishlatmaymiz, faqat
+ * ko'rsatamiz.
+ */
+export interface InvoiceDto {
+    id: string
+    invoiceNumber?: string
+    student?: StudentDto
+    amount?: number
+    /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
+    issuedAt?: string
+    status?: InvoiceStatus
 }
 
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */

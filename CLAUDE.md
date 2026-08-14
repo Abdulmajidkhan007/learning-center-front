@@ -84,10 +84,75 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 26. `src/demo/` faqat demo build uchun (`npm run build:demo`) — production
     bundle'ga tushmaydi va unga bog'liqlik qo'shilmaydi.
 
+## Git ish tartibi
+
+Asl repo: `nurulloh-coder-dev/learning-center-front`, asosiy branch — **`N`**.
+
+Ish to'g'ridan-to'g'ri shu repoda, lekin **hech qachon `N` ga push qilinmaydi**.
+Har bir ish alohida branchda ketadi va `N` ga faqat **PR orqali** qo'shiladi —
+odam ko'rib, merge qiladi.
+
+```
+agent/<qisqa-nom>      masalan: agent/payments, agent/super-admin
+```
+
+Bitta uzun "hamma narsa" branchi EMAS: uzoq yashagan branch qancha kutsa,
+konflikt ehtimoli shuncha oshadi. Bitta ish tugadi — PR, merge, keyingisi
+yangi branchdan.
+
+Ish boshlashdan oldin **doim**:
+
+```bash
+git fetch origin N
+git checkout -b agent/<nom> origin/N
+```
+
+PR ochishdan oldin `N` oldinga ketgan bo'lsa:
+
+```bash
+git fetch origin N && git merge origin/N     # konflikt bo'lsa shu yerda yechiladi
+```
+
+### Konfliktdan qochish
+
+Uch kishi bir vaqtda ishlaganda eng ko'p to'qnashadigan joylar:
+
+1. **`src/shared/i18n/locales/*.ts`** — hamma yangi kalit qo'shadi va hammasi
+   faylning bir joyiga tushadi. Kalitni **o'z bo'liming blokiga** qo'ying
+   (`// --- to'lovlar ---` kabi), faylning oxiriga emas.
+2. **`src/shared/types/index.ts`** — DTO qo'shganda ham shunday: mavjud
+   bloklarga tegmang, yangisini alohida qo'shing.
+3. **`shared/ui/`** — umumiy komponentni o'zgartirish hammaga ta'sir qiladi.
+   Tegishdan oldin kelishing.
+
+Qolgan hamma narsa `features/<bo'lim>/` ichida — u yerda har kim o'z
+papkasida ishlagani uchun to'qnashuv bo'lmaydi. Shuning uchun **yangi ish
+imkon qadar o'z bo'lim papkasida** yozilsin.
+
+### Eskirgan: fork orqali ishlash
+
+Ilgari ish `Abdulmajidkhan007/learning-center-front` fork'ida olib borilardi
+(agentda asl repoga yozish huquqi bo'lmasin degan maqsadda). Endi ish asl
+repoda, lekin himoya saqlanib qoladi: `N` ga to'g'ridan-to'g'ri push yo'q,
+faqat PR.
+
 ## Hujjatlar
 
 23. Imkoniyat qo'shilsa yoki sezilarli o'zgarsa — **o'sha commitning o'zida**
     `README.md` va tegishli `docs/` fayli yangilanadi.
+
+## Hozirgi holat (qisqacha)
+
+Tayyor va ulangan: kirish, admin paneli (o'quvchi/o'qituvchi/guruh/dars CRUD,
+guruhga o'quvchi qo'shish va chiqarish), o'qituvchi paneli va davomat,
+o'quvchi paneli, sozlamalar, **to'lovlar** (`/payments`), **super-admin**
+(tashkilotlar va filiallar).
+
+Backend bilan bog'liq ochiq savollar va so'rovlar —
+[`docs/backend-api-request.md`](docs/backend-api-request.md), topilgan
+xatolar — [`docs/backend-notes.md`](docs/backend-notes.md). Yangi ish
+boshlashdan oldin shu ikkisiga qarang: ko'p ekran aynan o'sha bandlar
+tuzatilmagani uchun cheklangan.
 
 ## Hali yechilmagan narsalar
 
@@ -95,14 +160,19 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
 - Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
   yuborish o'chirilgan).
-- Guruhga o'quvchi biriktirish endpoint'i yo'q (`AssignStudentsModal` —
-  vaqtinchalik matn).
+- Tashkilotni o'chirish yo'q: backendda `OrganizationService.delete` bo'sh
+  metod, lekin 204 qaytaradi — tugma qo'ysak yolg'on bo'lardi.
+- Filial qaysi tashkilotga tegishli ekani ko'rinmaydi: `BranchDto` da
+  `organization` izohga olingan.
+- Avtomatik parol generatsiyasi ishlamaydi: `Generator.generatePassword()`
+  ochiq matnni emas, hash'ni qaytaradi — parolni hech kim bilolmaydi.
+- Davomatdagi "sabab" matni serverga yuborilmaydi —
+  `AttendanceStudentCreateDto` da maydon yo'q.
 - `GET /group/groups` faqat `{id, name}` qaytaradi, shuning uchun
   o'qituvchi panelidagi toq/juft filtri proyeksiyaga `dayType` qo'shilmaguncha
   yashirin turadi.
 - Backendda tuzatilishi kerak bo'lgan narsalar — `docs/backend-notes.md`.
 - Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
   bunday endpoint yo'q (`useAttendanceRecords`).
-- CI sozlanmagan.
 - `Dockerfile` build qilib sinalmagan (bu muhitda Docker demoni yo'q edi);
   `Caddyfile` haqiqiy `dist/` ustida tekshirilgan.

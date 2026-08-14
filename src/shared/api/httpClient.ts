@@ -1,4 +1,5 @@
 import { ApiError } from './ApiError'
+import { getRequestLocale } from './requestLocale'
 
 const API_PREFIX = '/api/v1'
 
@@ -42,6 +43,8 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            // Backend xato matnini shu sarlavhaga qarab tarjima qiladi.
+            'Accept-Language': getRequestLocale(),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...headers,
         },
@@ -49,7 +52,8 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     })
 
     if (!res.ok) {
-        throw new ApiError(await readErrorMessage(res), res.status)
+        const { message, code } = await readError(res)
+        throw new ApiError(message, res.status, code)
     }
 
     const text = await res.text()
@@ -61,12 +65,38 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     }
 }
 
-async function readErrorMessage(res: Response): Promise<string> {
+/**
+ * Xato javobidan matn va kodni ajratib oladi.
+ *
+ * Backend IKKI xil shakl qaytaradi:
+ *  1. `{ timestamp, errorCode, message, path }` — odatiy xatolar
+ *     (`GlobalExceptionHandler`). `message` `Accept-Language` ga qarab
+ *     tarjima qilingan bo'ladi.
+ *  2. `{ "phone": "must not be blank", … }` — validatsiya xatolari
+ *     (`MethodArgumentNotValidException`) maydon → xabar xaritasi bo'lib
+ *     keladi, `message` maydoni umuman yo'q.
+ *
+ * Ikkinchisini ham o'qiymiz, aks holda forma "Request failed (400)" deb
+ * turaverardi. (Backendda bir xillashtirilsa, shu funksiya qisqaradi —
+ * `docs/backend-api-request.md` ga qarang.)
+ */
+async function readError(res: Response): Promise<{ message: string; code?: string }> {
+    const fallback = `Request failed (${res.status})`
     try {
-        const body = (await res.json()) as { message?: string; error?: string }
-        return body.message || body.error || `Request failed (${res.status})`
+        const body = (await res.json()) as Record<string, unknown>
+        if (typeof body?.message === 'string' && body.message) {
+            const code = typeof body.errorCode === 'string' ? body.errorCode : undefined
+            return { message: body.message, code }
+        }
+        // Validatsiya xaritasi: qiymatlari matn bo'lgan maydonlarni yig'amiz.
+        const fieldErrors = Object.entries(body ?? {})
+            .filter(([, value]) => typeof value === 'string')
+            .map(([field, value]) => `${field}: ${String(value)}`)
+        if (fieldErrors.length > 0) return { message: fieldErrors.join('; ') }
+
+        return { message: fallback }
     } catch {
-        return `Request failed (${res.status})`
+        return { message: fallback }
     }
 }
 

@@ -5,10 +5,10 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 
 | Rol             | Nima ko'radi                                                      |
 | --------------- | ----------------------------------------------------------------- |
-| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons bo'yicha to'liq CRUD        |
+| `ADMINISTRATOR` | Students / Teachers / Groups / Lessons CRUD + guruhga o'quvchi biriktirish + **To'lovlar** |
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
-| `STUDENT`       | Placeholder ekran (panel hali qurilmagan)                          |
-| `SUPER_ADMIN`   | Placeholder ekran                                                  |
+| `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
+| `SUPER_ADMIN`   | Tashkilotlar va filiallar (branch) CRUD                             |
 | hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
 | boshqa          | Tushunarli xabar bilan placeholder                                 |
 
@@ -82,7 +82,7 @@ src/
     providers/         Theme, Auth, QueryClient
     routes/            AppRoutes, RoleDashboard
   features/            biznes bo'limlari (har biri o'zicha to'liq)
-    auth/  admin/  teacher/  attendance/  settings/  student/  super-admin/
+    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/
       api/         shu bo'lim endpoint'lari
       hooks/       TanStack Query hooklari va holat mantiqi
       components/  shu bo'limga tegishli komponentlar
@@ -121,5 +121,6 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/i18n.md](docs/i18n.md)                           | Uch tillilik: yangi matn qo'shish, cheklovlar     |
 | [docs/testing.md](docs/testing.md)                     | Testlarni yozish va ishga tushirish               |
 | [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
-| [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik, xatolar, kerakli endpoint'lar |
+| [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik va topilgan xatolar  |
+| [docs/backend-api-request.md](docs/backend-api-request.md) | Backend jamoasiga: kerakli API'lar, ustuvorlik bo'yicha |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

@@ -22,6 +22,7 @@ export const uz = {
     'common.next': 'Keyingi',
     'common.pageInfo': '{{page}} / {{total}}-sahifa · jami {{count}}',
     'common.somethingWrong': 'Nimadir xato ketdi. Qaytadan urinib ko’ring.',
+    'common.back': 'Orqaga',
     'common.notConnected': 'Ulanmagan',
 
     // --- navigatsiya ---
@@ -90,6 +91,63 @@ export const uz = {
     'field.endTime': 'Tugash vaqti',
     'field.status': 'Status',
     'field.select': '— Tanlang —',
+    'field.lessonName': 'Dars nomi',
+    'field.lessonDate': 'Sana',
+    'field.lessonStatus': 'Holati',
+
+    // --- dars holati ---
+    'lesson.complete': 'Tugagan',
+    'lesson.ongoing': 'Davom etmoqda',
+
+    // --- to'lovlar ---
+    'invoice.title': 'To‘lovlar',
+    'invoice.eyebrow': 'Hisoblar',
+    'invoice.number': 'Hisob raqami',
+    'invoice.student': 'O‘quvchi',
+    'invoice.amount': 'Summa',
+    'invoice.issuedAt': 'Berilgan sana',
+    'invoice.new': '+ Yangi hisob',
+    'invoice.newTitle': 'Yangi hisob',
+    'invoice.createHint':
+        'Hisob “kutilmoqda” holatida yaratiladi. Pul kelgach uni “to‘landi” qilib belgilaysiz.',
+    'invoice.markPaid': 'To‘landi',
+    'invoice.search': 'raqam, ism yoki telefon…',
+    'invoice.from': 'Sanadan',
+    'invoice.to': 'Sanagacha',
+    'invoice.clearDates': 'Sanani tozalash',
+    'invoice.allStatuses': 'Barcha holatlar',
+    'invoice.empty': 'Hisob topilmadi',
+    'invoice.loadFailed': 'To‘lovlarni yuklab bo‘lmadi: {{message}}',
+    'invoice.deleteConfirm': '{{number}} hisobi o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
+    'invoice.status.PAID': 'To‘langan',
+    'invoice.status.PENDING': 'Kutilmoqda',
+    'invoice.status.OVERDUE': 'Muddati o‘tgan',
+
+    // --- super-admin ---
+    'superAdmin.role': 'Super-admin',
+    'superAdmin.eyebrow': 'Tizim',
+    'superAdmin.section': 'Bo‘lim',
+    'superAdmin.search': 'nom bo‘yicha qidirish…',
+    'org.plural': 'Tashkilotlar',
+    'org.new': '+ Yangi tashkilot',
+    'org.newTitle': 'Yangi tashkilot',
+    'org.editTitle': 'Tashkilotni tahrirlash',
+    'org.name': 'Nomi',
+    'org.phone': 'Telefon',
+    'org.email': 'Email',
+    'org.website': 'Veb-sayt',
+    'org.empty': 'Tashkilot topilmadi',
+    'branch.plural': 'Filiallar',
+    'branch.new': '+ Yangi filial',
+    'branch.newTitle': 'Yangi filial',
+    'branch.editTitle': 'Filialni tahrirlash',
+    'branch.name': 'Filial nomi',
+    'branch.address': 'Manzil',
+    'branch.chargeForMonth': 'Oylik to‘lov',
+    'branch.organization': 'Tashkilot',
+    'branch.organizationLocked': 'Filialni boshqa tashkilotga ko‘chirib bo‘lmaydi.',
+    'branch.empty': 'Filial topilmadi',
+    'branch.deleteConfirm': '{{name}} filiali o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
 
     // --- guruh statuslari ---
     'status.STARTING': 'Boshlanmoqda',
@@ -161,6 +219,12 @@ export const uz = {
     'attendance.EXCUSED': 'Sababli',
 
     // --- sozlamalar ---
+    'attendance.addExcuse': '{{name}} uchun sabab yozish',
+    'attendance.excuseReason': 'Sabab',
+    'attendance.excusePlaceholder': 'Masalan: kasal, oilaviy sabab',
+    'attendance.excuseNotStored': 'Izoh hozircha serverda saqlanmaydi — backendga maydon qo‘shilishi kerak.',
+    'attendance.hint': 'Kvadratni bossangiz keldi/kelmadi almashadi. Burchakdagi nuqta — sababli qilish.',
+
     'settings.title': 'Sozlamalar',
     'settings.appearance': "Ko'rinish",
     'settings.appearanceHint': 'Til va rang rejimi shu qurilmada saqlanadi.',
@@ -195,6 +259,23 @@ export const uz = {
     'teacher.level': 'Daraja',
     'teacher.month': '{{current}}-oy',
     'teacher.lessonsCount': 'O‘tilgan darslar',
+
+    'student.role': 'O‘quvchi',
+    'student.attendance': 'Mening davomatim',
+    'student.attendanceHint': 'Qatnashgan va qoldirgan darslaringiz.',
+    'student.group': 'Mening guruhim',
+    'student.groupHint': 'Guruh, o‘qituvchi va dars jadvali.',
+    'student.notFound': 'O‘quvchi kartangiz topilmadi',
+    'student.notFoundHint': 'Telefon raqamingiz bo‘yicha o‘quvchi yozuvi yo‘q. Administratorga murojaat qiling.',
+
+    'admin.addToGroup': 'Qo‘shish',
+    'admin.alreadyInGroup': 'Guruhda',
+    'admin.removeFromGroup': 'Chiqarish',
+    'admin.removeConfirm': 'Chiqarish',
+    'admin.removeReason': 'Chiqarish sababi',
+    'admin.removeReasonPlaceholder': 'sabab (majburiy)',
+    'error.notFound': 'Bunday sahifa yo‘q',
+    'error.notFoundHint': 'Manzil noto‘g‘ri yoki sahifa ko‘chirilgan.',
 
     'pending.title': 'Backend hali tayyor emas',
     'pending.body':

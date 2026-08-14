@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from './ApiError'
 import { apiFetch, errorMessage } from './httpClient'
+import { setRequestLocale } from './requestLocale'
 
 /**
  * `fetch` ni soxtalashtiradi.
@@ -93,6 +94,36 @@ describe('apiFetch', () => {
     it('xato tanasi o’qilmasa ham tushunarli xabar beradi', async () => {
         mockFetch({ ok: false, status: 500, text: '' })
         await expect(apiFetch('/student')).rejects.toThrow('Request failed (500)')
+    })
+
+    // `GlobalExceptionHandler` shakli: { timestamp, errorCode, message, path }
+    it('backendning errorCode ini saqlaydi', async () => {
+        mockFetch({
+            ok: false,
+            status: 404,
+            text: '{"timestamp":1,"errorCode":"NotFound","message":"Guruh topilmadi","path":"/api/v1/group/1"}',
+        })
+        await expect(apiFetch('/group/1')).rejects.toMatchObject({
+            message: 'Guruh topilmadi',
+            status: 404,
+            code: 'NotFound',
+        })
+    })
+
+    // Validatsiya xatolari boshqa shaklda keladi — maydon → xabar xaritasi.
+    it('validatsiya xaritasini o’qiydi', async () => {
+        mockFetch({ ok: false, status: 400, text: '{"phone":"must not be blank"}' })
+        await expect(apiFetch('/student', { method: 'POST' })).rejects.toThrow(
+            'phone: must not be blank'
+        )
+    })
+
+    it('tanlangan tilni Accept-Language sarlavhasida yuboradi', async () => {
+        setRequestLocale('ru')
+        const fetchMock = mockFetch({ text: '{}' })
+        await apiFetch('/student')
+        expect(fetchMock.mock.calls[0][1].headers['Accept-Language']).toBe('ru')
+        setRequestLocale('uz')
     })
 })
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
@@ -15,6 +16,7 @@ import { FORM_CONFIGS } from '../config/forms'
 import { useEntityCounts } from '../hooks/useEntityCounts'
 import { useEntityList } from '../hooks/useEntityList'
 import { useEntityMutations } from '../hooks/useEntityMutations'
+import { useGroupOptions } from '../hooks/useGroupOptions'
 import { useTeacherOptions } from '../hooks/useTeacherOptions'
 import { AppShell } from '@/shared/ui'
 import type { AdminRow, EntityKey, FormValues, ModalMode } from '../types'
@@ -29,6 +31,7 @@ export function AdminDashboardPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const navigate = useNavigate()
 
     const [activeTab, setActiveTab] = useState<EntityKey>('students')
     const [page, setPage] = useState(0)
@@ -52,6 +55,7 @@ export function AdminDashboardPage() {
     })
     const counts = useEntityCounts(session.token)
     const teacherOptions = useTeacherOptions(session.token)
+    const groupOptions = useGroupOptions(session.token)
     const { save, remove } = useEntityMutations(entity, session.token)
 
     const columns = columnConfigs ? columnConfigs.map((column) => column.key) : inferColumns(list.rows)
@@ -112,6 +116,11 @@ export function AdminDashboardPage() {
                 <AppShell
                     subtitle={t('admin.role')}
                     onSignOut={signOut}
+                    actions={
+                        <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
+                            {t('invoice.title')}
+                        </Button>
+                    }
                     secondary={<AdminTabStrip activeTab={activeTab} onTabChange={changeTab} />}
                 >
                     <StatsRow counts={counts} />
@@ -207,6 +216,7 @@ export function AdminDashboardPage() {
                     formConfig={formConfig}
                     fallbackColumns={columns}
                     teacherOptions={teacherOptions}
+                    groupOptions={groupOptions}
                     isSaving={save.isPending}
                     error={save.error}
                     onSubmit={handleSubmit}

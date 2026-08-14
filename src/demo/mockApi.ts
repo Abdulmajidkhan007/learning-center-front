@@ -1,5 +1,26 @@
-import { attendance, fullGroup, groups, lessons, students, teachers } from './mockData'
-import type { AttendanceDto, GroupDto, LessonDto, StudentDto, TeacherDto } from '@/shared/types'
+import {
+    attendance,
+    branches,
+    fullGroup,
+    groupRoster,
+    groups,
+    invoices,
+    lessons,
+    organizations,
+    students,
+    teachers,
+} from './mockData'
+import type {
+    AttendanceDto,
+    BranchDto,
+    GroupDto,
+    InvoiceDto,
+    InvoiceStatus,
+    LessonDto,
+    OrganizationDto,
+    StudentDto,
+    TeacherDto,
+} from '@/shared/types'
 
 /**
  * Demo uchun soxta backend.
@@ -15,7 +36,7 @@ type Row = Record<string, unknown> & { id: string }
 const demoUser = {
     id: 'u-demo',
     fullName: 'Demo Foydalanuvchi',
-    phone: '+998 90 000 00 00',
+    phone: '+998 93 100 10 01',
     birthDate: '1995-06-15',
     imageUrl: undefined,
     role: 'ADMINISTRATOR',
@@ -27,6 +48,9 @@ const db = {
     groups: [...groups] as GroupDto[],
     lessons: [...lessons] as LessonDto[],
     attendance: [...attendance] as AttendanceDto[],
+    invoices: [...invoices] as InvoiceDto[],
+    organizations: [...organizations] as OrganizationDto[],
+    branches: [...branches] as BranchDto[],
 }
 
 /** Imzosiz, lekin to'g'ri tuzilgan JWT (ilova faqat payload'ni o'qiydi). */
@@ -46,6 +70,17 @@ function json(body: unknown, status = 200): Response {
         status,
         headers: { 'Content-Type': 'application/json' },
     })
+}
+
+/**
+ * Tanasiz javob (`DELETE` uchun).
+ *
+ * `new Response(body, { status: 204 })` — brauzer buni rad etadi:
+ * "Response with null body status cannot have body". Backend ham
+ * `noContent()` qaytaradi, ya'ni shakl ham to'g'ri bo'ladi.
+ */
+function noContent(): Response {
+    return new Response(null, { status: 204 })
 }
 
 /** Spring Data `Page` ko'rinishida qaytaradi. */
@@ -109,6 +144,37 @@ export function installMockApi() {
             return json({ response: 'Password changed successfully' })
         }
 
+        // --- enrollments: o'quvchi ↔ guruh ko'prigi ---
+        if (path === '/enrollments' && method === 'GET') {
+            const groupId = url.searchParams.get('groupId') ?? ''
+            const ids = groupRoster[groupId] ?? []
+            return json({
+                // Enrollment id si demo'da guruh+o'quvchidan yasaladi —
+                // haqiqiy backendda u alohida yozuvning id si.
+                content: ids.map((studentId) => ({ id: `e-${groupId}-${studentId}`, studentId, groupId })),
+                totalPages: 1,
+                totalElements: ids.length,
+            })
+        }
+        if (path === '/enrollments' && method === 'POST') {
+            const groupId = String(body.groupId)
+            const studentId = String(body.studentId)
+            groupRoster[groupId] = [...(groupRoster[groupId] ?? []), studentId]
+            return json({ id: `e-${groupId}-${studentId}`, studentId, groupId })
+        }
+        if (path.startsWith('/enrollments/') && method === 'DELETE') {
+            // `e-<groupId>-<studentId>` ni teskari yechamiz.
+            const [, groupId, studentId] = path.split('/')[2].split('-')
+            groupRoster[groupId] = (groupRoster[groupId] ?? []).filter((id) => id !== studentId)
+            return noContent()
+        }
+
+        // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---
+        if (path === '/student/phone') {
+            const phone = url.searchParams.get('phone') ?? ''
+            return json(db.students.filter((student) => student.userDto?.phone === phone))
+        }
+
         // --- o'qituvchi paneli ---
         if (path === '/group/groups') {
             return json(db.groups.filter((group) => group.status !== 'ENDED'))
@@ -128,6 +194,84 @@ export function installMockApi() {
             }
             db.attendance = [...db.attendance, record]
             return json(record)
+        }
+
+        // --- super-admin: tashkilotlar va filiallar ---
+        if (path === '/organizations' && method === 'GET') {
+            return page(db.organizations as unknown as Row[], url)
+        }
+        if (path === '/organizations' && method === 'POST') {
+            const org = { id: nextId('o'), ...body } as OrganizationDto
+            db.organizations = [...db.organizations, org]
+            return json(org)
+        }
+        if (path.startsWith('/organizations/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.organizations = db.organizations.map((org) =>
+                org.id === id ? { ...org, ...body } : org
+            )
+            return json(db.organizations.find((org) => org.id === id))
+        }
+
+        if (path === '/branch' && method === 'GET') {
+            return page(db.branches as unknown as Row[], url)
+        }
+        if (path === '/branch' && method === 'POST') {
+            // `organizationId` javobda qaytmaydi — backendda ham `BranchDto`
+            // da tashkilot yo'q (izohga olingan).
+            const branch = {
+                id: nextId('b'),
+                name: body.name,
+                address: body.address,
+                chargeForMonth: body.chargeForMonth,
+            } as BranchDto
+            db.branches = [...db.branches, branch]
+            return json(branch)
+        }
+        if (path.startsWith('/branch/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.branches = db.branches.map((b) => (b.id === id ? { ...b, ...body } : b))
+            return json(db.branches.find((b) => b.id === id))
+        }
+        if (path.startsWith('/branch/') && method === 'DELETE') {
+            const id = path.split('/')[2]
+            db.branches = db.branches.filter((b) => b.id !== id)
+            return noContent()
+        }
+
+        // --- to'lovlar ---
+        if (path === '/invoice' && method === 'GET') {
+            const status = url.searchParams.get('status')
+            const rows = status
+                ? db.invoices.filter((invoice) => invoice.status === status)
+                : db.invoices
+            return page(rows as unknown as Row[], url)
+        }
+        if (path === '/invoice' && method === 'POST') {
+            const student = db.students.find((item) => item.id === String(body.studentId))
+            const invoice: InvoiceDto = {
+                id: nextId('i'),
+                invoiceNumber: `INV-${String(db.invoices.length + 1).padStart(3, '0')}`,
+                student,
+                amount: Number(body.amount),
+                issuedAt: new Date().toISOString().slice(0, 19),
+                // Backend ham shunday qiladi: yangi hisob doim kutilmoqda.
+                status: 'PENDING',
+            }
+            db.invoices = [...db.invoices, invoice]
+            return json(invoice)
+        }
+        if (path.startsWith('/invoice/') && method === 'PUT') {
+            const id = path.split('/')[2]
+            db.invoices = db.invoices.map((invoice) =>
+                invoice.id === id ? { ...invoice, status: body.status as InvoiceStatus } : invoice
+            )
+            return json(db.invoices.find((invoice) => invoice.id === id))
+        }
+        if (path.startsWith('/invoice/') && method === 'DELETE') {
+            const id = path.split('/')[2]
+            db.invoices = db.invoices.filter((invoice) => invoice.id !== id)
+            return noContent()
         }
 
         // --- generik CRUD: /student, /teacher, /group, /lesson ---
@@ -154,11 +298,14 @@ export function installMockApi() {
         if (method === 'POST') {
             // Dars boshlash: o'qituvchi paneli LessonDto kutadi.
             if (table === 'lessons') {
+                const group = db.groups.find((item) => item.id === String(body.groupId))
                 const lesson: LessonDto = {
                     id: nextId('l'),
                     lessonNumber: String(db.lessons.length + 12),
                     lessonDate: new Date().toISOString().slice(0, 19),
                     isComplete: false,
+                    group,
+                    teacherDto: group?.teacher,
                 }
                 db.lessons = [...db.lessons, lesson]
                 return json(lesson)

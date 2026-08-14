@@ -1,8 +1,9 @@
 import { useT } from '@/shared/i18n'
-import { DotBadge, Select } from '@/shared/ui'
+import { DotBadge } from '@/shared/ui'
 import { formatDate } from '@/shared/lib'
-import { ATTENDANCE_STATUSES, type AttendanceStatus, type AttendanceStudentDto, type StudentDto } from '@/shared/types'
+import type { AttendanceStatus, AttendanceStudentDto, StudentDto } from '@/shared/types'
 import { STATUS_TONE } from '../lib/attendanceStatus'
+import { AttendanceCell } from './AttendanceCell'
 import type { AttendanceDraft } from '../hooks/useAttendanceDraft'
 
 export interface PastLessonColumn {
@@ -16,7 +17,7 @@ interface AttendanceTableProps {
     pastColumns: PastLessonColumn[]
     /** `null` — faqat ko'rish rejimi (dashboarddagi kabi). */
     draft?: AttendanceDraft | null
-    onStatusChange?: (studentId: string, status: AttendanceStatus) => void
+    onStatusChange?: (studentId: string, status: AttendanceStatus, reason?: string) => void
     /** Ism ustiga bosilganda — o'quvchi kartasi. */
     onSelectStudent?: (student: StudentDto) => void
 }
@@ -39,11 +40,6 @@ export function AttendanceTable({
     onSelectStudent,
 }: AttendanceTableProps) {
     const { t } = useT()
-
-    const statusOptions = ATTENDANCE_STATUSES.map((status) => ({
-        value: status,
-        label: t(`attendance.${status}`),
-    }))
 
     return (
         <div className="overflow-x-auto rounded-lg border border-border-base bg-surface-card">
@@ -118,15 +114,12 @@ export function AttendanceTable({
 
                             {draft && onStatusChange && (
                                 <td className="border-b border-border-base px-3 py-2 text-center">
-                                    <Select
-                                        aria-label={t('attendance.forStudent', {
-                                            name: student.userDto?.fullName ?? student.id,
-                                        })}
-                                        className="w-28 py-1.5 text-center text-xs"
-                                        options={statusOptions}
-                                        value={draft.statuses[student.id] ?? 'PRESENT'}
-                                        onChange={(event) =>
-                                            onStatusChange(student.id, event.target.value as AttendanceStatus)
+                                    <AttendanceCell
+                                        studentName={student.userDto?.fullName ?? student.id}
+                                        status={draft.statuses[student.id] ?? 'PRESENT'}
+                                        reason={draft.reasons[student.id]}
+                                        onChange={(status, reason) =>
+                                            onStatusChange(student.id, status, reason)
                                         }
                                     />
                                 </td>

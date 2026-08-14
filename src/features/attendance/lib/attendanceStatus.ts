@@ -8,3 +8,16 @@ export const STATUS_TONE: Record<AttendanceStatus, BadgeTone> = {
     LATE: 'warning',
     EXCUSED: 'neutral',
 }
+
+/**
+ * Bosiladigan kvadratning ranglari.
+ *
+ * Nishondan farqli o'laroq bu yerda to'yingan fon ishlatiladi — o'qituvchi
+ * jadvalga bir qarab kim kelmaganini ko'rishi kerak.
+ */
+export const STATUS_SQUARE: Record<AttendanceStatus, string> = {
+    PRESENT: 'bg-success text-white hover:opacity-90',
+    ABSENT: 'bg-danger text-white hover:opacity-90',
+    LATE: 'bg-warning-soft text-warning-fg hover:opacity-90',
+    EXCUSED: 'bg-neutral-soft text-fg-muted hover:opacity-90',
+}

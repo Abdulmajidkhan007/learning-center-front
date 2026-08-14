@@ -1,7 +1,10 @@
 import type {
     AttendanceDto,
+    BranchDto,
     FullGroupDto,
     GroupDto,
+    InvoiceDto,
+    OrganizationDto,
     LessonDto,
     StudentDto,
     TeacherDto,
@@ -77,10 +80,30 @@ export const groupRoster: Record<string, string[]> = {
     g4: ['s4', 's5'],
 }
 
+// Backend `lessonName` va `lessonNumber` ni ALOHIDA maydon qilib berdi:
+// jadvalda nom, o'qituvchi panelidagi "{{number}}-dars" matnida esa raqam.
 export const lessons: LessonDto[] = [
-    { id: 'l1', lessonNumber: '12', lessonDate: '2026-08-03T09:00:00', isComplete: true },
-    { id: 'l2', lessonNumber: '13', lessonDate: '2026-08-05T09:00:00', isComplete: true },
-    { id: 'l3', lessonNumber: '14', lessonDate: '2026-08-07T09:00:00', isComplete: false },
+    { id: 'l1', lessonNumber: '12', lessonName: 'Unit 12 — Past perfect', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l2', lessonNumber: '13', lessonName: 'Unit 13 — Reported speech', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l3', lessonNumber: '14', lessonName: 'Unit 14 — Conditionals', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
+]
+
+export const invoices: InvoiceDto[] = [
+    { id: 'i1', invoiceNumber: 'INV-001', student: students[0], amount: 450000, issuedAt: '2026-07-01T09:00:00', status: 'PAID' },
+    { id: 'i2', invoiceNumber: 'INV-002', student: students[1], amount: 450000, issuedAt: '2026-08-01T09:00:00', status: 'PENDING' },
+    { id: 'i3', invoiceNumber: 'INV-003', student: students[2], amount: 600000, issuedAt: '2026-06-01T09:00:00', status: 'OVERDUE' },
+    { id: 'i4', invoiceNumber: 'INV-004', student: students[3], amount: 450000, issuedAt: '2026-08-05T09:00:00', status: 'PENDING' },
+]
+
+export const organizations: OrganizationDto[] = [
+    { id: 'o1', name: 'Cornerstone Education', phone: '+998 71 200 10 10', email: 'info@cornerstone.uz', website: 'cornerstone.uz' },
+    { id: 'o2', name: 'Bright Minds', phone: '+998 71 200 20 20', email: 'hello@brightminds.uz' },
+]
+
+export const branches: BranchDto[] = [
+    { id: 'b1', name: 'Chilonzor', address: 'Chilonzor 9, Toshkent', chargeForMonth: 450000 },
+    { id: 'b2', name: 'Yunusobod', address: 'Amir Temur 108, Toshkent', chargeForMonth: 500000 },
+    { id: 'b3', name: 'Samarqand', address: 'Registon 4, Samarqand', chargeForMonth: 380000 },
 ]
 
 export const attendance: AttendanceDto[] = [

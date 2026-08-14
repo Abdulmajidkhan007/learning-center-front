@@ -12,11 +12,20 @@ export const queryKeys = {
     entityCount: (entity: string) => ['entity', entity, 'count'] as const,
 
     me: () => ['auth', 'me'] as const,
+    myStudentRecord: (phone: string) => ['student', 'byPhone', phone] as const,
 
     teacherOptions: () => ['teacher', 'options'] as const,
+    groupOptions: () => ['group', 'options'] as const,
+
+    groupEnrollments: (groupId: string) => ['enrollments', groupId] as const,
 
     teacherGroups: () => ['teacher', 'groups'] as const,
     groupInfo: (groupId: string) => ['group', 'info', groupId] as const,
 
     attendance: () => ['attendance', 'list'] as const,
+
+    invoices: (params: Record<string, unknown>) => ['invoice', 'list', params] as const,
+
+    organizations: (params: Record<string, unknown>) => ['organization', 'list', params] as const,
+    branches: (params: Record<string, unknown>) => ['branch', 'list', params] as const,
 } as const

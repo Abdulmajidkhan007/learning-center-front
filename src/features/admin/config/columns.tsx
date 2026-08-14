@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { TranslationKey } from '@/shared/i18n'
+import { formatDate } from '@/shared/lib'
 import { GroupStatusBadge } from '../components/GroupStatusBadge'
+import { LessonStatusBadge } from '../components/LessonStatusBadge'
 import { TimetableCell } from '../components/TimetableCell'
 import type { AdminRow, EntityKey } from '../types'
 
@@ -17,8 +19,8 @@ export interface ColumnConfig {
  * Ustunlar formadagi maydonlarni takrorlaydi — shunda jadvalda ichma-ich
  * obyektlarning JSON dumpi emas, haqiqiy qiymatlar ko'rinadi.
  *
- * Bu yerda yo'q entity (`lessons`) uchun ustunlar mavjud qatorlarning
- * kalitlaridan avtomatik chiqariladi.
+ * Bu yerda yo'q entity uchun ustunlar mavjud qatorlarning kalitlaridan
+ * avtomatik chiqariladi (`inferColumns`).
  */
 export const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
     students: [
@@ -38,6 +40,17 @@ export const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
         { key: 'teacher', labelKey: 'field.teacher', get: (row) => row.teacher?.userDto?.fullName },
         { key: 'timetable', labelKey: 'field.days', render: (row) => <TimetableCell timeTable={row.timeTable} /> },
         { key: 'status', labelKey: 'field.status', render: (row) => <GroupStatusBadge status={row.status} /> },
+    ],
+    lessons: [
+        { key: 'lessonName', labelKey: 'field.lessonName', get: (row) => row.lessonName },
+        { key: 'lessonDate', labelKey: 'field.lessonDate', get: (row) => formatDate(row.lessonDate) || undefined },
+        { key: 'group', labelKey: 'field.groupName', get: (row) => row.group?.name },
+        { key: 'teacher', labelKey: 'field.teacher', get: (row) => row.teacherDto?.userDto?.fullName },
+        {
+            key: 'isComplete',
+            labelKey: 'field.lessonStatus',
+            render: (row) => <LessonStatusBadge isComplete={row.isComplete} />,
+        },
     ],
 }
 
