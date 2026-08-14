@@ -87,10 +87,12 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 ## Git ish tartibi
 
 Asl repo: `nurulloh-coder-dev/learning-center-front`, asosiy branch — **`N`**.
+Ish esa fork'da: `Abdulmajidkhan007/learning-center-front`.
 
-Ish to'g'ridan-to'g'ri shu repoda, lekin **hech qachon `N` ga push qilinmaydi**.
-Har bir ish alohida branchda ketadi va `N` ga faqat **PR orqali** qo'shiladi —
-odam ko'rib, merge qiladi.
+**Nega fork:** asl repo boshqa odamniki va unga Claude GitHub app o'rnatilmagan
+(o'rnatish uchun repoda admin huquqi kerak). Bundan tashqari fork'da agentda
+asl repoga yozish huquqi umuman bo'lmaydi — eng yomon holatda o'z fork'ingizda
+keraksiz branch paydo bo'ladi, xolos.
 
 ```
 agent/<qisqa-nom>      masalan: agent/payments, agent/super-admin
@@ -100,18 +102,23 @@ Bitta uzun "hamma narsa" branchi EMAS: uzoq yashagan branch qancha kutsa,
 konflikt ehtimoli shuncha oshadi. Bitta ish tugadi — PR, merge, keyingisi
 yangi branchdan.
 
-Ish boshlashdan oldin **doim**:
+Ish boshlashdan oldin **doim** asl repodan yangilanishni oling:
 
 ```bash
-git fetch origin N
-git checkout -b agent/<nom> origin/N
+git fetch https://github.com/nurulloh-coder-dev/learning-center-front N
+git checkout -b agent/<nom> FETCH_HEAD
 ```
 
-PR ochishdan oldin `N` oldinga ketgan bo'lsa:
+(Asl repo ochiq, shuning uchun o'qish uchun app ham, huquq ham kerak emas.)
 
-```bash
-git fetch origin N && git merge origin/N     # konflikt bo'lsa shu yerda yechiladi
+Ish tugagach fork'ga push qilinadi va odam PR ochadi:
+
 ```
+https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:agent/<nom>
+```
+
+PR — har commit uchun emas, **tugagan ish uchun**. `N` ga to'g'ridan-to'g'ri
+push hech qachon qilinmaydi.
 
 ### Konfliktdan qochish
 
@@ -129,12 +136,12 @@ Qolgan hamma narsa `features/<bo'lim>/` ichida — u yerda har kim o'z
 papkasida ishlagani uchun to'qnashuv bo'lmaydi. Shuning uchun **yangi ish
 imkon qadar o'z bo'lim papkasida** yozilsin.
 
-### Eskirgan: fork orqali ishlash
+### Asl repoda to'g'ridan-to'g'ri ishlash
 
-Ilgari ish `Abdulmajidkhan007/learning-center-front` fork'ida olib borilardi
-(agentda asl repoga yozish huquqi bo'lmasin degan maqsadda). Endi ish asl
-repoda, lekin himoya saqlanib qoladi: `N` ga to'g'ridan-to'g'ri push yo'q,
-faqat PR.
+Buning uchun repo egasi Claude GitHub app'ni o'sha repoga o'rnatishi kerak
+(GitHub → repo → Settings → GitHub Apps → Claude → Configure). O'rnatilgach
+oqim soddalashadi: fork kerak bo'lmaydi, branch to'g'ridan-to'g'ri asl
+repoda ochiladi. `N` ga push qilmaslik qoidasi o'zgarmaydi.
 
 ## Hujjatlar
 
