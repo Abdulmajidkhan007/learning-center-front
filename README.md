@@ -93,7 +93,7 @@ src/
     ui/      Button, Modal, Table, Badge, ThemeToggle …
     lib/     format, jwt, cn
     hooks/   useClickOutside
-    i18n/    tarjimalar (uz/ru/en) va `useT`
+    i18n/    tarjimalar: uz/ ru/ en/ papkalari, har bo'lim alohida fayl
     types/   backend DTO tiplari
   styles/index.css   Tailwind + rang tokenlari + dark rejim
   test/              test setup va yordamchilari

@@ -1,0 +1,31 @@
+import type { SettingsKeys } from '../uz/settings'
+
+/** Sozlamalar sahifasi. (inglizcha) */
+export const settings: Record<SettingsKeys, string> = {
+    'settings.title': 'Settings',
+    'settings.appearance': 'Appearance',
+    'settings.appearanceHint': 'Language and theme are saved on this device.',
+    'settings.language': 'Language',
+    'settings.theme': 'Theme',
+    'settings.themeLight': 'Light',
+    'settings.themeDark': 'Dark',
+    'settings.profile': 'Profile',
+    'settings.profileHint': 'Your own details.',
+    'settings.password': 'Password',
+    'settings.passwordHint': 'Change your password.',
+    'settings.currentPassword': 'Current password',
+    'settings.newPassword': 'New password',
+    'settings.repeatPassword': 'Repeat new password',
+    'settings.passwordMismatch': "New passwords don't match.",
+    'settings.centre': 'Centre settings',
+    'settings.centreHint': 'Centre-wide — administrators only.',
+    'settings.centreName': 'Centre name',
+    'settings.centreLogo': 'Logo URL',
+    'settings.workStart': 'Opening time',
+    'settings.workEnd': 'Closing time',
+    'settings.weekend': 'Weekend days',
+    'settings.profileSaved': 'Profile saved.',
+    'settings.passwordChanged': 'Password changed.',
+    'settings.passwordEmpty': 'Fill in every field.',
+    'settings.passwordTooShort': 'The new password must be at least 8 characters.',
+}

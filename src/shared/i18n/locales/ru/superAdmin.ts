@@ -1,0 +1,30 @@
+import type { SuperAdminKeys } from '../uz/superAdmin'
+
+/** Super-admin: tashkilotlar va filiallar. (ruscha) */
+export const superAdmin: Record<SuperAdminKeys, string> = {
+    'superAdmin.role': 'Супер-админ',
+    'superAdmin.eyebrow': 'Система',
+    'superAdmin.section': 'Раздел',
+    'superAdmin.search': 'поиск по названию…',
+    'org.plural': 'Организации',
+    'org.new': '+ Новая организация',
+    'org.newTitle': 'Новая организация',
+    'org.editTitle': 'Изменить организацию',
+    'org.name': 'Название',
+    'org.phone': 'Телефон',
+    'org.email': 'Email',
+    'org.website': 'Сайт',
+    'org.noAdminYet': 'Супер-админ вместе с организацией не создаётся — его нужно добавить отдельно.',
+    'org.empty': 'Организации не найдены',
+    'branch.plural': 'Филиалы',
+    'branch.new': '+ Новый филиал',
+    'branch.newTitle': 'Новый филиал',
+    'branch.editTitle': 'Изменить филиал',
+    'branch.name': 'Название филиала',
+    'branch.address': 'Адрес',
+    'branch.chargeForMonth': 'Оплата в месяц',
+    'branch.organization': 'Организация',
+    'branch.organizationLocked': 'Перенести филиал в другую организацию нельзя.',
+    'branch.empty': 'Филиалы не найдены',
+    'branch.deleteConfirm': 'Удалить филиал {{name}}? Это необратимо.',
+}

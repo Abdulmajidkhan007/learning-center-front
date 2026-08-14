@@ -1,0 +1,30 @@
+import type { SuperAdminKeys } from '../uz/superAdmin'
+
+/** Super-admin: tashkilotlar va filiallar. (inglizcha) */
+export const superAdmin: Record<SuperAdminKeys, string> = {
+    'superAdmin.role': 'Super admin',
+    'superAdmin.eyebrow': 'System',
+    'superAdmin.section': 'Section',
+    'superAdmin.search': 'search by name…',
+    'org.plural': 'Organizations',
+    'org.new': '+ New organization',
+    'org.newTitle': 'New organization',
+    'org.editTitle': 'Edit organization',
+    'org.name': 'Name',
+    'org.phone': 'Phone',
+    'org.email': 'Email',
+    'org.website': 'Website',
+    'org.noAdminYet': 'A super admin is not created together with the organization — add one separately.',
+    'org.empty': 'No organizations found',
+    'branch.plural': 'Branches',
+    'branch.new': '+ New branch',
+    'branch.newTitle': 'New branch',
+    'branch.editTitle': 'Edit branch',
+    'branch.name': 'Branch name',
+    'branch.address': 'Address',
+    'branch.chargeForMonth': 'Monthly fee',
+    'branch.organization': 'Organization',
+    'branch.organizationLocked': 'A branch cannot be moved to another organization.',
+    'branch.empty': 'No branches found',
+    'branch.deleteConfirm': 'Delete branch {{name}}? This cannot be undone.',
+}

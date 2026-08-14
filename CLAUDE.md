@@ -54,8 +54,8 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
     qilinganini tushuntirsin.
 14. **Commit xabarlari — inglizcha** (loyihada shunday).
 15. **UI matni kodga yozilmaydi.** Faqat `t('kalit')`. Yangi matn: avval
-    `locales/uz.ts` ga (haqiqat manbai), keyin `ru.ts` va `en.ts` ga —
-    unutilsa `tsc` xato beradi.
+    `locales/uz/<bo'lim>.ts` ga (haqiqat manbai), keyin `ru/` va `en/` dagi
+    **o'sha nomli** faylga — unutilsa `tsc` qaysi faylda ekanini aytadi.
 16. **Backenddan kelgan matn tarjima qilinmaydi** (ism, guruh nomi, server
     xatosi) — u qanday kelsa shunday ko'rsatiladi.
 
@@ -124,9 +124,10 @@ push hech qachon qilinmaydi.
 
 Uch kishi bir vaqtda ishlaganda eng ko'p to'qnashadigan joylar:
 
-1. **`src/shared/i18n/locales/*.ts`** — hamma yangi kalit qo'shadi va hammasi
-   faylning bir joyiga tushadi. Kalitni **o'z bo'liming blokiga** qo'ying
-   (`// --- to'lovlar ---` kabi), faylning oxiriga emas.
+1. **`src/shared/i18n/locales/`** — endi har bo'lim alohida faylda
+   (`uz/payments.ts`, `uz/superAdmin.ts` …), shuning uchun turli bo'limlarga
+   tegilsa to'qnashuv bo'lmaydi. Yangi kalitni **o'z bo'liming fayliga**
+   qo'ying.
 2. **`src/shared/types/index.ts`** — DTO qo'shganda ham shunday: mavjud
    bloklarga tegmang, yangisini alohida qo'shing.
 3. **`shared/ui/`** — umumiy komponentni o'zgartirish hammaga ta'sir qiladi.
