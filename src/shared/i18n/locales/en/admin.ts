@@ -29,6 +29,7 @@ export const admin: Record<AdminKeys, string> = {
     'admin.assignTitle': 'Add students to {{group}}',
     'admin.assignPending':
         "Student assignment isn't wired up yet — once the endpoint is shared, this becomes a picker.",
+    'admin.initialPasswordHint': 'The initial password is the date of birth, written as 14.02.2007. The user can change it later in settings.',
     'admin.filterStatus': 'Filter by status',
     'field.fullName': 'Full name',
     'field.phone': 'Phone',

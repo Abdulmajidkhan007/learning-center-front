@@ -29,6 +29,7 @@ export const admin: Record<AdminKeys, string> = {
     'admin.assignTitle': 'Добавить учеников в группу {{group}}',
     'admin.assignPending':
         'Привязка учеников ещё не подключена — когда появится endpoint, здесь будет выбор учеников.',
+    'admin.initialPasswordHint': 'Начальный пароль — дата рождения (в виде 14.02.2007). Пользователь сможет изменить её в настройках.',
     'admin.filterStatus': 'Фильтр по статусу',
     'field.fullName': 'Полное имя',
     'field.phone': 'Телефон',

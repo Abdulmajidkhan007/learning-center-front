@@ -32,6 +32,7 @@ export const admin = {
     'admin.assignTitle': '{{group}} guruhiga o’quvchi qo’shish',
     'admin.assignPending':
         "O'quvchi biriktirish hali ulanmagan — endpoint berilgach, bu yerda tanlash oynasi bo'ladi.",
+    'admin.initialPasswordHint': 'Boshlang‘ich parol — tug‘ilgan sana (14.02.2007 ko‘rinishida). Foydalanuvchi keyin sozlamalardan o‘zgartira oladi.',
     'admin.filterStatus': 'Status bo’yicha filtr',
     'field.fullName': 'To’liq ism',
     'field.phone': 'Telefon',

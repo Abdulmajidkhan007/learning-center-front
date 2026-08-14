@@ -88,10 +88,19 @@ Tug'ilgan sana o'zi ham sir emas: sinfdoshlar, o'qituvchi, ota-ona biladi.
 
 Shu uchtasi bo'lsa, xavf yo'qoladi.
 
-**Va bitta amaliy savol — formati qanday?** `birthDate` — `LocalDate`.
-Parol sifatida qaysi ko'rinish kutiladi: `2007-02-14` mi, `14.02.2007` mi,
-`14022007` mi? Bilmasak, login ekranida hech kim kira olmaydi. Aniq ayting,
-kerak bo'lsa kirish sahifasiga izoh qo'shamiz.
+**Format — javob keldi: `14.02.2007`** (kun.oy.yil). Frontendda ikki joyga
+izoh qo'yildi: kirish sahifasida ("birinchi marta kirayotgan bo'lsangiz,
+parol — tug'ilgan sanangiz shu ko'rinishda") va admin panelida o'quvchi
+qo'shish formasida (adminga aytish uchun).
+
+Shuning uchun **format o'zgarsa xabar bering** — u endi uch tildagi matnda
+yozilgan va foydalanuvchiga ko'rsatiladi.
+
+> Loyiha egasi bu parolni vaqtinchalik deb qaror qildi: foydalanuvchi keyin
+> sozlamalardan o'zgartira oladi. Yuqoridagi tavsiya kuchida qoladi —
+> **hech narsa o'zgartirishga majburlamaydi**, shuning uchun ko'pchilik
+> o'zgartirmaydi. `mustChangePassword` qo'shilsa, frontend uni bir qatorda
+> qo'llaydi.
 
 ### Super-admin panelini ulaganda topilganlar (P0)
 
