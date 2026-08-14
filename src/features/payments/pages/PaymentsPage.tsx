@@ -18,6 +18,7 @@ import {
     Select,
 } from '@/shared/ui'
 import { InvoiceTable } from '../components/InvoiceTable'
+import { formatAmount } from '../lib/format'
 import { NewInvoiceModal } from '../components/NewInvoiceModal'
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations'
 import { useInvoices } from '../hooks/useInvoices'
@@ -52,7 +53,7 @@ export function PaymentsPage() {
         setPage(0)
     }
     const studentOptions = useStudentOptions(session.token)
-    const { create, changeStatus, remove } = useInvoiceMutations(session.token)
+    const { create, changeStatus, remove, refund } = useInvoiceMutations(session.token)
 
     function handleMarkPaid(invoice: InvoiceDto) {
         changeStatus.mutate({ id: invoice.id, status: 'PAID' })
@@ -63,7 +64,21 @@ export function PaymentsPage() {
         remove.mutate(invoice.id)
     }
 
-    const mutationError = changeStatus.error ?? remove.error
+    /**
+     * Pul qaytarish.
+     *
+     * Summani backend hisoblagani uchun oldindan ko'rsata olmaymiz —
+     * tasdiqlash matni shuni ochiq aytadi, natija esa javobdan olinadi.
+     */
+    function handleRefund(invoice: InvoiceDto) {
+        const studentId = invoice.student?.id
+        if (!studentId) return
+        const name = invoice.student?.userDto?.fullName ?? ''
+        if (!confirm(t('invoice.refundConfirm', { name }))) return
+        refund.mutate(studentId)
+    }
+
+    const mutationError = changeStatus.error ?? remove.error ?? refund.error
 
     return (
         <AppShell
@@ -164,6 +179,15 @@ export function PaymentsPage() {
                     </div>
                 )}
 
+                {refund.isSuccess && refund.data && (
+                    <p className="mb-4 text-sm text-success-fg">
+                        {t('invoice.refundDone', {
+                            amount: formatAmount(refund.data.amount),
+                            number: refund.data.invoiceNumber ?? '',
+                        })}
+                    </p>
+                )}
+
                 {!list.error && (
                     <InvoiceTable
                         invoices={list.invoices}
@@ -171,6 +195,8 @@ export function PaymentsPage() {
                         pendingId={changeStatus.isPending ? changeStatus.variables?.id : undefined}
                         onMarkPaid={handleMarkPaid}
                         onDelete={handleDelete}
+                        onRefund={handleRefund}
+                        isRefunding={refund.isPending}
                     />
                 )}
 

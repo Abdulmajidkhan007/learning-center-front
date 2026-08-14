@@ -12,6 +12,10 @@ export const payments: Record<PaymentsKeys, string> = {
     'invoice.newTitle': 'Новый счёт',
     'invoice.createHint':
         'Счёт создаётся со статусом «ожидает». Когда деньги придут, отметите его как оплаченный.',
+    'invoice.type': 'Тип',
+    'invoice.refund': 'Возврат',
+    'invoice.refundConfirm': 'Вернуть деньги ученику {{name}}? Сумму считает сервер: стоимость проведённых занятий удерживается, остаток возвращается.',
+    'invoice.refundDone': 'Возвращено: {{amount}} ({{number}}).',
     'invoice.markPaid': 'Оплачено',
     'invoice.search': 'номер, имя или телефон…',
     'invoice.from': 'С даты',

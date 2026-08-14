@@ -15,6 +15,10 @@ export const payments = {
     'invoice.newTitle': 'Yangi hisob',
     'invoice.createHint':
         'Hisob “kutilmoqda” holatida yaratiladi. Pul kelgach uni “to‘landi” qilib belgilaysiz.',
+    'invoice.type': 'Turi',
+    'invoice.refund': 'Qaytarish',
+    'invoice.refundConfirm': '{{name}}ga pul qaytarilsinmi? Summani server hisoblaydi: o‘tilgan darslar puli ushlab qolinadi, qolgani qaytariladi.',
+    'invoice.refundDone': 'Qaytarildi: {{amount}} ({{number}}).',
     'invoice.markPaid': 'To‘landi',
     'invoice.search': 'raqam, ism yoki telefon…',
     'invoice.from': 'Sanadan',

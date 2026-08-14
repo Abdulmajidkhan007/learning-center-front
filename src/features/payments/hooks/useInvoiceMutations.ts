@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
     createInvoice,
     deleteInvoice,
+    returnInvoice,
     updateInvoiceStatus,
     type CreateInvoicePayload,
 } from '../api/invoiceApi'
@@ -36,5 +37,10 @@ export function useInvoiceMutations(token: string) {
         onSuccess: invalidate,
     })
 
-    return { create, changeStatus, remove }
+    const refund = useMutation({
+        mutationFn: (studentId: string) => returnInvoice(token, studentId),
+        onSuccess: invalidate,
+    })
+
+    return { create, changeStatus, remove, refund }
 }

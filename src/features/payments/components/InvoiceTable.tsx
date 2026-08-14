@@ -12,6 +12,9 @@ interface InvoiceTableProps {
     pendingId?: string
     onMarkPaid: (invoice: InvoiceDto) => void
     onDelete: (invoice: InvoiceDto) => void
+    /** Pul qaytarish — o'quvchi bo'yicha, bitta hisob bo'yicha emas. */
+    onRefund: (invoice: InvoiceDto) => void
+    isRefunding: boolean
 }
 
 export function InvoiceTable({
@@ -20,6 +23,8 @@ export function InvoiceTable({
     pendingId,
     onMarkPaid,
     onDelete,
+    onRefund,
+    isRefunding,
 }: InvoiceTableProps) {
     const { t } = useT()
 
@@ -33,6 +38,7 @@ export function InvoiceTable({
                             t('invoice.student'),
                             t('invoice.amount'),
                             t('invoice.issuedAt'),
+                            t('invoice.type'),
                             t('field.status'),
                         ].map((label) => (
                             <th
@@ -50,7 +56,7 @@ export function InvoiceTable({
                 <tbody>
                     {isLoading && (
                         <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-fg-faint">
+                            <td colSpan={7} className="px-4 py-8 text-center text-fg-faint">
                                 {t('common.loading')}
                             </td>
                         </tr>
@@ -58,7 +64,7 @@ export function InvoiceTable({
 
                     {!isLoading && invoices.length === 0 && (
                         <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-fg-faint">
+                            <td colSpan={7} className="px-4 py-8 text-center text-fg-faint">
                                 {t('invoice.empty')}
                             </td>
                         </tr>
@@ -79,6 +85,12 @@ export function InvoiceTable({
                                 <td className="border-b border-border-base px-4 py-3 tabular-nums whitespace-nowrap text-fg-muted">
                                     {formatDate(invoice.issuedAt) || '—'}
                                 </td>
+                                {/* Turi serverdan kelgan enum nomi bilan
+                                    ko'rsatiladi: qiymatlari hali aytilmagan,
+                                    taxminiy tarjima esa yolg'on bo'lardi. */}
+                                <td className="border-b border-border-base px-4 py-3 font-mono text-xs whitespace-nowrap text-fg-muted">
+                                    {invoice.type || '—'}
+                                </td>
                                 <td className="border-b border-border-base px-4 py-3 whitespace-nowrap">
                                     <InvoiceStatusBadge status={invoice.status} />
                                 </td>
@@ -92,6 +104,18 @@ export function InvoiceTable({
                                                 onClick={() => onMarkPaid(invoice)}
                                             >
                                                 {t('invoice.markPaid')}
+                                            </Button>
+                                        )}
+                                        {/* Qaytarish faqat to'langan puldan ma'noga
+                                            ega — to'lanmagan hisobni qaytarib
+                                            bo'lmaydi. */}
+                                        {invoice.status === 'PAID' && invoice.student?.id && (
+                                            <Button
+                                                size="sm"
+                                                disabled={isRefunding}
+                                                onClick={() => onRefund(invoice)}
+                                            >
+                                                {t('invoice.refund')}
                                             </Button>
                                         )}
                                         <IconButton

@@ -232,6 +232,15 @@ export interface InvoiceDto {
     /** `LocalDateTime` — "yyyy-MM-ddTHH:mm:ss". */
     issuedAt?: string
     status?: InvoiceStatus
+    /**
+     * To'lov turi: o'quvchi to'ladimi yoki markaz qaytardimi.
+     *
+     * Ataylab union EMAS, oddiy `string`: `InvoiceType` enum'i backendning
+     * merge bo'lmagan branchida va qiymatlari bizga aytilmagan. Taxmin
+     * qilsak, noto'g'ri qiymat kelganda ekran buziladi. Qiymatlar
+     * ma'lum bo'lgach union qilinadi (`JwtClaims['role']` bilan bir sabab).
+     */
+    type?: string
 }
 
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */

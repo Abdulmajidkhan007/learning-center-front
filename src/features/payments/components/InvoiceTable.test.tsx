@@ -16,16 +16,20 @@ const pending: InvoiceDto = {
 
 const paid: InvoiceDto = { ...pending, id: 'i2', invoiceNumber: 'INV-001', status: 'PAID' }
 
-function renderTable(invoices: InvoiceDto[], onMarkPaid = vi.fn()) {
+function renderTable(invoices: InvoiceDto[], handlers: { onMarkPaid?: () => void; onRefund?: () => void } = {}) {
+    const onMarkPaid = handlers.onMarkPaid ?? vi.fn()
+    const onRefund = handlers.onRefund ?? vi.fn()
     renderWithProviders(
         <InvoiceTable
             invoices={invoices}
             isLoading={false}
             onMarkPaid={onMarkPaid}
             onDelete={vi.fn()}
+            onRefund={onRefund}
+            isRefunding={false}
         />
     )
-    return onMarkPaid
+    return { onMarkPaid, onRefund }
 }
 
 describe('InvoiceTable', () => {
@@ -43,9 +47,21 @@ describe('InvoiceTable', () => {
     })
 
     it('kutilayotgan hisobda tugma bosilsa hisobni uzatadi', async () => {
-        const onMarkPaid = renderTable([pending])
+        const { onMarkPaid } = renderTable([pending])
         await userEvent.click(screen.getByRole('button', { name: /to‘landi/i }))
         expect(onMarkPaid).toHaveBeenCalledWith(pending)
+    })
+
+    // Qaytarish faqat to'langan puldan ma'noga ega.
+    it('to’lanmagan hisobda "qaytarish" tugmasi bo’lmaydi', () => {
+        renderTable([pending])
+        expect(screen.queryByRole('button', { name: /qaytarish/i })).not.toBeInTheDocument()
+    })
+
+    it('to’langan hisobda qaytarish tugmasi hisobni uzatadi', async () => {
+        const { onRefund } = renderTable([paid])
+        await userEvent.click(screen.getByRole('button', { name: /qaytarish/i }))
+        expect(onRefund).toHaveBeenCalledWith(paid)
     })
 
     it('ro’yxat bo’sh bo’lsa tushunarli xabar chiqadi', () => {

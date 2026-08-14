@@ -12,6 +12,10 @@ export const payments: Record<PaymentsKeys, string> = {
     'invoice.newTitle': 'New invoice',
     'invoice.createHint':
         'The invoice is created as pending. Mark it paid once the money arrives.',
+    'invoice.type': 'Type',
+    'invoice.refund': 'Refund',
+    'invoice.refundConfirm': 'Refund {{name}}? The server works out the amount: lessons already held are deducted and the rest is returned.',
+    'invoice.refundDone': 'Refunded: {{amount}} ({{number}}).',
     'invoice.markPaid': 'Mark paid',
     'invoice.search': 'number, name or phone…',
     'invoice.from': 'From',

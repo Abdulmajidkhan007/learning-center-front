@@ -178,11 +178,38 @@ public record BranchDto(
 
 ### Shu yangilanishdan keyin qolgan savollar
 
-1. **`InvoiceType` qiymatlari qanday?** `InvoiceDto` ga `type` qo'shilgan,
-   lekin enum berilmagan — tipga yozolmaymiz.
-2. **`POST /invoice/return?studentId=` nima qiladi?** Oxirgi hisobni
-   bekor qiladimi, pul qaytarish yozuvini yaratadimi, yoki balansdan
-   ayiradimi? Javobi qaysi hisob?
+1. **`InvoiceType` qiymatlari qanday?** Ma'nosi tushuntirildi (2-band), lekin
+   enum konstantalarining **nomlari** hali aytilmagan va kod `N` ga merge
+   bo'lmagan. Shuning uchun frontendda `type` — union emas, oddiy `string`
+   va jadvalda serverdan kelgan nom shundoq ko'rsatiladi (`PAYMENT`,
+   `RETURN` …). Qiymatlarni yuboring — tarjima qilib, nishon (badge) qilamiz.
+
+   **Buning ko'rinadigan oqibati:** qaysi yozuv qaytarim ekanini bilmagani
+   uchun interfeys **qaytarim yozuvining o'zida ham "Qaytarish" tugmasini
+   ko'rsatadi**. Qiymatlar ma'lum bo'lgach bu bir qatorda yopiladi.
+
+2. ✅ **`POST /invoice/return?studentId=` — tushunarli.** O'quvchi oylik
+   to'lovni to'lab, oy o'rtasida ketsa (masalan sayohatga), markaz qolgan
+   pulni qaytaradi: o'tilgan darslar puli ushlab qolinadi, qolgani
+   qaytariladi va bu daromaddan ayiriladi.
+
+   Frontendda ulandi: to'langan hisob qatorida "Qaytarish" tugmasi,
+   tasdiqlash oynasi summani **oldindan ko'rsatmaydi** (uni server
+   hisoblaydi), natija esa javobdan olinib ekranda yoziladi.
+
+   **Qo'shimcha so'rov — daromad xulosasi.** "Qaytarilganni daromaddan olib
+   tashlash kerak" dedingiz. Buni mijozda hisoblab bo'lmaydi: ro'yxat
+   sahifalangan, ya'ni bizda faqat 15 ta yozuv bo'ladi va yig'indi yolg'on
+   chiqadi. Kerak:
+
+   ```java
+   GET /invoice/summary?from=&to=   → InvoiceSummaryDto
+   public record InvoiceSummaryDto(BigDecimal paid, BigDecimal returned,
+                                   BigDecimal net, long count) {}
+   ```
+
+   Shu bo'lsa, to'lovlar sahifasining tepasiga "kirim / qaytarim / sof"
+   kartalarini qo'yamiz — monitoring uchun aynan shu kerak edi.
 3. **`Student.balance`** paydo bo'ldi va hisob yaratilganda oshyapti.
    Uni ekranda ko'rsatamizmi? Manfiy balans "qarzdor" degani bo'ladimi?
 4. **`UserCreateDto` ga `branchId` va `organizationId` qo'shildi** —
