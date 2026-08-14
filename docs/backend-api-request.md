@@ -59,6 +59,40 @@ Frontend tomondan qilingani: `apiFetch` endi `Accept-Language` yuboradi va
 `errorCode` ni `ApiError.code` ga oladi; validatsiya xatolari (maydon →
 xabar xaritasi) ham o'qiladi; darslar jadvali `lessonName` ga o'tdi.
 
+### 🔴 Parol = tug'ilgan sana: buni qayta ko'rib chiqing
+
+Javob keldi: generatsiya o'rniga **tug'ilgan sana** parol bo'lar ekan. Bu
+ishlaydi va yetkazish muammosini yopadi, lekin bitta natijasi bor va u
+jiddiy.
+
+**Tug'ilgan sana tizimning o'zida ochiq turibdi.** `GET /student` har bir
+o'quvchining `phone` va `birthDate` ini qaytaradi, admin panelidagi
+o'quvchilar jadvalida ikkalasi yonma-yon ustun bo'lib ko'rinadi. Ya'ni
+parol = tug'ilgan sana bo'lsa, o'sha jadval **hammaning login va parolini
+ko'rsatib turadigan ro'yxatga** aylanadi.
+
+Bunga `@PreAuthorize` yo'qligi qo'shiladi (1-band): hozir **istalgan**
+kirgan foydalanuvchi — bitta o'quvchi ham — `GET /student` ni chaqirib,
+butun markazning hisoblarini oladi. Ikkalasi birga ishlaganda bu
+autentifikatsiyani butunlay chetlab o'tish demak.
+
+Tug'ilgan sana o'zi ham sir emas: sinfdoshlar, o'qituvchi, ota-ona biladi.
+
+**Taklif** — g'oyani tashlash shart emas, uni *vaqtinchalik* qilish yetadi:
+
+1. tug'ilgan sana faqat **birinchi kirish** uchun ishlasin;
+2. `/auth/me` yoki token claim'ida **`mustChangePassword: true`** kelsin —
+   biz o'sha foydalanuvchini boshqa ekranga qo'ymay, parol almashtirish
+   formasiga yo'naltiramiz;
+3. `@PreAuthorize` qo'yilib, o'quvchilar ro'yxati xodimlarga cheklansin.
+
+Shu uchtasi bo'lsa, xavf yo'qoladi.
+
+**Va bitta amaliy savol — formati qanday?** `birthDate` — `LocalDate`.
+Parol sifatida qaysi ko'rinish kutiladi: `2007-02-14` mi, `14.02.2007` mi,
+`14022007` mi? Bilmasak, login ekranida hech kim kira olmaydi. Aniq ayting,
+kerak bo'lsa kirish sahifasiga izoh qo'shamiz.
+
 ### Super-admin panelini ulaganda topilganlar (P0)
 
 Panel yozildi va `GET/POST/PUT /organizations` hamda `/branch` CRUD ulandi.

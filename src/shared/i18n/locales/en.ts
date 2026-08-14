@@ -121,6 +121,7 @@ export const en: Translations = {
     'org.phone': 'Phone',
     'org.email': 'Email',
     'org.website': 'Website',
+    'org.noAdminYet': 'A super admin is not created together with the organization — add one separately.',
     'org.empty': 'No organizations found',
     'branch.plural': 'Branches',
     'branch.new': '+ New branch',

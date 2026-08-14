@@ -9,7 +9,7 @@ ishlaydi va rolga qarab har xil panel ko'rsatadi:
 | `TEACHER`       | O'z guruhlari, ro'yxat, "Start lesson", davomat                    |
 | `STUDENT`       | O'z profili; davomat va guruh — endpoint kutilmoqda                |
 | `SUPER_ADMIN`   | Tashkilotlar va filiallar (branch) CRUD                             |
-| hamma rol       | **Sozlamalar**: til, tema, profil, parol, (admin) markaz sozlamalari |
+| hamma rol       | **Sozlamalar**: til, tema, profil, parol (markaz bloki — `/auth/me` da filial yo'q) |
 | boshqa          | Tushunarli xabar bilan placeholder                                 |
 
 ## Stack

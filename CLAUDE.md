@@ -165,8 +165,11 @@ tuzatilmagani uchun cheklangan.
 
 - Teacher paneldagi KPI kartalar, uy vazifasi, guruh progressi va ballar —
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
-- Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
-  yuborish o'chirilgan).
+- Sozlamalardagi **markaz** bloki bo'sh: uni ulash uchun `/auth/me`
+  foydalanuvchining filiali (`branchId`) ni qaytarishi kerak — hozir
+  qaytarmaydi. Profil va parol bloklari esa ulangan va ishlaydi.
+- Tashkilot yaratilganda super-admin avtomatik yaratilmaydi — backend uni
+  qo'lda qo'shadi, forma buni ochiq aytadi.
 - Tashkilotni o'chirish yo'q: backendda `OrganizationService.delete` bo'sh
   metod, lekin 204 qaytaradi — tugma qo'ysak yolg'on bo'lardi.
 - Filial qaysi tashkilotga tegishli ekani ko'rinmaydi: `BranchDto` da

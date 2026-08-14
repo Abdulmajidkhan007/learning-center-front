@@ -130,6 +130,7 @@ export const ru: Translations = {
     'org.phone': 'Телефон',
     'org.email': 'Email',
     'org.website': 'Сайт',
+    'org.noAdminYet': 'Супер-админ вместе с организацией не создаётся — его нужно добавить отдельно.',
     'org.empty': 'Организации не найдены',
     'branch.plural': 'Филиалы',
     'branch.new': '+ Новый филиал',

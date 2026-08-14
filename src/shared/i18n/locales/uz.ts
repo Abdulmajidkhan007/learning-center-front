@@ -136,6 +136,7 @@ export const uz = {
     'org.phone': 'Telefon',
     'org.email': 'Email',
     'org.website': 'Veb-sayt',
+    'org.noAdminYet': 'Tashkilot bilan birga super-admin yaratilmaydi — uni alohida qo‘shish kerak.',
     'org.empty': 'Tashkilot topilmadi',
     'branch.plural': 'Filiallar',
     'branch.new': '+ Yangi filial',
