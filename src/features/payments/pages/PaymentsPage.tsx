@@ -44,6 +44,7 @@ export function PaymentsPage() {
     const [from, setFrom] = useState('')
     const [to, setTo] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [refundStudentId, setRefundStudentId] = useState('')
 
     const list = useInvoices(session.token, { page, search, status, from, to })
 
@@ -67,15 +68,19 @@ export function PaymentsPage() {
     /**
      * Pul qaytarish.
      *
+     * Jadval qatorida EMAS, alohida blokda: `POST /invoice/return` o'quvchi
+     * bo'yicha ishlaydi, hisob bo'yicha emas. Qatorga qo'ysak, bitta
+     * o'quvchining har hisobida bir xil tugma takrorlanardi va qaytarim
+     * yozuvining o'zida ham chiqib qolardi.
+     *
      * Summani backend hisoblagani uchun oldindan ko'rsata olmaymiz —
      * tasdiqlash matni shuni ochiq aytadi, natija esa javobdan olinadi.
      */
-    function handleRefund(invoice: InvoiceDto) {
-        const studentId = invoice.student?.id
-        if (!studentId) return
-        const name = invoice.student?.userDto?.fullName ?? ''
+    function handleRefund() {
+        if (refundStudentId === '') return
+        const name = studentOptions.find((option) => option.value === refundStudentId)?.label ?? ''
         if (!confirm(t('invoice.refundConfirm', { name }))) return
-        refund.mutate(studentId)
+        refund.mutate(refundStudentId, { onSuccess: () => setRefundStudentId('') })
     }
 
     const mutationError = changeStatus.error ?? remove.error ?? refund.error
@@ -165,6 +170,28 @@ export function PaymentsPage() {
                     )}
                 </div>
 
+                <div className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-border-base p-3">
+                    <Field label={t('invoice.refundFor')}>
+                        <Select
+                            className="sm:w-56"
+                            placeholder={t('field.select')}
+                            options={studentOptions}
+                            value={refundStudentId}
+                            onChange={(event) => setRefundStudentId(event.target.value)}
+                        />
+                    </Field>
+                    <Button
+                        size="sm"
+                        disabled={refundStudentId === '' || refund.isPending}
+                        onClick={handleRefund}
+                    >
+                        {refund.isPending ? t('common.saving') : t('invoice.refund')}
+                    </Button>
+                    <p className="w-full text-[0.72rem] leading-snug text-fg-faint">
+                        {t('invoice.refundHint')}
+                    </p>
+                </div>
+
                 {list.error && (
                     <div className="mb-4">
                         <ErrorBox>
@@ -195,8 +222,6 @@ export function PaymentsPage() {
                         pendingId={changeStatus.isPending ? changeStatus.variables?.id : undefined}
                         onMarkPaid={handleMarkPaid}
                         onDelete={handleDelete}
-                        onRefund={handleRefund}
-                        isRefunding={refund.isPending}
                     />
                 )}
 

@@ -14,6 +14,8 @@ export const payments: Record<PaymentsKeys, string> = {
         'Счёт создаётся со статусом «ожидает». Когда деньги придут, отметите его как оплаченный.',
     'invoice.type': 'Тип',
     'invoice.refund': 'Возврат',
+    'invoice.refundFor': 'Кому вернуть',
+    'invoice.refundHint': 'Сумму считает сервер: стоимость проведённых занятий удерживается, остаток возвращается.',
     'invoice.refundConfirm': 'Вернуть деньги ученику {{name}}? Сумму считает сервер: стоимость проведённых занятий удерживается, остаток возвращается.',
     'invoice.refundDone': 'Возвращено: {{amount}} ({{number}}).',
     'invoice.markPaid': 'Оплачено',

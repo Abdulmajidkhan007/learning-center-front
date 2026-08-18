@@ -12,9 +12,6 @@ interface InvoiceTableProps {
     pendingId?: string
     onMarkPaid: (invoice: InvoiceDto) => void
     onDelete: (invoice: InvoiceDto) => void
-    /** Pul qaytarish — o'quvchi bo'yicha, bitta hisob bo'yicha emas. */
-    onRefund: (invoice: InvoiceDto) => void
-    isRefunding: boolean
 }
 
 export function InvoiceTable({
@@ -23,8 +20,6 @@ export function InvoiceTable({
     pendingId,
     onMarkPaid,
     onDelete,
-    onRefund,
-    isRefunding,
 }: InvoiceTableProps) {
     const { t } = useT()
 
@@ -104,18 +99,6 @@ export function InvoiceTable({
                                                 onClick={() => onMarkPaid(invoice)}
                                             >
                                                 {t('invoice.markPaid')}
-                                            </Button>
-                                        )}
-                                        {/* Qaytarish faqat to'langan puldan ma'noga
-                                            ega — to'lanmagan hisobni qaytarib
-                                            bo'lmaydi. */}
-                                        {invoice.status === 'PAID' && invoice.student?.id && (
-                                            <Button
-                                                size="sm"
-                                                disabled={isRefunding}
-                                                onClick={() => onRefund(invoice)}
-                                            >
-                                                {t('invoice.refund')}
                                             </Button>
                                         )}
                                         <IconButton
