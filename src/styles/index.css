@@ -14,118 +14,118 @@
  * Shundan keyin `bg-surface`, `text-fg-muted` kabi utility'lar o'zi paydo bo'ladi.
  */
 :root {
-    /* Yuzalar: sahifa foni → karta → ajratilgan bloklar */
-    --surface: #faf6ee;
-    --surface-card: #fffdf8;
-    --surface-muted: #f1e8d3;
-    --surface-hover: #f4efe3;
+    /* Yuzalar: sahifa foni lavanda tovlanadi, karta esa toza oq */
+    --surface: #f6f5fd;
+    --surface-card: #ffffff;
+    --surface-muted: #eeecfb;
+    --surface-hover: #f1effc;
 
-    --border: #e2d9c4;
-    --border-strong: #b7ab8a;
+    --border: #e6e3f5;
+    --border-strong: #c9c3ea;
 
     /* Matn: asosiy → ikkilamchi → eng xira (label, eyebrow) */
-    --fg: #1f2a3d;
-    --fg-muted: #4b5768;
-    --fg-faint: #8892a0;
-    --fg-inverted: #faf6ee;
+    --fg: #0f1424;
+    --fg-muted: #5a6178;
+    --fg-faint: #8b90a6;
+    --fg-inverted: #ffffff;
 
-    /* Brend sarg'ish marker rangi — CLC belgisi va asosiy CTA */
-    --brand: #f2b705;
-    --brand-fg: #5c4400;
+    /* Brend — binafsha; CTA va CLC belgisi shu rangda */
+    --brand: #7c3aed;
+    --brand-fg: #ffffff;
 
-    --accent: #4c5fd5;
-    --accent-fg: #4c5fd5;
-    --accent-soft: #eaecfb;
+    --accent: #6d28d9;
+    --accent-fg: #6d28d9;
+    --accent-soft: #ede9fe;
 
-    --success: #2f6b4f;
-    --success-fg: #2f6b4f;
-    --success-soft: #e7f0ea;
+    --success: #059669;
+    --success-fg: #047857;
+    --success-soft: #d1fae5;
 
-    --danger: #b4533c;
-    --danger-fg: #b4533c;
-    --danger-soft: #f6e6e1;
+    --danger: #dc2626;
+    --danger-fg: #b91c1c;
+    --danger-soft: #fee2e2;
 
-    --warning-fg: #8b7000;
-    --warning-soft: #fdf6e0;
+    --warning-fg: #b45309;
+    --warning-soft: #fef3c7;
 
-    --neutral-soft: #f0f0f2;
+    --neutral-soft: #eef0f6;
 
     --purple: #8b5cf6;
-    --purple-fg: #8b5cf6;
-    --purple-soft: #f1ebfd;
-    --magenta: #c244b0;
+    --purple-fg: #7c3aed;
+    --purple-soft: #ede9fe;
+    --magenta: #d946ef;
 
     /* Admin panelining chap ustuni — ikkala temada ham to'q */
-    --sidebar: #1f2a3d;
-    --sidebar-fg: #faf6ee;
+    --sidebar: #12101f;
+    --sidebar-fg: #ede9fe;
 
     /* Statistika kartalari va status nishonlari uchun qo'shimcha ranglar */
-    --sage-fg: #3c5f44;
-    --sage-soft: #e3ece0;
-    --amber: #c97a2b;
-    --amber-fg: #8a5416;
-    --amber-soft: #fbead2;
-    --steel: #3e6b8a;
-    --steel-fg: #2b4f66;
-    --steel-soft: #e2ebf0;
-    --slate-fg: #6b7280;
-    --slate-soft: #eae7dd;
+    --sage-fg: #047857;
+    --sage-soft: #d1fae5;
+    --amber: #f97316;
+    --amber-fg: #c2410c;
+    --amber-soft: #ffedd5;
+    --steel: #0891b2;
+    --steel-fg: #0e7490;
+    --steel-soft: #cffafe;
+    --slate-fg: #64748b;
+    --slate-soft: #e9edf5;
 }
 
 .dark {
-    /* Dark'da ham "qog'oz" hissi saqlanadi: sovuq emas, iliq to'q kulrang */
-    --surface: #16171b;
-    --surface-card: #1e2025;
-    --surface-muted: #24262c;
-    --surface-hover: #282a31;
+    /* Deyarli qora, binafsha tovlanishi bilan — EduSphere ko'rinishi */
+    --surface: #08070f;
+    --surface-card: #12111d;
+    --surface-muted: #191828;
+    --surface-hover: #1d1c2e;
 
-    --border: #32353d;
-    --border-strong: #4a4e58;
+    --border: #262438;
+    --border-strong: #3a3752;
 
-    --fg: #ece7db;
-    --fg-muted: #abb1bc;
-    --fg-faint: #7c828e;
-    --fg-inverted: #16171b;
+    --fg: #f0eefb;
+    --fg-muted: #a5a2bd;
+    --fg-faint: #7c7996;
+    --fg-inverted: #08070f;
 
-    --brand: #f2b705;
-    --brand-fg: #2a1f00;
+    --brand: #8b5cf6;
+    --brand-fg: #ffffff;
 
     /* To'q fonda to'yingan ranglar "yonib" ketadi — ochroq variant olinadi */
-    --accent: #8b9bff;
-    --accent-fg: #b9c2ff;
-    --accent-soft: #262a45;
+    --accent: #a78bfa;
+    --accent-fg: #c4b5fd;
+    --accent-soft: #241f3d;
 
-    --success: #4f9a74;
-    --success-fg: #7fc9a3;
-    --success-soft: #1b2e24;
+    --success: #10b981;
+    --success-fg: #34d399;
+    --success-soft: #0d2b22;
 
-    --danger: #c96a51;
-    --danger-fg: #e79b83;
-    --danger-soft: #33201b;
+    --danger: #ef4444;
+    --danger-fg: #f87171;
+    --danger-soft: #2d1517;
 
-    --warning-fg: #e3c15c;
-    --warning-soft: #2e2716;
+    --warning-fg: #fbbf24;
+    --warning-soft: #2c2210;
 
-    --neutral-soft: #2a2c32;
+    --neutral-soft: #1e1d2e;
 
     --purple: #a78bfa;
-    --purple-fg: #bda6ff;
-    --purple-soft: #2a2340;
-    --magenta: #e06bcb;
+    --purple-fg: #c4b5fd;
+    --purple-soft: #241f3d;
+    --magenta: #e879f9;
 
-    --sidebar: #101216;
-    --sidebar-fg: #ece7db;
+    --sidebar: #0b0a14;
+    --sidebar-fg: #ede9fe;
 
-    --sage-fg: #8fbd9c;
-    --sage-soft: #1e2a21;
-    --amber: #d8964e;
-    --amber-fg: #dfae6f;
-    --amber-soft: #2e2416;
-    --steel: #6d9cba;
-    --steel-fg: #8fb6cd;
-    --steel-soft: #1b262e;
-    --slate-fg: #9aa1ad;
-    --slate-soft: #262830;
+    --sage-fg: #34d399;
+    --sage-soft: #0d2b22;
+    --amber: #fb923c;
+    --amber-fg: #fdba74;
+    --amber-soft: #2d1e10;
+    --steel: #22d3ee;
+    --steel-fg: #67e8f9;
+    --steel-soft: #0c2730;
+    --slate-fg: #9ca3b8;
+    --slate-soft: #1e1d2e;
 }
 
 /*
@@ -186,9 +186,19 @@
     --color-slate-fg: var(--slate-fg);
     --color-slate-soft: var(--slate-soft);
 
-    --font-display: "Fraunces", ui-serif, Georgia, serif;
-    --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+    /* Zamonaviy SaaS ko'rinishi: sarlavha ham, matn ham bitta grotesk.
+       Ilgari sarlavha serif (Fraunces) edi — u "gazeta" hissini berardi. */
+    --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    /* Burchak shkalasi bosib o'tiladi — shunda `rounded-lg` yozilgan
+       o'nlab komponentga tegmasdan hammasi yumaloqroq bo'ladi. */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+    --radius-2xl: 1.5rem;
 
     --animate-float-slow: float-slow 16s ease-in-out infinite alternate;
     --animate-float-slower: float-slower 20s ease-in-out infinite alternate;
