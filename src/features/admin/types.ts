@@ -61,6 +61,8 @@ export type ModalMode = 'create' | 'edit'
 
 export interface EntityFormConfig {
     fields: FormField[] | ((mode: ModalMode) => FormField[])
+    /** Faqat yaratish rejimida ko'rinadigan izoh (masalan boshlang'ich parol). */
+    createHintKey?: TranslationKey
     getInitialValues: (row: AdminRow | null) => FormValues
     /** Create va Update DTO'lari har xil bo'lgani uchun ikkita alohida funksiya. */
     buildCreatePayload: (values: FormValues) => unknown

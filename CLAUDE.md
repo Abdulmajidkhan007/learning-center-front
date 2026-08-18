@@ -54,8 +54,8 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
     qilinganini tushuntirsin.
 14. **Commit xabarlari — inglizcha** (loyihada shunday).
 15. **UI matni kodga yozilmaydi.** Faqat `t('kalit')`. Yangi matn: avval
-    `locales/uz.ts` ga (haqiqat manbai), keyin `ru.ts` va `en.ts` ga —
-    unutilsa `tsc` xato beradi.
+    `locales/uz/<bo'lim>.ts` ga (haqiqat manbai), keyin `ru/` va `en/` dagi
+    **o'sha nomli** faylga — unutilsa `tsc` qaysi faylda ekanini aytadi.
 16. **Backenddan kelgan matn tarjima qilinmaydi** (ism, guruh nomi, server
     xatosi) — u qanday kelsa shunday ko'rsatiladi.
 
@@ -87,10 +87,12 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 ## Git ish tartibi
 
 Asl repo: `nurulloh-coder-dev/learning-center-front`, asosiy branch — **`N`**.
+Ish esa fork'da: `Abdulmajidkhan007/learning-center-front`.
 
-Ish to'g'ridan-to'g'ri shu repoda, lekin **hech qachon `N` ga push qilinmaydi**.
-Har bir ish alohida branchda ketadi va `N` ga faqat **PR orqali** qo'shiladi —
-odam ko'rib, merge qiladi.
+**Nega fork:** asl repo boshqa odamniki va unga Claude GitHub app o'rnatilmagan
+(o'rnatish uchun repoda admin huquqi kerak). Bundan tashqari fork'da agentda
+asl repoga yozish huquqi umuman bo'lmaydi — eng yomon holatda o'z fork'ingizda
+keraksiz branch paydo bo'ladi, xolos.
 
 ```
 agent/<qisqa-nom>      masalan: agent/payments, agent/super-admin
@@ -100,26 +102,32 @@ Bitta uzun "hamma narsa" branchi EMAS: uzoq yashagan branch qancha kutsa,
 konflikt ehtimoli shuncha oshadi. Bitta ish tugadi — PR, merge, keyingisi
 yangi branchdan.
 
-Ish boshlashdan oldin **doim**:
+Ish boshlashdan oldin **doim** asl repodan yangilanishni oling:
 
 ```bash
-git fetch origin N
-git checkout -b agent/<nom> origin/N
+git fetch https://github.com/nurulloh-coder-dev/learning-center-front N
+git checkout -b agent/<nom> FETCH_HEAD
 ```
 
-PR ochishdan oldin `N` oldinga ketgan bo'lsa:
+(Asl repo ochiq, shuning uchun o'qish uchun app ham, huquq ham kerak emas.)
 
-```bash
-git fetch origin N && git merge origin/N     # konflikt bo'lsa shu yerda yechiladi
+Ish tugagach fork'ga push qilinadi va odam PR ochadi:
+
 ```
+https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:agent/<nom>
+```
+
+PR — har commit uchun emas, **tugagan ish uchun**. `N` ga to'g'ridan-to'g'ri
+push hech qachon qilinmaydi.
 
 ### Konfliktdan qochish
 
 Uch kishi bir vaqtda ishlaganda eng ko'p to'qnashadigan joylar:
 
-1. **`src/shared/i18n/locales/*.ts`** — hamma yangi kalit qo'shadi va hammasi
-   faylning bir joyiga tushadi. Kalitni **o'z bo'liming blokiga** qo'ying
-   (`// --- to'lovlar ---` kabi), faylning oxiriga emas.
+1. **`src/shared/i18n/locales/`** — endi har bo'lim alohida faylda
+   (`uz/payments.ts`, `uz/superAdmin.ts` …), shuning uchun turli bo'limlarga
+   tegilsa to'qnashuv bo'lmaydi. Yangi kalitni **o'z bo'liming fayliga**
+   qo'ying.
 2. **`src/shared/types/index.ts`** — DTO qo'shganda ham shunday: mavjud
    bloklarga tegmang, yangisini alohida qo'shing.
 3. **`shared/ui/`** — umumiy komponentni o'zgartirish hammaga ta'sir qiladi.
@@ -129,12 +137,12 @@ Qolgan hamma narsa `features/<bo'lim>/` ichida — u yerda har kim o'z
 papkasida ishlagani uchun to'qnashuv bo'lmaydi. Shuning uchun **yangi ish
 imkon qadar o'z bo'lim papkasida** yozilsin.
 
-### Eskirgan: fork orqali ishlash
+### Asl repoda to'g'ridan-to'g'ri ishlash
 
-Ilgari ish `Abdulmajidkhan007/learning-center-front` fork'ida olib borilardi
-(agentda asl repoga yozish huquqi bo'lmasin degan maqsadda). Endi ish asl
-repoda, lekin himoya saqlanib qoladi: `N` ga to'g'ridan-to'g'ri push yo'q,
-faqat PR.
+Buning uchun repo egasi Claude GitHub app'ni o'sha repoga o'rnatishi kerak
+(GitHub → repo → Settings → GitHub Apps → Claude → Configure). O'rnatilgach
+oqim soddalashadi: fork kerak bo'lmaydi, branch to'g'ridan-to'g'ri asl
+repoda ochiladi. `N` ga push qilmaslik qoidasi o'zgarmaydi.
 
 ## Hujjatlar
 
@@ -158,8 +166,11 @@ tuzatilmagani uchun cheklangan.
 
 - Teacher paneldagi KPI kartalar, uy vazifasi, guruh progressi va ballar —
   backendda endpoint yo'q, ular `PendingBackend` bilan bo'sh turibdi.
-- Sozlamalardagi profil, parol va markaz bloklari ham shunday (forma tayyor,
-  yuborish o'chirilgan).
+- Sozlamalardagi **markaz** bloki bo'sh: uni ulash uchun `/auth/me`
+  foydalanuvchining filiali (`branchId`) ni qaytarishi kerak — hozir
+  qaytarmaydi. Profil va parol bloklari esa ulangan va ishlaydi.
+- Tashkilot yaratilganda super-admin avtomatik yaratilmaydi — backend uni
+  qo'lda qo'shadi, forma buni ochiq aytadi.
 - Tashkilotni o'chirish yo'q: backendda `OrganizationService.delete` bo'sh
   metod, lekin 204 qaytaradi — tugma qo'ysak yolg'on bo'lardi.
 - Filial qaysi tashkilotga tegishli ekani ko'rinmaydi: `BranchDto` da

@@ -44,6 +44,25 @@ export function deleteInvoice(token: string, id: string) {
 }
 
 /**
+ * Pul qaytarish.
+ *
+ * O'quvchi oylik to'lovni to'lab, oy o'rtasida ketsa (masalan sayohatga),
+ * markaz qolgan pulni qaytaradi. **Summani backend o'zi hisoblaydi** —
+ * o'tilgan darslar puli ushlab qolinadi, qolgani qaytariladi. Shuning uchun
+ * bu yerda summa yuborilmaydi va oldindan ko'rsatilmaydi: mijozda hisoblasak,
+ * server bilan farq chiqib, foydalanuvchiga noto'g'ri raqam aytardik.
+ *
+ * Hisob `studentId` bo'yicha, ya'ni bitta yozuvga emas, O'QUVCHIGA tegishli.
+ */
+export function returnInvoice(token: string, studentId: string) {
+    return apiFetch<InvoiceDto>(`${ENDPOINT}/return`, {
+        method: 'POST',
+        token,
+        params: { studentId },
+    })
+}
+
+/**
  * Yangi hisob formasidagi o'quvchi tanlagichi.
  *
  * Bo'limlar bir-biridan import qilmagani uchun admin'dagi o'xshash

@@ -42,6 +42,13 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 />
             </Field>
 
+            {/* Boshlang'ich parol — tug'ilgan sana. Busiz birinchi marta
+                kirayotgan odam nima yozishini bilmaydi va "parol xato" deb
+                o'ylab qoladi. */}
+            <p className="-mt-1 text-[0.72rem] leading-snug text-fg-faint">
+                {t('auth.firstTimeHint')}
+            </p>
+
             <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                     type="checkbox"

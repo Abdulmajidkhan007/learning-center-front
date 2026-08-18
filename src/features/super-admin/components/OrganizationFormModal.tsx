@@ -55,6 +55,16 @@ export function OrganizationFormModal({
                     <Input value={website} onChange={(e) => setWebsite(e.target.value)} />
                 </Field>
 
+                {/* Backend tashkilot bilan birga super-adminni YARATMAYDI
+                    (`OrganizationService.create` da faqat tashkilot saqlanadi).
+                    Buni aytmasak, tashkilot yaratgan odam unga kira oladigan
+                    hisob ham paydo bo'ldi deb o'ylaydi. */}
+                {!organization && (
+                    <p className="text-[0.72rem] leading-snug text-fg-faint">
+                        {t('org.noAdminYet')}
+                    </p>
+                )}
+
                 {error != null && <ErrorBox>{errorMessage(error)}</ErrorBox>}
 
                 <div className="mt-1 flex justify-end gap-2.5">

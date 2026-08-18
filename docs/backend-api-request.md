@@ -59,6 +59,49 @@ Frontend tomondan qilingani: `apiFetch` endi `Accept-Language` yuboradi va
 `errorCode` ni `ApiError.code` ga oladi; validatsiya xatolari (maydon →
 xabar xaritasi) ham o'qiladi; darslar jadvali `lessonName` ga o'tdi.
 
+### 🔴 Parol = tug'ilgan sana: buni qayta ko'rib chiqing
+
+Javob keldi: generatsiya o'rniga **tug'ilgan sana** parol bo'lar ekan. Bu
+ishlaydi va yetkazish muammosini yopadi, lekin bitta natijasi bor va u
+jiddiy.
+
+**Tug'ilgan sana tizimning o'zida ochiq turibdi.** `GET /student` har bir
+o'quvchining `phone` va `birthDate` ini qaytaradi, admin panelidagi
+o'quvchilar jadvalida ikkalasi yonma-yon ustun bo'lib ko'rinadi. Ya'ni
+parol = tug'ilgan sana bo'lsa, o'sha jadval **hammaning login va parolini
+ko'rsatib turadigan ro'yxatga** aylanadi.
+
+Bunga `@PreAuthorize` yo'qligi qo'shiladi (1-band): hozir **istalgan**
+kirgan foydalanuvchi — bitta o'quvchi ham — `GET /student` ni chaqirib,
+butun markazning hisoblarini oladi. Ikkalasi birga ishlaganda bu
+autentifikatsiyani butunlay chetlab o'tish demak.
+
+Tug'ilgan sana o'zi ham sir emas: sinfdoshlar, o'qituvchi, ota-ona biladi.
+
+**Taklif** — g'oyani tashlash shart emas, uni *vaqtinchalik* qilish yetadi:
+
+1. tug'ilgan sana faqat **birinchi kirish** uchun ishlasin;
+2. `/auth/me` yoki token claim'ida **`mustChangePassword: true`** kelsin —
+   biz o'sha foydalanuvchini boshqa ekranga qo'ymay, parol almashtirish
+   formasiga yo'naltiramiz;
+3. `@PreAuthorize` qo'yilib, o'quvchilar ro'yxati xodimlarga cheklansin.
+
+Shu uchtasi bo'lsa, xavf yo'qoladi.
+
+**Format — javob keldi: `14.02.2007`** (kun.oy.yil). Frontendda ikki joyga
+izoh qo'yildi: kirish sahifasida ("birinchi marta kirayotgan bo'lsangiz,
+parol — tug'ilgan sanangiz shu ko'rinishda") va admin panelida o'quvchi
+qo'shish formasida (adminga aytish uchun).
+
+Shuning uchun **format o'zgarsa xabar bering** — u endi uch tildagi matnda
+yozilgan va foydalanuvchiga ko'rsatiladi.
+
+> Loyiha egasi bu parolni vaqtinchalik deb qaror qildi: foydalanuvchi keyin
+> sozlamalardan o'zgartira oladi. Yuqoridagi tavsiya kuchida qoladi —
+> **hech narsa o'zgartirishga majburlamaydi**, shuning uchun ko'pchilik
+> o'zgartirmaydi. `mustChangePassword` qo'shilsa, frontend uni bir qatorda
+> qo'llaydi.
+
 ### Super-admin panelini ulaganda topilganlar (P0)
 
 Panel yozildi va `GET/POST/PUT /organizations` hamda `/branch` CRUD ulandi.
@@ -135,11 +178,38 @@ public record BranchDto(
 
 ### Shu yangilanishdan keyin qolgan savollar
 
-1. **`InvoiceType` qiymatlari qanday?** `InvoiceDto` ga `type` qo'shilgan,
-   lekin enum berilmagan — tipga yozolmaymiz.
-2. **`POST /invoice/return?studentId=` nima qiladi?** Oxirgi hisobni
-   bekor qiladimi, pul qaytarish yozuvini yaratadimi, yoki balansdan
-   ayiradimi? Javobi qaysi hisob?
+1. **`InvoiceType` qiymatlari qanday?** Ma'nosi tushuntirildi (2-band), lekin
+   enum konstantalarining **nomlari** hali aytilmagan va kod `N` ga merge
+   bo'lmagan. Shuning uchun frontendda `type` — union emas, oddiy `string`
+   va jadvalda serverdan kelgan nom shundoq ko'rsatiladi (`PAYMENT`,
+   `RETURN` …). Qiymatlarni yuboring — tarjima qilib, nishon (badge) qilamiz.
+
+   **Buning ko'rinadigan oqibati:** qaysi yozuv qaytarim ekanini bilmagani
+   uchun interfeys **qaytarim yozuvining o'zida ham "Qaytarish" tugmasini
+   ko'rsatadi**. Qiymatlar ma'lum bo'lgach bu bir qatorda yopiladi.
+
+2. ✅ **`POST /invoice/return?studentId=` — tushunarli.** O'quvchi oylik
+   to'lovni to'lab, oy o'rtasida ketsa (masalan sayohatga), markaz qolgan
+   pulni qaytaradi: o'tilgan darslar puli ushlab qolinadi, qolgani
+   qaytariladi va bu daromaddan ayiriladi.
+
+   Frontendda ulandi: to'langan hisob qatorida "Qaytarish" tugmasi,
+   tasdiqlash oynasi summani **oldindan ko'rsatmaydi** (uni server
+   hisoblaydi), natija esa javobdan olinib ekranda yoziladi.
+
+   **Qo'shimcha so'rov — daromad xulosasi.** "Qaytarilganni daromaddan olib
+   tashlash kerak" dedingiz. Buni mijozda hisoblab bo'lmaydi: ro'yxat
+   sahifalangan, ya'ni bizda faqat 15 ta yozuv bo'ladi va yig'indi yolg'on
+   chiqadi. Kerak:
+
+   ```java
+   GET /invoice/summary?from=&to=   → InvoiceSummaryDto
+   public record InvoiceSummaryDto(BigDecimal paid, BigDecimal returned,
+                                   BigDecimal net, long count) {}
+   ```
+
+   Shu bo'lsa, to'lovlar sahifasining tepasiga "kirim / qaytarim / sof"
+   kartalarini qo'yamiz — monitoring uchun aynan shu kerak edi.
 3. **`Student.balance`** paydo bo'ldi va hisob yaratilganda oshyapti.
    Uni ekranda ko'rsatamizmi? Manfiy balans "qarzdor" degani bo'ladimi?
 4. **`UserCreateDto` ga `branchId` va `organizationId` qo'shildi** —

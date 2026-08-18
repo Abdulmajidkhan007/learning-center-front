@@ -1,0 +1,31 @@
+import type { SettingsKeys } from '../uz/settings'
+
+/** Sozlamalar sahifasi. (ruscha) */
+export const settings: Record<SettingsKeys, string> = {
+    'settings.title': 'Настройки',
+    'settings.appearance': 'Внешний вид',
+    'settings.appearanceHint': 'Язык и тема сохраняются на этом устройстве.',
+    'settings.language': 'Язык',
+    'settings.theme': 'Тема',
+    'settings.themeLight': 'Светлая',
+    'settings.themeDark': 'Тёмная',
+    'settings.profile': 'Профиль',
+    'settings.profileHint': 'Ваши данные.',
+    'settings.password': 'Пароль',
+    'settings.passwordHint': 'Смена пароля.',
+    'settings.currentPassword': 'Текущий пароль',
+    'settings.newPassword': 'Новый пароль',
+    'settings.repeatPassword': 'Повторите новый пароль',
+    'settings.passwordMismatch': 'Новые пароли не совпадают.',
+    'settings.centre': 'Настройки центра',
+    'settings.centreHint': 'Для всего центра — видит только администратор.',
+    'settings.centreName': 'Название центра',
+    'settings.centreLogo': 'Ссылка на логотип',
+    'settings.workStart': 'Начало работы',
+    'settings.workEnd': 'Конец работы',
+    'settings.weekend': 'Выходные дни',
+    'settings.profileSaved': 'Профиль сохранён.',
+    'settings.passwordChanged': 'Пароль изменён.',
+    'settings.passwordEmpty': 'Заполните все поля.',
+    'settings.passwordTooShort': 'Новый пароль должен быть не короче 8 символов.',
+}

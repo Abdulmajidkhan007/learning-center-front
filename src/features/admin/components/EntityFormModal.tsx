@@ -98,6 +98,12 @@ export function EntityFormModal({
                           </Field>
                       ))}
 
+                {mode === 'create' && formConfig?.createHintKey && (
+                    <p className="text-[0.72rem] leading-snug text-fg-faint">
+                        {t(formConfig.createHintKey)}
+                    </p>
+                )}
+
                 {error != null && <ErrorBox>{errorMessage(error)}</ErrorBox>}
 
                 <div className="mt-1 flex justify-end gap-2.5">

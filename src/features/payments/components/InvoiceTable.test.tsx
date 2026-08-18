@@ -48,6 +48,7 @@ describe('InvoiceTable', () => {
         expect(onMarkPaid).toHaveBeenCalledWith(pending)
     })
 
+
     it('ro’yxat bo’sh bo’lsa tushunarli xabar chiqadi', () => {
         renderTable([])
         expect(screen.getByText(/hisob topilmadi/i)).toBeInTheDocument()
