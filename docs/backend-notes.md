@@ -105,7 +105,7 @@ DayType getDayType();
 Frontend `dayType` ni optional deb biladi, `null` kelsa o'sha guruh
 toq/juft filtriga tushmaydi — xato bermaydi.
 
-### 4. 🟠 `frontUrl` hamon qattiq yozilgan
+### 4. 🔴 `frontUrl` qattiq yozilgani PRODUCTIONDA LOGINNI BLOKLAYAPTI
 
 ```yaml
 spring:
@@ -120,8 +120,39 @@ Bu qiymat CORS'da `allowedOrigins` bo'lib ishlatiladi. Productionda
 frontUrl: ${FRONT_URL:http://localhost:5173}
 ```
 
-(Frontend `/api` ni o'zi uzatgani uchun CORS umuman ishlamaydi, lekin
-qiymat baribir to'g'ri bo'lgani ma'qul.)
+**2026-08-19 holati: kirish sahifasida `Request failed (403)` shundan.**
+
+`SecurityConfig` da:
+
+```java
+config.setAllowedOrigins(List.of(frontUrl));   // frontUrl = http://localhost:5173
+```
+
+Brauzer **POST** so'rovida `Origin` sarlavhasini **same-origin bo'lganda ham**
+yuboradi (GET da yubormaydi). Ya'ni frontend o'z domenidan `/api/v1/auth/login`
+ga POST qilganda, Caddy uni backendga `Origin: https://robust-forgiveness-…`
+bilan uzatadi. Spring'ning CORS filtri ro'yxatda faqat `http://localhost:5173`
+ni ko'radi va so'rovni **403, bo'sh tana** bilan rad etadi — controller'gacha
+yetib ham bormaydi.
+
+Shuning uchun: GET'lar o'tadi, faqat POST yiqiladi va xabar bo'sh bo'ladi.
+
+**Tuzatish — ikkita qadam:**
+
+1. `application.yaml`:
+   ```yaml
+   frontUrl: ${FRONT_URL:http://localhost:5173}
+   ```
+2. Railway → backend xizmati → Variables:
+   ```
+   FRONT_URL = https://robust-forgiveness-production-c350.up.railway.app
+   ```
+
+Env o'zgaruvchisining o'zi yetmaydi — hozir yaml'da qiymat qattiq yozilgan,
+ya'ni `FRONT_URL` o'qilmaydi.
+
+(Frontend `/api` ni o'zi uzatgani uchun CORS mantiqan kerak emas, lekin
+filtr baribir `Origin` ni tekshiradi — shuning uchun to'g'ri qiymat shart.)
 
 ### 5. 🟠 `/student/phone` ham himoyalanishi kerak
 
