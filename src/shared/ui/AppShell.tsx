@@ -40,7 +40,7 @@ export function AppShell({
 
     return (
         <div className="flex min-h-screen flex-col bg-surface">
-            <header className="sticky top-0 z-30 border-b border-border-base bg-surface-card/95 backdrop-blur">
+            <header className="sticky top-0 z-30 border-b border-border-base bg-surface-card/82 shadow-[0_18px_55px_-45px_var(--fg)] backdrop-blur-xl">
                 <div className="flex items-center gap-2 px-4 py-2.5 sm:px-8">
                     <Brand subtitle={subtitle} className="min-w-0 [&>span:last-child]:truncate" />
 
@@ -64,7 +64,7 @@ export function AppShell({
                 {secondary && <div className="px-4 pb-2.5 sm:px-8">{secondary}</div>}
             </header>
 
-            <main className={cn('flex-1 px-4 py-6 pb-16 sm:px-8', mainClassName)}>{children}</main>
+            <main className={cn('flex-1 bg-surface px-4 py-6 pb-16 sm:px-8', mainClassName)}>{children}</main>
         </div>
     )
 }
