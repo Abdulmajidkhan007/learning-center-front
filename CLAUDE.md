@@ -32,9 +32,11 @@ Topshirishdan oldin to'rttasi ham o'tishi shart:
 5. **Server ma'lumoti `useState` da saqlanmaydi** — TanStack Query.
    Mutatsiyadan keyin `invalidateQueries`, qo'lda `setState` emas.
 6. **Query kalitlari** faqat `shared/api/queryKeys.ts` dan.
-7. **DTO tiplari** faqat `shared/types/` da. Ular `goodman113/learning_center`
-   dagi haqiqiy Java record'laridan olingan — o'zgartirishdan oldin o'sha
-   repo bilan solishtiring.
+7. **DTO tiplari** faqat `shared/types/` da. Ular
+   `nurulloh-coder-dev/learning-center` (branch `N`) dagi haqiqiy Java
+   record'laridan olingan — o'zgartirishdan oldin o'sha repo bilan
+   solishtiring. Eski `goodman113/learning_center` orqada qolgan, unga
+   qaralmaydi.
 
 ## Stil qoidalari
 
@@ -171,10 +173,11 @@ tuzatilmagani uchun cheklangan.
   qaytarmaydi. Profil va parol bloklari esa ulangan va ishlaydi.
 - Tashkilot yaratilganda super-admin avtomatik yaratilmaydi — backend uni
   qo'lda qo'shadi, forma buni ochiq aytadi.
-- Tashkilotni o'chirish yo'q: backendda `OrganizationService.delete` bo'sh
-  metod, lekin 204 qaytaradi — tugma qo'ysak yolg'on bo'lardi.
-- Filial qaysi tashkilotga tegishli ekani ko'rinmaydi: `BranchDto` da
-  `organization` izohga olingan.
+- Tashkilotni o'chirish tugmasi yo'q. Backendda (`learning-center@N`)
+  `OrganizationService.delete` endi haqiqiy `softDelete` qiladi — to'siq
+  yo'q, frontendda qilinishi kerak.
+- Filial qaysi tashkilotga tegishli ekani ko'rsatilmaydi. `BranchDto.organization`
+  `N` branchda izohdan chiqarilgan — ustun qo'shilishi kerak.
 - Avtomatik parol generatsiyasi ishlamaydi: `Generator.generatePassword()`
   ochiq matnni emas, hash'ni qaytaradi — parolni hech kim bilolmaydi.
 - Davomatdagi "sabab" matni serverga yuborilmaydi —
@@ -183,7 +186,8 @@ tuzatilmagani uchun cheklangan.
   o'qituvchi panelidagi toq/juft filtri proyeksiyaga `dayType` qo'shilmaguncha
   yashirin turadi.
 - Backendda tuzatilishi kerak bo'lgan narsalar — `docs/backend-notes.md`.
-- Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
-  bunday endpoint yo'q (`useAttendanceRecords`).
+- Davomat "guruh bo'yicha" filtri hali mijozda bajariladi
+  (`useAttendanceRecords`). `N` branchda `GET /attendance/group/{groupId}`
+  paydo bo'ldi — serverga o'tkazilishi kerak.
 - `Dockerfile` build qilib sinalmagan (bu muhitda Docker demoni yo'q edi);
   `Caddyfile` haqiqiy `dist/` ustida tekshirilgan.

@@ -1,7 +1,12 @@
-# Backend uchun eslatmalar (goodman113 ga)
+# Backend uchun eslatmalar
 
-Frontend `goodman113/learning_center` bilan solishtirib tekshiriladi.
-Oxirgi tekshiruv: commit `6eacde9`, Spring Boot **4.1.0**.
+**Qaysi repo tekshiriladi.** Railway'ga joylangan backend endi
+`nurulloh-coder-dev/learning-center` da, asosiy ish branchi — **`N`**
+(paket nomi `org.example.crm`). Eski `goodman113/learning_center` orqada
+qolgan: unda `Lead` ham, `InvoiceType` ham yo'q. Quyidagi eslatmalar
+`nurulloh-coder-dev/learning-center@N` (commit `a8a67ca`, 2026-08-19) bo'yicha.
+
+DTO tiplarini solishtirganda ham **shu** repo olinadi.
 
 ## Tuzatilganlar ✅
 
@@ -15,6 +20,16 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 | Parol o'zgartirishdagi teskari shart | ✅ `!equals(...)` |
 | `GroupNameProjection` ga `dayType` | ✅ frontendda filtr o'zi ishlab ketadi |
 | Cookie `SameSite=Lax` | ✅ |
+
+**`nurulloh-coder-dev/learning-center@N` da qo'shimcha tuzalganlar
+(2026-08-19, `a8a67ca`):**
+
+| Nima | Holati | Frontendga ta'siri |
+| --- | --- | --- |
+| `BranchDto.organization` izohdan chiqarildi | ✅ | super-adminda filial qaysi tashkilotniki ekani ko'rsatilishi mumkin |
+| `OrganizationService.delete` haqiqiy `softDelete` qiladi | ✅ | tashkilotni o'chirish tugmasi qo'yilishi mumkin |
+| `GET /attendance/group/{groupId}` qo'shildi | ✅ | davomatdagi "guruh bo'yicha" filtri mijozdan serverga o'tkazilishi mumkin |
+| `Lead` API to'liq (`/api/v1/leads`) | ✅ | Leads bo'limi endi yozilishi mumkin |
 
 > **Eslatma:** kalitlar env'ga chiqarilgani — ularni almashtirish o'rnini
 > bosmaydi. Eski AWS va JWT kalitlari git tarixida qolgan va ochiq repoda
@@ -137,11 +152,38 @@ yetib ham bormaydi.
 
 Shuning uchun: GET'lar o'tadi, faqat POST yiqiladi va xabar bo'sh bo'ladi.
 
+#### Nega "biz tuzatdik" deyilyapti, lekin baribir ishlamayapti
+
+`nurulloh-coder-dev/learning-center@N` dagi `application.yaml` da
+`frontUrl: ${FRONT_URL}` **bor** — lekin u faylning **izohga olingan**
+qismida (1–46-qatorlar hammasi `#` bilan boshlanadi). Spring izohni o'qimaydi.
+
+Faylning **haqiqiy** qismi 47-qatordan boshlanadi va 50-qatorda:
+
+```yaml
+spring:
+  application:
+    name: CRM
+    frontUrl: http://localhost:5173   # ← ishlaydigan qiymat shu
+  profiles:
+    default: prod
+```
+
+`application-prod.yaml` esa `frontUrl` ni umuman qayta belgilamaydi
+(unda faqat datasource, aws, jwt va `server.port` bor). Ya'ni `prod`
+profilida ham asosiy fayldagi `localhost:5173` kuchda qoladi.
+
 **Tuzatish — ikkita qadam:**
 
-1. `application.yaml`:
+1. `application.yaml`, **47-qatordan keyingi** (izohga olinmagan) blokda:
    ```yaml
    frontUrl: ${FRONT_URL:http://localhost:5173}
+   ```
+   — yoki `application-prod.yaml` ga qo'shish:
+   ```yaml
+   spring:
+     application:
+       frontUrl: ${FRONT_URL}
    ```
 2. Railway → backend xizmati → Variables:
    ```
@@ -149,7 +191,19 @@ Shuning uchun: GET'lar o'tadi, faqat POST yiqiladi va xabar bo'sh bo'ladi.
    ```
 
 Env o'zgaruvchisining o'zi yetmaydi — hozir yaml'da qiymat qattiq yozilgan,
-ya'ni `FRONT_URL` o'qilmaydi.
+ya'ni `FRONT_URL` o'qilmaydi. Izohga olingan blokni tuzatish ham yetmaydi —
+u baribir o'qilmaydi.
+
+**Tekshirish:** deploydan keyin
+
+```bash
+curl -i -X POST https://<backend>/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: https://robust-forgiveness-production-c350.up.railway.app' \
+  -d '{"phone":"+998000000000","password":"x"}'
+```
+
+403 va bo'sh tana o'rniga 400/401 va JSON kelsa — CORS tuzalgan.
 
 (Frontend `/api` ni o'zi uzatgani uchun CORS mantiqan kerak emas, lekin
 filtr baribir `Origin` ni tekshiradi — shuning uchun to'g'ri qiymat shart.)
@@ -276,20 +330,12 @@ Yechim ikkitadan biri:
 
 Ikkinchisi soddaroq va deyarli har doim to'g'ri.
 
-### 10. 🟠 `Branch` uchun API yo'q — super-admin paneli shu sababdan qilinmadi
+### 10. ✅ `Branch` API — qilingan
 
-Frontendda super-admin uchun placeholder ekran turibdi. Uni haqiqiy qilish
-uchun filiallar (branch) API si kerak, hozir esa:
-
-- `BranchController` **yo'q**;
-- `BranchDto`, `BranchCreateDto`, `BranchUpdateDto` — uchalasi ham **bo'sh
-  record** (`public record BranchDto() {}`);
-- `Branch` entity'sida esa maydonlar bor: `organization`, `name`, `address`,
-  `email`, `phone`, `chargeForMonth`, `googlePlaceId`, `latitude`, `longitude`.
-
-Kerak bo'ladigan minimum: `GET/POST/PUT/DELETE /api/v1/branch` va DTO'lar
-to'ldirilgan holda. Shundan keyin super-admin paneli boshqa tablar bilan
-bir xil generik jadvalga tushadi — frontendda bir kunlik ish.
+`BranchController` va to'ldirilgan `BranchDto` paydo bo'lgach super-admin
+paneli yozildi (`/super-admin`). `N` branchda `BranchDto.organization` ham
+izohdan chiqarilgan, ya'ni filial qaysi tashkilotniki ekani ko'rsatilishi
+mumkin — frontendda ustun qo'shish qoldi.
 
 ### 11. 🔴 `InvoiceMapper` da ism va rasm manzili almashib ketgan
 
@@ -331,6 +377,43 @@ uchun `new UserDto(...)` ni nomlangan qurilishga o'tkazing yoki
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot
 paydo bo'lgach Flyway yoki Liquibase'ga o'ting, `ddl-auto: validate` bilan.
+
+### 13. 🔴 `messages*.properties` yo'q — xato matnlari kalit bo'lib chiqadi
+
+Login noto'g'ri bo'lganda javob:
+
+```json
+{"message": "MessageKey not found: illegal.phone.number.or.password"}
+```
+
+`src/main/resources` da birorta `messages.properties` /
+`messages_uz.properties` / `messages_ru.properties` fayli yo'q, shuning uchun
+`MessageSource` hech qaysi kalitni topolmaydi. Frontend serverdan kelgan
+matnni **tarjima qilmaydi va o'zgartirmaydi** (bu ataylab: server xatosi
+qanday kelsa shunday ko'rsatiladi), ya'ni foydalanuvchi shu texnik satrni
+ko'radi.
+
+Kerak: `messages_uz.properties`, `messages_ru.properties`,
+`messages_en.properties` (`Accept-Language` frontenddan `uz`/`ru`/`en` bo'lib
+keladi) va ularda ishlatilayotgan hamma kalit.
+
+### 14. 🟠 `InvoiceDto` da `type` yo'q, lekin `Invoice` da bor
+
+`Invoice` entity'sida `InvoiceType type` bor (`PAID`, `RETURNED`) va
+`InvoiceMapper` qaytarimda uni `RETURNED` qilib belgilaydi. Ammo:
+
+```java
+public record InvoiceDto(
+        String id, String invoiceNumber, StudentDto student,
+        BigDecimal amount, LocalDateTime issuedAt, InvoiceStatus status
+) {}
+```
+
+`type` DTO'da yo'q — ya'ni to'lov va qaytarim yozuvlari ro'yxatda bir xil
+ko'rinadi, faqat summasi bilan farq qiladi. Frontendda "Turi" ustuni bor,
+lekin u doim bo'sh (`—`) chiqadi.
+
+Kerak: `InvoiceDto` ga `InvoiceType type` qo'shilsin.
 
 ---
 

@@ -47,8 +47,9 @@ bo'lishi shart: `vite.config.ts` (`resolve.alias`) va `tsconfig.app.json`
 **Backend DTO'lari — `src/shared/types/`.** Bitta `StudentDto` bor, hamma
 shuni import qiladi.
 
-Shakllar `goodman113/learning_center` repo'sidagi haqiqiy Java
-record'laridan olingan (2026-08-13). Ilgari ular `fetch` chaqiruvlaridan
+Shakllar backend repo'sidagi haqiqiy Java record'laridan olingan
+(dastlab `goodman113/learning_center`, 2026-08-13; joriy manba —
+`nurulloh-coder-dev/learning-center@N`). Ilgari ular `fetch` chaqiruvlaridan
 taxmin qilingan edi; farq chiqqan uchta joy tuzatildi:
 
 | Frontend taxmin qilgan | Haqiqatda |
