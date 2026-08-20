@@ -19,7 +19,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
     const { t } = useT()
 
     return (
-        <aside className="hidden w-55 shrink-0 flex-col bg-sidebar py-6 text-sidebar-fg lg:flex">
+        <aside className="hidden w-55 shrink-0 flex-col border-r border-white/10 bg-sidebar py-6 text-sidebar-fg shadow-[22px_0_60px_-42px_var(--fg)] lg:flex">
             <div className="mb-3 flex items-center gap-2 border-b border-white/10 px-5 pb-6">
                 <span className="rounded-sm bg-brand px-1.5 py-0.5 font-mono text-xs tracking-[0.1em] text-brand-fg">
                     CLC
@@ -36,8 +36,8 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
                         className={cn(
                             'cursor-pointer border-l-3 px-5 py-3 text-left text-sm transition-colors',
                             activeTab === entity.key
-                                ? 'border-l-brand bg-white/6 font-medium text-sidebar-fg'
-                                : 'border-l-transparent text-sidebar-fg/65 hover:bg-white/5 hover:text-sidebar-fg'
+                                ? 'border-l-brand bg-brand/14 font-medium text-sidebar-fg shadow-[inset_14px_0_28px_-28px_var(--brand)]'
+                                : 'border-l-transparent text-sidebar-fg/65 hover:bg-sidebar-fg/8 hover:text-sidebar-fg'
                         )}
                     >
                         {t(entity.pluralKey)}
