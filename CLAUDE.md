@@ -201,8 +201,6 @@ Bular allaqachon topilgan, qayta "kashf qilish" shart emas:
 - `src/features/teacher/pages/TeacherDashboardPage.tsx:7` va
   `src/features/student/pages/StudentDashboardPage.tsx:5` — bo'limlararo
   import.
-- `src/features/teacher/components/RosterList.tsx` — hech qayerdan import
-  qilinmagan.
 - `src/demo/mockApi.ts` (384 qator) va `src/shared/types/index.ts`
   (256 qator) — 3-qoidadan oshgan.
 - Uchta jadval komponenti bir xil `<th>`/`<td>` klasslarini takrorlaydi:
