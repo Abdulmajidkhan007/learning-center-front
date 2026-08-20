@@ -15,7 +15,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export function Select({ options, placeholder, className, ...props }: SelectProps) {
     return (
-        <select className={cn(inputClasses, 'cursor-pointer', className)} {...props}>
+        <select className={cn(inputClasses, 'cursor-pointer appearance-auto accent-accent', className)} {...props}>
             {placeholder !== undefined && <option value="">{placeholder}</option>}
             {options.map((option) => (
                 <option key={option.value} value={option.value}>
