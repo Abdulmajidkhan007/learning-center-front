@@ -87,6 +87,32 @@ export interface TeacherDto {
     userDto?: UserDto
 }
 
+export const LEAD_STATUSES = ['NEW', 'CONFIRMED', 'CALL_LATER', 'REJECTED'] as const
+export type LeadStatus = (typeof LEAD_STATUSES)[number]
+export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
+export type LeadSource = (typeof LEAD_SOURCES)[number]
+
+/** CRM prospect returned by `/api/v1/leads`. */
+export interface LeadDto {
+    id: string
+    fullName?: string
+    phone?: string
+    callAt?: string | null
+    status?: LeadStatus
+    source?: LeadSource | null
+    preferredCourse?: string | null
+    createdAt?: string | null
+    updatedAt?: string | null
+}
+
+/** The documented create/update fields for the Leads API. */
+export interface LeadCreateDto {
+    fullName: string
+    phone: string
+    source?: LeadSource
+    preferredCourse?: string
+}
+
 /**
  * Guruh jadvali turi.
  *

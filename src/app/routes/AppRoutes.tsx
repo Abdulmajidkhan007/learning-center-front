@@ -3,6 +3,7 @@ import { useAuth } from '@/app/providers/useAuth'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage'
 import { PaymentsPage } from '@/features/payments/pages/PaymentsPage'
+import { LeadsPage } from '@/features/leads/pages/LeadsPage'
 import { SettingsPage } from '@/features/settings/pages/SettingsPage'
 import { NotFoundPage } from './NotFoundPage'
 import { RoleDashboard } from './RoleDashboard'
@@ -27,6 +28,7 @@ export function AppRoutes() {
         <Routes>
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/payments" element={<PaymentsPage />} />
+            <Route path="/leads" element={<LeadsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/" element={<RoleDashboard />} />
             <Route path="*" element={<NotFoundPage />} />

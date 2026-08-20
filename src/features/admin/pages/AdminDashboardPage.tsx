@@ -117,9 +117,14 @@ export function AdminDashboardPage() {
                     subtitle={t('admin.role')}
                     onSignOut={signOut}
                     actions={
-                        <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
-                            {t('invoice.title')}
-                        </Button>
+                        <>
+                            <Button variant="purple" size="sm" onClick={() => navigate('/leads')}>
+                                Leads
+                            </Button>
+                            <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
+                                {t('invoice.title')}
+                            </Button>
+                        </>
                     }
                     secondary={<AdminTabStrip activeTab={activeTab} onTabChange={changeTab} />}
                 >
