@@ -15,7 +15,7 @@ export function IconButton({ label, tone = 'default', className, children, ...pr
             aria-label={label}
             title={label}
             className={cn(
-                'inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border',
+                'inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border shadow-[0_12px_28px_-24px_var(--fg)]',
                 'transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                 tone === 'danger'
                     ? 'border-danger-soft bg-danger-soft text-danger-fg hover:bg-danger hover:text-white'

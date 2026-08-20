@@ -13,11 +13,11 @@ export function Pagination({ page, totalPages, totalElements, onPageChange }: Pa
     const { t } = useT()
 
     return (
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 rounded-xl border border-border-base bg-surface-card/70 p-2 shadow-[0_16px_42px_-34px_var(--fg)] backdrop-blur">
             <Button size="sm" disabled={page <= 0} onClick={() => onPageChange(Math.max(0, page - 1))}>
                 ← {t('common.prev')}
             </Button>
-            <span className="font-mono text-xs tabular-nums text-fg-faint">
+            <span className="rounded-full bg-surface-muted px-3 py-2 font-mono text-xs tabular-nums text-fg-faint">
                 {t('common.pageInfo', {
                     page: page + 1,
                     total: Math.max(totalPages, 1),

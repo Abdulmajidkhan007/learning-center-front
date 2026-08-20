@@ -6,7 +6,7 @@ export function Panel({ children, className }: { children: ReactNode; className?
     return (
         <section
             className={cn(
-                'rounded-lg border border-border-base bg-surface-card p-6 shadow-[0_10px_30px_-18px_rgba(31,42,61,0.3)]',
+                'rounded-xl border border-border-base bg-surface-card/78 p-6 shadow-[0_24px_70px_-38px_var(--fg)] backdrop-blur-xl',
                 className
             )}
         >
