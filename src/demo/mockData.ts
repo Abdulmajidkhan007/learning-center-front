@@ -66,7 +66,7 @@ export const groups: GroupDto[] = [
         id: 'g4',
         name: 'Kids Club',
         room: '1',
-        status: 'ENDED',
+        status: 'COMPLETED',
         teacher: teachers[2],
         timeTable: { id: 'tt4', dayType: 'EVEN', startTime: '11:00:00', endTime: '12:00:00' },
     },

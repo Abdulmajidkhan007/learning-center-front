@@ -90,9 +90,8 @@ src/
       pages/       ekran
   shared/            bo'limlarga bog'liq bo'lmagan hamma narsa
     api/     apiFetch, ApiError, queryKeys
-    ui/      Button, Modal, Table, Badge, ThemeToggle …
+    ui/      AppShell, Button, Modal, Panel, Badge, ThemeToggle …
     lib/     format, jwt, cn
-    hooks/   useClickOutside
     i18n/    tarjimalar: uz/ ru/ en/ papkalari, har bo'lim alohida fayl
     types/   backend DTO tiplari
   styles/index.css   Tailwind + rang tokenlari + dark rejim
@@ -123,4 +122,5 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
 | [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik va topilgan xatolar  |
 | [docs/backend-api-request.md](docs/backend-api-request.md) | Backend jamoasiga: kerakli API'lar, ustuvorlik bo'yicha |
+| [docs/ARXITEKTURA-TARIXI.md](docs/ARXITEKTURA-TARIXI.md) | Nega shunday qilingan + loyihaning hozirgi holati |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

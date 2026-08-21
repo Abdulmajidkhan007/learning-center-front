@@ -104,7 +104,7 @@ export interface TimeTableDto {
     endTime?: string
 }
 
-export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'ENDED'] as const
+export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'COMPLETED'] as const
 export type GroupStatus = (typeof GROUP_STATUSES)[number]
 
 export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
