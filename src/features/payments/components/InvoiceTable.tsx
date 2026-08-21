@@ -1,6 +1,7 @@
 import { useT } from '@/shared/i18n'
 import { formatDate } from '@/shared/lib'
-import { Button, IconButton, TrashIcon } from '@/shared/ui'
+import { Button, DataTable, IconButton, TrashIcon } from '@/shared/ui'
+import type { DataTableColumn } from '@/shared/ui'
 import { formatAmount } from '../lib/format'
 import { InvoiceStatusBadge } from './InvoiceStatusBadge'
 import type { InvoiceDto } from '@/shared/types'
@@ -23,97 +24,72 @@ export function InvoiceTable({
 }: InvoiceTableProps) {
     const { t } = useT()
 
+    const columns: DataTableColumn<InvoiceDto>[] = [
+        {
+            key: 'invoiceNumber',
+            header: t('invoice.number'),
+            className: 'font-mono text-xs text-fg-muted',
+            render: (invoice) => invoice.invoiceNumber ?? '—',
+        },
+        {
+            key: 'student',
+            header: t('invoice.student'),
+            render: (invoice) => invoice.student?.userDto?.fullName ?? '—',
+        },
+        {
+            key: 'amount',
+            header: t('invoice.amount'),
+            align: 'right',
+            className: 'tabular-nums',
+            render: (invoice) => formatAmount(invoice.amount),
+        },
+        {
+            key: 'issuedAt',
+            header: t('invoice.issuedAt'),
+            className: 'tabular-nums text-fg-muted',
+            render: (invoice) => formatDate(invoice.issuedAt) || '—',
+        },
+        {
+            key: 'type',
+            header: t('invoice.type'),
+            className: 'font-mono text-xs text-fg-muted',
+            // Turi serverdan kelgan enum nomi bilan ko'rsatiladi: qiymatlari hali aytilmagan,
+            // taxminiy tarjima esa yolg'on bo'lardi.
+            render: (invoice) => invoice.type || '—',
+        },
+        {
+            key: 'status',
+            header: t('field.status'),
+            render: (invoice) => <InvoiceStatusBadge status={invoice.status} />,
+        },
+    ]
+
     return (
-        <div className="mb-4 overflow-x-auto rounded-lg border border-border-base">
-            <table className="w-full border-collapse text-sm">
-                <thead>
-                    <tr>
-                        {[
-                            t('invoice.number'),
-                            t('invoice.student'),
-                            t('invoice.amount'),
-                            t('invoice.issuedAt'),
-                            t('invoice.type'),
-                            t('field.status'),
-                        ].map((label) => (
-                            <th
-                                key={label}
-                                className="border-b border-border-base bg-surface px-4 py-2.5 text-left font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase"
-                            >
-                                {label}
-                            </th>
-                        ))}
-                        <th className="border-b border-border-base bg-surface px-4 py-2.5 text-right font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase">
-                            {t('admin.actions')}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {isLoading && (
-                        <tr>
-                            <td colSpan={7} className="px-4 py-8 text-center text-fg-faint">
-                                {t('common.loading')}
-                            </td>
-                        </tr>
+        <DataTable
+            rows={invoices}
+            columns={columns}
+            isLoading={isLoading}
+            loadingText={t('common.loading')}
+            emptyText={t('invoice.empty')}
+            getRowKey={(invoice) => invoice.id}
+            actionsHeader={t('admin.actions')}
+            renderActions={(invoice) => (
+                <>
+                    {invoice.status !== 'PAID' && (
+                        <Button
+                            variant="success"
+                            size="sm"
+                            disabled={pendingId === invoice.id}
+                            onClick={() => onMarkPaid(invoice)}
+                        >
+                            {t('invoice.markPaid')}
+                        </Button>
                     )}
-
-                    {!isLoading && invoices.length === 0 && (
-                        <tr>
-                            <td colSpan={7} className="px-4 py-8 text-center text-fg-faint">
-                                {t('invoice.empty')}
-                            </td>
-                        </tr>
-                    )}
-
-                    {!isLoading &&
-                        invoices.map((invoice) => (
-                            <tr key={invoice.id} className="hover:bg-surface-hover">
-                                <td className="border-b border-border-base px-4 py-3 font-mono text-xs whitespace-nowrap text-fg-muted">
-                                    {invoice.invoiceNumber ?? '—'}
-                                </td>
-                                <td className="border-b border-border-base px-4 py-3 whitespace-nowrap text-fg">
-                                    {invoice.student?.userDto?.fullName ?? '—'}
-                                </td>
-                                <td className="border-b border-border-base px-4 py-3 text-right tabular-nums whitespace-nowrap text-fg">
-                                    {formatAmount(invoice.amount)}
-                                </td>
-                                <td className="border-b border-border-base px-4 py-3 tabular-nums whitespace-nowrap text-fg-muted">
-                                    {formatDate(invoice.issuedAt) || '—'}
-                                </td>
-                                {/* Turi serverdan kelgan enum nomi bilan
-                                    ko'rsatiladi: qiymatlari hali aytilmagan,
-                                    taxminiy tarjima esa yolg'on bo'lardi. */}
-                                <td className="border-b border-border-base px-4 py-3 font-mono text-xs whitespace-nowrap text-fg-muted">
-                                    {invoice.type || '—'}
-                                </td>
-                                <td className="border-b border-border-base px-4 py-3 whitespace-nowrap">
-                                    <InvoiceStatusBadge status={invoice.status} />
-                                </td>
-                                <td className="border-b border-border-base px-4 py-3 text-right whitespace-nowrap">
-                                    <div className="flex justify-end gap-2">
-                                        {invoice.status !== 'PAID' && (
-                                            <Button
-                                                variant="success"
-                                                size="sm"
-                                                disabled={pendingId === invoice.id}
-                                                onClick={() => onMarkPaid(invoice)}
-                                            >
-                                                {t('invoice.markPaid')}
-                                            </Button>
-                                        )}
-                                        <IconButton
-                                            label={t('common.delete')}
-                                            tone="danger"
-                                            onClick={() => onDelete(invoice)}
-                                        >
-                                            <TrashIcon />
-                                        </IconButton>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
-        </div>
+                    <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(invoice)}>
+                        <TrashIcon />
+                    </IconButton>
+                </>
+            )}
+        />
     )
 }
