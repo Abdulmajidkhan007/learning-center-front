@@ -243,6 +243,32 @@ export interface InvoiceDto {
     type?: string
 }
 
+export const LEAD_STATUSES = ['NEW', 'CONFIRMED', 'REJECTED', 'CALL_LATER'] as const
+export type LeadStatus = (typeof LEAD_STATUSES)[number]
+
+export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
+export type LeadSource = (typeof LEAD_SOURCES)[number]
+
+/**
+ * `LeadDto` — potentsial o'quvchi (lid).
+ *
+ * Diqqat: `PUT /leads/{id}` uchun `LeadUpdateDto` boshqa shaklda (maydon
+ * `name`, `fullName` emas) — bu backend nomuvofiqligi, hozircha tahrirlash
+ * shu sabab ulanmagan (`docs/backend-notes.md`ga qarang).
+ */
+export interface LeadDto {
+    id: string
+    fullName?: string
+    phone?: string
+    /** `LocalDateTime` — qo'ng'iroq qilish rejalashtirilgan vaqt. */
+    callAt?: string
+    status?: LeadStatus
+    source?: LeadSource
+    preferredCourse?: string
+    createdAt?: string
+    updatedAt?: string
+}
+
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
 export const WEEK_DAYS = [
     'MONDAY',

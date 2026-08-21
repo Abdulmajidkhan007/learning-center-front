@@ -326,7 +326,29 @@ uchun `new UserDto(...)` ni nomlangan qurilishga o'tkazing yoki
 `TeacherDto` uchun ham shu proyeksiyada `getTeacherFullName` /
 `getTeacherImageUrl` bor — o'sha joyni ham tekshiring.
 
-### 12. 🟡 `ddl-auto: update`
+### 12. 🟠 `LeadUpdateDto` maydonlari `LeadDto` bilan mos emas
+
+`GET /leads` (va boshqa o'qish yo'llari) `LeadDto{id, fullName, phone, callAt,
+status, source, preferredCourse, createdAt, updatedAt}` qaytaradi, lekin
+`PUT /leads/{id}` kutayotgan `LeadUpdateDto` boshqacha:
+
+- ism maydoni `fullName` emas, `name`;
+- `preferredCourse` boshqa turda (aniq qaysi — ma'lum emas, `String` deb
+  taxmin qilingan).
+
+Ikkalasi bir xil "lid" tushunchasini tasvirlaydigan bo'lsa, maydon
+nomlari ham mos kelishi kerak — aks holda frontendda ikkita alohida
+xarita saqlashga to'g'ri keladi va birortasi yangilansa ikkinchisi
+unutiladi.
+
+Shu sabab **tahrirlash (edit) funksiyasi hozircha ulanmagan**: faqat
+ro'yxat, yaratish, o'chirish va holat o'zgartirish (`PATCH .../status`)
+ishlaydi. Aniqlik kirgach `NewLeadModal` yonida `EditLeadModal` qo'shiladi
+(`src/features/leads/`).
+
+**So'rov:** `docs/backend-api-request.md`.
+
+### 13. 🟡 `ddl-auto: update`
 
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot
