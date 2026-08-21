@@ -1,20 +1,15 @@
 import { apiFetch } from '@/shared/api'
-import type { AttendanceDto, AttendanceStudentDto, Page } from '@/shared/types'
+import type { AttendanceDto, AttendanceStudentDto } from '@/shared/types'
 
 const ENDPOINT = '/attendance'
 
 /**
- * Backend ba'zan massiv, ba'zan `Page` qaytaradi — ikkalasini ham qabul
- * qilamiz va bitta massivga keltiramiz. (Kontrollerlar bir xillashtirilsa,
- * shu funksiya soddalashadi.)
+ * Guruh bo'yicha davomat — backend faqat shu guruhning yozuvlarini qaytaradi
+ * (`List`, `Page` emas), shuning uchun mijozda qo'shimcha filtrlash kerak emas.
  */
-export async function fetchAttendance(token: string): Promise<AttendanceDto[]> {
-    const data = await apiFetch<AttendanceDto[] | Page<AttendanceDto>>(ENDPOINT, {
-        token,
-        params: { size: 200 },
-    })
-    if (Array.isArray(data)) return data
-    return data?.content ?? []
+export async function fetchAttendanceByGroup(token: string, groupId: string): Promise<AttendanceDto[]> {
+    const data = await apiFetch<AttendanceDto[]>(`${ENDPOINT}/group/${groupId}`, { token })
+    return data ?? []
 }
 
 export interface CreateAttendancePayload {

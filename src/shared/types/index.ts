@@ -104,7 +104,7 @@ export interface TimeTableDto {
     endTime?: string
 }
 
-export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'ENDED'] as const
+export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'COMPLETED'] as const
 export type GroupStatus = (typeof GROUP_STATUSES)[number]
 
 export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
@@ -241,6 +241,32 @@ export interface InvoiceDto {
      * ma'lum bo'lgach union qilinadi (`JwtClaims['role']` bilan bir sabab).
      */
     type?: string
+}
+
+export const LEAD_STATUSES = ['NEW', 'CONFIRMED', 'REJECTED', 'CALL_LATER'] as const
+export type LeadStatus = (typeof LEAD_STATUSES)[number]
+
+export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
+export type LeadSource = (typeof LEAD_SOURCES)[number]
+
+/**
+ * `LeadDto` — potentsial o'quvchi (lid).
+ *
+ * Diqqat: `PUT /leads/{id}` uchun `LeadUpdateDto` boshqa shaklda (maydon
+ * `name`, `fullName` emas) — bu backend nomuvofiqligi, hozircha tahrirlash
+ * shu sabab ulanmagan (`docs/backend-notes.md`ga qarang).
+ */
+export interface LeadDto {
+    id: string
+    fullName?: string
+    phone?: string
+    /** `LocalDateTime` — qo'ng'iroq qilish rejalashtirilgan vaqt. */
+    callAt?: string
+    status?: LeadStatus
+    source?: LeadSource
+    preferredCourse?: string
+    createdAt?: string
+    updatedAt?: string
 }
 
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */

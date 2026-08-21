@@ -2,9 +2,11 @@ import { Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/app/providers/useAuth'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage'
+import { LeadsPage } from '@/features/leads/pages/LeadsPage'
 import { PaymentsPage } from '@/features/payments/pages/PaymentsPage'
 import { SettingsPage } from '@/features/settings/pages/SettingsPage'
 import { NotFoundPage } from './NotFoundPage'
+import { RequireRole } from './RequireRole'
 import { RoleDashboard } from './RoleDashboard'
 
 /**
@@ -13,6 +15,10 @@ import { RoleDashboard } from './RoleDashboard'
  * Autentifikatsiya shu yerda yagona joyda tekshiriladi: sessiya bo'lmasa
  * hech qanday himoyalangan marshrut umuman render bo'lmaydi, shuning uchun
  * ichkarida `session` doim mavjud (`useSession` shunga tayanadi).
+ *
+ * Rol tekshiruvi esa `RequireRole` orqali — qarang o'sha faylning
+ * izohidagi ogohlantirish: bu faqat UI qulayligi, backendda hali
+ * `@PreAuthorize` yo'q.
  */
 export function AppRoutes() {
     const { session, signIn, isRestoring } = useAuth()
@@ -25,9 +31,38 @@ export function AppRoutes() {
 
     return (
         <Routes>
-            <Route path="/attendance" element={<AttendancePage />} />
-            <Route path="/payments" element={<PaymentsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route
+                path="/attendance"
+                element={
+                    <RequireRole roles={['ADMINISTRATOR', 'TEACHER']}>
+                        <AttendancePage />
+                    </RequireRole>
+                }
+            />
+            <Route
+                path="/payments"
+                element={
+                    <RequireRole roles={['ADMINISTRATOR', 'TEACHER', 'SUPER_ADMIN']}>
+                        <PaymentsPage />
+                    </RequireRole>
+                }
+            />
+            <Route
+                path="/leads"
+                element={
+                    <RequireRole roles={['ADMINISTRATOR', 'SUPER_ADMIN']}>
+                        <LeadsPage />
+                    </RequireRole>
+                }
+            />
+            <Route
+                path="/settings"
+                element={
+                    <RequireRole roles={['SUPER_ADMIN', 'ADMINISTRATOR', 'TEACHER', 'STUDENT']}>
+                        <SettingsPage />
+                    </RequireRole>
+                }
+            />
             <Route path="/" element={<RoleDashboard />} />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>

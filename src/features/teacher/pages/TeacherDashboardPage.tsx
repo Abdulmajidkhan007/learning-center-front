@@ -53,7 +53,7 @@ export function TeacherDashboardPage() {
     const group = groupInfoQuery.data?.groupDto
     const students = useMemo(() => groupInfoQuery.data?.studentDto ?? [], [groupInfoQuery.data])
 
-    const { records } = useAttendanceRecords(session.token, students)
+    const { records } = useAttendanceRecords(session.token, selectedGroupId)
     const pastColumns = useMemo<PastLessonColumn[]>(
         () =>
             records.map((record) => ({
@@ -70,7 +70,7 @@ export function TeacherDashboardPage() {
     })
 
     function openAttendance() {
-        navigate('/attendance', { state: { students, activeLesson } })
+        navigate('/attendance', { state: { students, activeLesson, groupId: selectedGroupId } })
     }
 
     function switchGroup(groupId: string) {

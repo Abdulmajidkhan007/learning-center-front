@@ -5,7 +5,7 @@ import type { GroupStatus } from '@/shared/types'
 const STATUS_TONE: Record<GroupStatus, BadgeTone> = {
     STARTING: 'amber',
     ONGOING: 'sage',
-    ENDED: 'slate',
+    COMPLETED: 'slate',
 }
 
 export function GroupStatusBadge({ status }: { status?: GroupStatus }) {

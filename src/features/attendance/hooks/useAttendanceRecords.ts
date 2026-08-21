@@ -1,31 +1,19 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
-import { fetchAttendance } from '../api/attendanceApi'
-import type { AttendanceDto, StudentDto } from '@/shared/types'
+import { fetchAttendanceByGroup } from '../api/attendanceApi'
 
 /**
- * Guruhga tegishli davomat yozuvlari.
- *
- * Backendda "guruh bo'yicha" filtr yo'q, shuning uchun hammasi olinib,
- * mijozda filtrlanadi. Endpoint qo'shilsa, filtrlash shu yerdan olib
- * tashlanadi — sahifaga tegilmaydi.
+ * Guruhga tegishli davomat yozuvlari — backend `/attendance/group/{groupId}`
+ * orqali faqat shu guruhning yozuvlarini qaytaradi, mijozda filtrlash kerak
+ * emas (boshqacha bo'lganida boshqa guruhlarning ma'lumoti ham brauzerga
+ * tushib qolardi).
  */
-export function useAttendanceRecords(token: string, students: StudentDto[]) {
+export function useAttendanceRecords(token: string, groupId: string) {
     const query = useQuery({
-        queryKey: queryKeys.attendance(),
-        queryFn: () => fetchAttendance(token),
-        enabled: students.length > 0,
+        queryKey: queryKeys.attendanceByGroup(groupId),
+        queryFn: () => fetchAttendanceByGroup(token, groupId),
+        enabled: Boolean(groupId),
     })
 
-    const studentIds = useMemo(() => new Set(students.map((student) => student.id)), [students])
-
-    const records = useMemo<AttendanceDto[]>(() => {
-        if (!query.data) return []
-        return query.data.filter((record) =>
-            (record.attendanceStudents ?? []).some((entry) => studentIds.has(entry.studentId))
-        )
-    }, [query.data, studentIds])
-
-    return { ...query, records }
+    return { ...query, records: query.data ?? [] }
 }
