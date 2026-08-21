@@ -15,6 +15,7 @@ import type { LessonDto, StudentDto } from '@/shared/types'
 interface AttendanceRouteState {
     students?: StudentDto[]
     activeLesson?: LessonDto | null
+    groupId?: string
 }
 
 export function AttendancePage() {
@@ -27,8 +28,9 @@ export function AttendancePage() {
     const state = (location.state ?? null) as AttendanceRouteState | null
     const students = useMemo(() => state?.students ?? [], [state])
     const activeLesson = state?.activeLesson ?? null
+    const groupId = state?.groupId ?? ''
 
-    const { records, error } = useAttendanceRecords(session.token, students)
+    const { records, error } = useAttendanceRecords(session.token, groupId)
     const draft = useAttendanceDraft(students, activeLesson)
     const submit = useSubmitAttendance(session.token, () => {
         draft.clearDraft()

@@ -183,7 +183,5 @@ tuzatilmagani uchun cheklangan.
   o'qituvchi panelidagi toq/juft filtri proyeksiyaga `dayType` qo'shilmaguncha
   yashirin turadi.
 - Backendda tuzatilishi kerak bo'lgan narsalar — `docs/backend-notes.md`.
-- Davomat "guruh bo'yicha" filtri mijozda bajariladi, chunki backendda
-  bunday endpoint yo'q (`useAttendanceRecords`).
 - `Dockerfile` build qilib sinalmagan (bu muhitda Docker demoni yo'q edi);
   `Caddyfile` haqiqiy `dist/` ustida tekshirilgan.
