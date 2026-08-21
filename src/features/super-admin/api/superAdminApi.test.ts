@@ -1,0 +1,103 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+    createBranch,
+    createOrganization,
+    deleteBranch,
+    fetchBranches,
+    fetchOrganizations,
+    updateBranch,
+    updateOrganization,
+} from './superAdminApi'
+
+interface FakeResponse {
+    ok?: boolean
+    status?: number
+    text?: string
+}
+
+function mockFetch({ ok = true, status = 200, text = '' }: FakeResponse) {
+    const fetchMock = vi.fn().mockResolvedValue({
+        ok,
+        status,
+        text: () => Promise.resolve(text),
+        json: () => Promise.resolve(JSON.parse(text || '{}')),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+}
+
+beforeEach(() => vi.unstubAllGlobals())
+afterEach(() => vi.restoreAllMocks())
+
+const TOKEN = 'tok'
+
+describe('fetchOrganizations', () => {
+    it('to‘g‘ri yo‘l va query parametrlarini yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"content":[],"totalElements":0}' })
+        await fetchOrganizations(TOKEN, { page: 0, size: 10 })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations?page=0&size=10')
+    })
+
+    it('bo‘sh search parametrini query’dan tushirib qoldiradi', async () => {
+        const fetchMock = mockFetch({ text: '{}' })
+        await fetchOrganizations(TOKEN, { page: 0, size: 10, search: '' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations?page=0&size=10')
+    })
+})
+
+describe('createOrganization', () => {
+    it('POST /organizations ga body yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"id":"1"}' })
+        await createOrganization(TOKEN, { name: 'Markaz' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations')
+        expect(fetchMock.mock.calls[0][1].method).toBe('POST')
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Markaz"}')
+    })
+})
+
+describe('updateOrganization', () => {
+    it('PUT /organizations/{id} ga body yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"id":"1"}' })
+        await updateOrganization(TOKEN, '1', { name: 'Markaz 2' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations/1')
+        expect(fetchMock.mock.calls[0][1].method).toBe('PUT')
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Markaz 2"}')
+    })
+})
+
+describe('fetchBranches', () => {
+    it('to‘g‘ri yo‘l va query parametrlarini yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"content":[],"totalElements":0}' })
+        await fetchBranches(TOKEN, { page: 0, size: 10, search: 'Toshkent' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/branch?page=0&size=10&search=Toshkent')
+    })
+})
+
+describe('createBranch', () => {
+    it('POST /branch ga organizationId bilan yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"id":"1"}' })
+        await createBranch(TOKEN, { name: 'Filial 1', organizationId: 'o1' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/branch')
+        expect(fetchMock.mock.calls[0][1].method).toBe('POST')
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Filial 1","organizationId":"o1"}')
+    })
+})
+
+describe('updateBranch', () => {
+    it('PUT /branch/{id} ga organizationId siz body yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"id":"1"}' })
+        await updateBranch(TOKEN, '1', { name: 'Filial 2' })
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/branch/1')
+        expect(fetchMock.mock.calls[0][1].method).toBe('PUT')
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Filial 2"}')
+    })
+})
+
+describe('deleteBranch', () => {
+    it('DELETE /branch/{id} yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '' })
+        await deleteBranch(TOKEN, '1')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/branch/1')
+        expect(fetchMock.mock.calls[0][1].method).toBe('DELETE')
+    })
+})
