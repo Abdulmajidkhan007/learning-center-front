@@ -82,7 +82,7 @@ src/
     providers/         Theme, Auth, QueryClient
     routes/            AppRoutes, RoleDashboard
   features/            biznes bo'limlari (har biri o'zicha to'liq)
-    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/
+    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/  leads/
       api/         shu bo'lim endpoint'lari
       hooks/       TanStack Query hooklari va holat mantiqi
       components/  shu bo'limga tegishli komponentlar

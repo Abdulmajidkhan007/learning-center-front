@@ -621,6 +621,24 @@ id sini qayerdandir topishi kerak — u yo'q.
 
 ---
 
+## P1-2. `LeadUpdateDto` — `LeadDto` bilan bir xil maydon nomlari kerak
+
+Lidlar bo'limi ulandi: ro'yxat, yaratish, o'chirish, holat o'zgartirish
+(`PATCH /leads/{id}/status`). Faqat **tahrirlash ulanmagan**, chunki
+`PUT /leads/{id}` kutayotgan `LeadUpdateDto` `LeadDto` dan farqli:
+
+- ism maydoni `name`, `LeadDto`dagi `fullName` emas;
+- `preferredCourse` boshqa turda (aniq qaysi ma'lum emas).
+
+So'rov: `LeadUpdateDto` ni `LeadDto` bilan bir xil nomlarga keltiring
+(`fullName`, `preferredCourse: String`) — yoki farq ataylab bo'lsa, sababini
+ayting, biz shunga moslashamiz. Batafsil: `backend-notes.md`, 12-band.
+
+```java
+public record LeadUpdateDto(String fullName, String phone, LocalDateTime callAt,
+                            LeadSource source, String preferredCourse) {}
+```
+
 ## P2-1. O'qituvchi paneli — KPI kartalar
 
 Reference dizaynda guruh tepasida kartalar bor, hozir ular `PendingBackend`
