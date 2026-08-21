@@ -177,7 +177,7 @@ export function installMockApi() {
 
         // --- o'qituvchi paneli ---
         if (path === '/group/groups') {
-            return json(db.groups.filter((group) => group.status !== 'ENDED'))
+            return json(db.groups.filter((group) => group.status !== 'COMPLETED'))
         }
         if (path === '/group/groupInfo') {
             return json(fullGroup(url.searchParams.get('groupId') ?? 'g1'))

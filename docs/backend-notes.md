@@ -440,6 +440,54 @@ Frontend `GET /<endpoint>/count` ni parametrsiz chaqiradi va javobning
 ikkala shaklini ham (`5` va `{"count": 5}`) tushunadi
 (`src/features/admin/api/adminApi.ts:24`).
 
+### 16. 🔴 `branch.organization_id` bo'sh — guruhlar ro'yxati shundan bo'sh chiqadi
+
+`GroupRepository.getAllByFilter` shunday filtrlaydi:
+
+```sql
+JOIN g.branch b
+WHERE b.organizationId = :organizationId
+```
+
+`Branch` da alohida `organization` bog'lanishi **yo'q** — uning tashkilotga
+yagona aloqasi `BaseEntity.organizationId`. U esa faqat `@PrePersist` da
+to'ladi, ya'ni **yangi qo'shilgan qatorlarda**. Bu o'zgarishdan oldin
+yaratilgan filiallarning `organization_id` ustuni `NULL` bo'lib qolgan.
+
+`NULL = 'biror-id'` hech qachon rost bo'lmaydi → ro'yxat bo'sh.
+
+Darslar ishlayotgani shuni tasdiqlaydi: `GET /lesson` tashkilot bo'yicha
+filtrlamaydi, shuning uchun ma'lumot ko'rinadi.
+
+**Tuzatish — eski qatorlarni to'ldirish:**
+
+```sql
+SELECT id, name FROM organizations;
+UPDATE branch SET organization_id = '<org-id>' WHERE organization_id IS NULL;
+```
+
+Xuddi shu muammo `BaseEntity` dan meros olgan **hamma** jadvalda bor:
+`groups`, `students`, `teachers`, `lessons`, `invoice`. Tashkilot bo'yicha
+filtr qo'shilgan har bir joyda eski ma'lumot ko'rinmay qoladi.
+
+**Diqqat — ilova orqali tuzatib bo'lmaydi:**
+
+```java
+@Column(name = "organization_id", updatable = false)
+```
+
+`updatable = false` tufayli Hibernate mavjud qatorga bu ustunni **yozmaydi**.
+Ya'ni to'ldirish faqat SQL bilan bo'ladi, yoki avval shu bayroq olib
+tashlanishi kerak.
+
+### 17. 🟡 `GroupStatus` da `ENDED` → `COMPLETED` (frontend moslashtirildi)
+
+Backend enum'i `STARTING, ONGOING, COMPLETED` bo'ldi. Frontendda `ENDED`
+turgandi — `src/shared/types/index.ts` va uch tildagi `status.*` kalitlari
+yangilandi. Bu bandda backenddan hech narsa talab qilinmaydi, faqat yozib
+qo'yildi: enum qiymati o'zgarsa frontend filtri jim yiqiladi (400), shuning
+uchun bunday o'zgarishlarni oldindan ayting.
+
 ---
 
 ## Railway env o'zgaruvchilari

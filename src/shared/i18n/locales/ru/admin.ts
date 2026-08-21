@@ -50,7 +50,7 @@ export const admin: Record<AdminKeys, string> = {
     'lesson.ongoing': 'Идёт',
     'status.STARTING': 'Начинается',
     'status.ONGOING': 'Идёт',
-    'status.ENDED': 'Завершена',
+    'status.COMPLETED': 'Завершена',
     'group.dayType.ODD': 'Нечётные дни',
     'group.dayType.EVEN': 'Чётные дни',
     'field.dayType': 'Тип расписания',
