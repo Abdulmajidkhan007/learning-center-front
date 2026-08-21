@@ -174,7 +174,8 @@ src/
     api/                      httpClient(apiFetch), ApiError, queryKeys,
                               requestLocale
     ui/                       AppShell, Button, Modal, Panel, Input, Select,
-                              Pagination, Badge, icons, inputClasses.ts …
+                              Pagination, Badge, DataTable, icons,
+                              *Classes.ts (klass jadvallari) …
     lib/                      format, jwt, cn
     i18n/                     translate, useT, locales/{uz,ru,en}/<bo'lim>.ts
     types/index.ts            backend DTO tiplari (bitta fayl)
@@ -207,9 +208,6 @@ Bular allaqachon topilgan, qayta "kashf qilish" shart emas:
   import.
 - `src/demo/mockApi.ts` (384 qator) va `src/shared/types/index.ts`
   (256 qator) — 3-qoidadan oshgan.
-- Uchta jadval komponenti bir xil `<th>`/`<td>` klasslarini takrorlaydi:
-  `admin/components/EntityTable.tsx`, `payments/components/InvoiceTable.tsx`,
-  `super-admin/components/SimpleTable.tsx`.
 
 ## Hujjatlar
 
