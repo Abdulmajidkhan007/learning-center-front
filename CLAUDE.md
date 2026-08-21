@@ -78,7 +78,8 @@ Shuning uchun yangi ish **imkon qadar o'z bo'lim papkasida** yozilsin.
 6. **Query kalitlari** faqat `src/shared/api/queryKeys.ts` dan.
    *Sabab: kalit satrini qo'lda yozish — invalidatsiya xatolarining manbai.*
 7. **DTO tiplari** faqat `src/shared/types/` da. Manba —
-   `nurulloh-coder-dev/learning-center` (branch `N`) dagi Java record'lari.
+   `nurulloh-coder-dev/learning-center` (branch **`main`** — production shundan
+   deploy bo'ladi va u `N` dan oldinda) dagi Java record'lari.
    O'zgartirishdan oldin o'sha repo bilan solishtiring. Eski
    `goodman113/learning_center` ga qaralmaydi.
 8. **`shared/ui/` ga faqat ikki yoki undan ko'p bo'lim ishlatadigan narsa**

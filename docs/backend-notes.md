@@ -1,12 +1,12 @@
 # Backend uchun eslatmalar
 
-**Qaysi repo tekshiriladi.** Railway'ga joylangan backend endi
-`nurulloh-coder-dev/learning-center` da, asosiy ish branchi — **`N`**
-(paket nomi `org.example.crm`). Eski `goodman113/learning_center` orqada
-qolgan: unda `Lead` ham, `InvoiceType` ham yo'q. Quyidagi eslatmalar
-`nurulloh-coder-dev/learning-center@N` (commit `a8a67ca`, 2026-08-19) bo'yicha.
+**Qaysi repo va branch tekshiriladi.** Railway'ga joylangan backend —
+`nurulloh-coder-dev/learning-center`, branch **`main`** (backend jamoasi
+2026-08-21 da tasdiqladi). `main` o'ziga `N` ni merge qilib olgan va undan
+12 commit oldinda, ya'ni **haqiqat manbai `main`**, `N` emas.
 
-DTO tiplarini solishtirganda ham **shu** repo olinadi.
+Eski `goodman113/learning_center` ga qaralmaydi. Quyidagi eslatmalar
+`nurulloh-coder-dev/learning-center@main` (`e02c464`, 2026-08-21) bo'yicha.
 
 ## Tuzatilganlar ✅
 
@@ -414,6 +414,31 @@ ko'rinadi, faqat summasi bilan farq qiladi. Frontendda "Turi" ustuni bor,
 lekin u doim bo'sh (`—`) chiqadi.
 
 Kerak: `InvoiceDto` ga `InvoiceType type` qo'shilsin.
+
+### 15. 🔴 To'rtta `/count` endpoint'i ham admin paneliga yaramaydi
+
+Admin panelining tepasidagi to'rtta KPI kartasi (o'quvchilar, o'qituvchilar,
+guruhlar, darslar soni) hammasi `—` ko'rsatadi. Sabab — to'rttala
+endpoint ham frontend bera olmaydigan majburiy parametr talab qiladi:
+
+| Endpoint | Talab qiladi | Muammo |
+| --- | --- | --- |
+| `GET /student/count` | `groupId` | Kartaga **markazdagi jami** o'quvchi kerak, guruhdagi emas |
+| `GET /lesson/count` | `groupId` | Xuddi shunday |
+| `GET /group/count` | `organizationId` | Tokendan olinishi kerak, mijozdan emas |
+| `GET /teacher/count` | `organizationId` | Xuddi shunday |
+
+Ya'ni hozir markaz bo'yicha umumiy sonni **hech qanday yo'l bilan** olib
+bo'lmaydi.
+
+Kerak: to'rttasi ham parametrsiz ishlasin va tashkilotni tokendan olsin
+(`userValidator.authenticateAndGetOrganizationId()`). Guruh bo'yicha son
+kerak bo'lsa — `groupId` **ixtiyoriy** parametr bo'lsin
+(`@RequestParam(required = false)`), majburiy emas.
+
+Frontend `GET /<endpoint>/count` ni parametrsiz chaqiradi va javobning
+ikkala shaklini ham (`5` va `{"count": 5}`) tushunadi
+(`src/features/admin/api/adminApi.ts:24`).
 
 ---
 
