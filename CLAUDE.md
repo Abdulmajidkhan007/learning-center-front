@@ -189,9 +189,12 @@ Ildizda: `Dockerfile` + `Caddyfile` (production, `/api` proxysi),
 
 ### Marshrutlar
 
-`/` → rolga qarab dashboard · `/attendance` · `/payments` · `/settings`
-(`src/app/routes/AppRoutes.tsx`). **Diqqat:** hozir marshrutlarda rol
-tekshiruvi YO'Q — faqat `RoleDashboard` rolga qaraydi.
+`/` → rolga qarab dashboard · `/attendance` · `/payments` · `/leads` ·
+`/settings` (`src/app/routes/AppRoutes.tsx`).
+
+Rol tekshiruvi `RequireRole` orqali (`src/app/routes/RequireRole.tsx`).
+**Diqqat:** bu himoya EMAS, faqat qulaylik — backendda `@PreAuthorize`
+yo'q, ya'ni tokeni bor har kim API'ga to'g'ridan-to'g'ri kira oladi.
 
 ## Ma'lum chetlanishlar
 

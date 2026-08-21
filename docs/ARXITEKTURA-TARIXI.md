@@ -166,7 +166,6 @@ profil, parol), to'lovlar (`/payments`, qaytarim bilan), super-admin
 **Backend tayyor, frontendda qilinishi kerak** (`learning-center@N` da
 2026-08-19 da paydo bo'ldi):
 
-- `GET /attendance/group/{groupId}` — davomat filtri hali mijozda.
 - `BranchDto.organization` — filial qaysi tashkilotniki, ko'rsatilmayapti.
 - `OrganizationService.delete` endi haqiqiy `softDelete` — o'chirish
   tugmasi qo'yilishi mumkin.
