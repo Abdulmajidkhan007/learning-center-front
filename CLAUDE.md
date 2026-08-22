@@ -31,15 +31,28 @@ boshqa hech narsani — "menda ishlayapti, CI'da yiqilyapti" bo'lmasligi uchun.
 ## Ish tartibi
 
 Asl repo: `nurulloh-coder-dev/learning-center-front`, asosiy branch — **`N`**.
-Ish fork'da: `Abdulmajidkhan007/learning-center-front`.
+
+**Branch nomi: `<ism>/<ish>`** — `oybek/leads-kanban`, `diyor/ui-kit`,
+`frontend/lead-007`, `backend/invoice-fix`.
+*Sabab: jamoa kattalashdi; nomda ism bo'lsa kim nima qilayotgani ro'yxatdan
+darhol ko'rinadi va bir ishni ikki kishi yozib qo'ymaydi.*
+
+Jamoa a'zolari asl repoda o'z branchini ochadi:
+
+```bash
+git fetch origin N
+git checkout -b <ism>/<ish> origin/N
+```
+
+Agentlar esa fork'da ishlaydi (`Abdulmajidkhan007/learning-center-front`) —
+ularda asl repoga yozish huquqi yo'q, PR orqali qo'shiladi:
 
 ```bash
 git fetch https://github.com/nurulloh-coder-dev/learning-center-front N
-git checkout -b agent/<qisqa-nom> FETCH_HEAD
+git checkout -b <ism>/<ish> FETCH_HEAD
 ```
 
-- Branch nomi: `agent/<bo'lim>` — `agent/payments`, `agent/leads`.
-  Agent sessiyasiga tayin branch berilgan bo'lsa, o'shanisi ishlatiladi.
+- Agent sessiyasiga tayin branch berilgan bo'lsa, o'shanisi ishlatiladi.
 - **`N` ga to'g'ridan-to'g'ri push QILINMAYDI.** PR — har commit uchun emas,
   tugagan ish uchun.
 - Bitta uzun "hamma narsa" branchi ochilmaydi — uzoq yashagan branch qancha
@@ -47,7 +60,7 @@ git checkout -b agent/<qisqa-nom> FETCH_HEAD
 - Commit xabarlari — **inglizcha** (loyihada shunday). Kod izohlari —
   **o'zbekcha**.
 - PR havolasi:
-  `https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:agent/<nom>`
+  `https://github.com/nurulloh-coder-dev/learning-center-front/compare/N...Abdulmajidkhan007:<ism>/<ish>`
 
 ### Konflikt chiqadigan uch joy
 
