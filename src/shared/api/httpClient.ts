@@ -102,6 +102,9 @@ async function readError(res: Response): Promise<{ message: string; code?: strin
 
 /** Xato obyektidan foydalanuvchiga ko'rsatiladigan matnni oladi. */
 export function errorMessage(error: unknown, fallback = 'Something went wrong. Try again.'): string {
-    if (error instanceof Error && error.message) return error.message
+    if (error instanceof Error && error.message) {
+        if (error.message.startsWith('MessageKey not found:')) return fallback
+        return error.message
+    }
     return fallback
 }

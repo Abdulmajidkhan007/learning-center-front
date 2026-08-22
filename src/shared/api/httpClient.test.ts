@@ -136,4 +136,10 @@ describe('errorMessage', () => {
         expect(errorMessage(undefined, 'fallback')).toBe('fallback')
         expect(errorMessage({}, 'fallback')).toBe('fallback')
     })
+
+    it('backend topilmagan message kalitini zaxira matn bilan almashtiradi', () => {
+        expect(errorMessage(new Error('MessageKey not found: illegal.phone.number.or.password'), 'fallback')).toBe(
+            'fallback'
+        )
+    })
 })

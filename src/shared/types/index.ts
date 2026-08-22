@@ -243,8 +243,11 @@ export interface InvoiceDto {
     type?: string
 }
 
-export const LEAD_STATUSES = ['NEW', 'CONFIRMED', 'REJECTED', 'CALL_LATER'] as const
+export const LEAD_STATUSES = ['NEW', 'ENROLLED', 'REJECTED', 'CALL_LATER'] as const
 export type LeadStatus = (typeof LEAD_STATUSES)[number]
+
+export const REJECTION_REASONS = ['PRICE_TOO_HIGH', 'SCHEDULE_CONFLICT', 'LOCATION_FAR', 'CHOSE_COMPETITOR', 'UNRESPONSIVE', 'NOT_INTERESTED', 'OTHER'] as const
+export type RejectionReason = (typeof REJECTION_REASONS)[number]
 
 export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
 export type LeadSource = (typeof LEAD_SOURCES)[number]
@@ -256,6 +259,10 @@ export type LeadSource = (typeof LEAD_SOURCES)[number]
  * `name`, `fullName` emas) — bu backend nomuvofiqligi, hozircha tahrirlash
  * shu sabab ulanmagan (`docs/backend-notes.md`ga qarang).
  */
+export type LeadCourse = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
+
+export type LeadRejectReason = RejectionReason
+
 export interface LeadDto {
     id: string
     fullName?: string
@@ -264,7 +271,7 @@ export interface LeadDto {
     callAt?: string
     status?: LeadStatus
     source?: LeadSource
-    preferredCourse?: string
+    preferredCourse?: LeadCourse
     createdAt?: string
     updatedAt?: string
 }
@@ -274,7 +281,21 @@ export interface LeadCreateDto {
     fullName: string
     phone: string
     source?: LeadSource
-    preferredCourse?: string
+    preferredCourse?: LeadCourse
+}
+
+export interface LeadUpdateDto {
+    fullName?: string
+    phone?: string
+    status: LeadStatus
+    source?: LeadSource
+    preferredCourse?: LeadCourse
+    callAt?: string
+}
+
+export interface LeadRejectDto {
+    reason: LeadRejectReason
+    note?: string
 }
 
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
