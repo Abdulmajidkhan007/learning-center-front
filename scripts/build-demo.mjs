@@ -5,7 +5,7 @@ import { join } from 'node:path'
  * Demo build'ini bitta o'zi yetarli faylga yig'adi.
  *
  * Ikkita chiqish beriladi:
- *  - `cornerstone-demo.html` — to'liq HTML hujjat. Istalgan statik hostingga
+ *  - `alia-demo.html` — to'liq HTML hujjat. Istalgan statik hostingga
  *    tashlash yoki brauzerda to'g'ridan-to'g'ri ochish mumkin.
  *  - `artifact.html` — faqat sahifa ichi (doctype/head/body siz). Sahifani
  *    o'z karkasiga o'raydigan platformalar uchun.
@@ -26,7 +26,7 @@ const css = assets.find((name) => name.endsWith('.css'))
 const script = `<script type="module">\n${readFileSync(join(dir, 'assets', js), 'utf8')}\n</script>`
 const style = `<style>\n${readFileSync(join(dir, 'assets', css), 'utf8')}\n</style>`
 
-const title = 'Cornerstone Learning Centre'
+const title = 'A.L.I.A.'
 
 const standalone = readFileSync(join(dir, 'demo.html'), 'utf8')
     .replace(new RegExp(`<script[^>]*src="[^"]*${js}"[^>]*></script>`), () => script)
@@ -35,7 +35,7 @@ const standalone = readFileSync(join(dir, 'demo.html'), 'utf8')
 const fragment = [`<title>${title}</title>`, style, '<div id="root"></div>', script].join('\n')
 
 for (const [name, content] of [
-    ['cornerstone-demo.html', standalone],
+    ['alia-demo.html', standalone],
     ['artifact.html', fragment],
 ]) {
     writeFileSync(join(dir, name), content)
@@ -44,7 +44,7 @@ for (const [name, content] of [
 
 // Sanity: bundle buzilmaganini tekshiramiz. `$$typeof` React'ning ichki
 // belgisi — u yo'qolgan bo'lsa, almashtirish yana satr bilan bo'lgan.
-for (const name of ['cornerstone-demo.html', 'artifact.html']) {
+for (const name of ['alia-demo.html', 'artifact.html']) {
     const html = readFileSync(join(dir, name), 'utf8')
     if (!html.includes('$$typeof')) {
         throw new Error(`${name}: bundle buzilgan ($$typeof yo'qolgan)`)

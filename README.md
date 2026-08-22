@@ -1,4 +1,6 @@
-# Cornerstone Learning Centre — frontend
+# A.L.I.A. — frontend
+
+**A**cademic **L**ead & **I**ntelligence **A**ssistant
 
 O'quv markazi uchun veb-mijoz. Spring backend bilan `/api/v1/**` orqali
 ishlaydi va rolga qarab har xil panel ko'rsatadi:
@@ -44,7 +46,7 @@ Batafsil: [`docs/deployment.md`](docs/deployment.md).
 ## Backendsiz demo
 
 ```bash
-npm run build:demo    # → dist-demo/cornerstone-demo.html
+npm run build:demo    # → dist-demo/alia-demo.html
 ```
 
 Bitta o'zi yetarli HTML fayl: soxta API, soxta ma'lumot, shriftlar ham
