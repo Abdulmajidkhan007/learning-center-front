@@ -269,6 +269,14 @@ export interface LeadDto {
     updatedAt?: string
 }
 
+/** `POST /leads` va tasdiqlangan `PUT /leads/{id}` maydonlari. */
+export interface LeadCreateDto {
+    fullName: string
+    phone: string
+    source?: LeadSource
+    preferredCourse?: string
+}
+
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
 export const WEEK_DAYS = [
     'MONDAY',
