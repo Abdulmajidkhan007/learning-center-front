@@ -115,7 +115,7 @@ export const attendance: AttendanceDto[] = [
             { studentId: 's1', status: 'PRESENT' },
             { studentId: 's2', status: 'ABSENT' },
             { studentId: 's3', status: 'PRESENT' },
-            { studentId: 's4', status: 'LATE' },
+            { studentId: 's4', status: 'EXCUSED' },
             { studentId: 's5', status: 'PRESENT' },
         ],
     },

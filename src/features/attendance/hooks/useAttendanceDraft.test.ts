@@ -35,7 +35,7 @@ describe('useAttendanceDraft', () => {
         act(() => result.current.setStatus('s2', 'ABSENT'))
 
         expect(result.current.draft?.statuses.s2).toBe('ABSENT')
-        expect(result.current.counts).toMatchObject({ PRESENT: 2, ABSENT: 1, LATE: 0, EXCUSED: 0 })
+        expect(result.current.counts).toMatchObject({ PRESENT: 2, ABSENT: 1, EXCUSED: 0 })
     })
 
     it('boshqa darsga o’tilganda o’zgarishlar tashlab yuboriladi', () => {
@@ -44,8 +44,8 @@ describe('useAttendanceDraft', () => {
             { initialProps: { activeLesson: lesson } }
         )
 
-        act(() => result.current.setStatus('s1', 'LATE'))
-        expect(result.current.draft?.statuses.s1).toBe('LATE')
+        act(() => result.current.setStatus('s1', 'EXCUSED'))
+        expect(result.current.draft?.statuses.s1).toBe('EXCUSED')
 
         rerender({ activeLesson: { id: 'l2', lessonNumber: '5' } })
 

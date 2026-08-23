@@ -1,10 +1,14 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
 import type { LeadCreateDto, LeadRejectDto, LeadUpdateDto } from '@/shared/types'
-import { callLaterLead, createLead, deleteLead, enrollLead, fetchGroupOptions, fetchLeads, rejectLead, updateLead, type LeadListParams } from '../api/leadsApi'
+import { callLaterLead, createLead, deleteLead, enrollLead, fetchGroupOptions, fetchLeadCourseOptions, fetchLeads, rejectLead, updateLead, type LeadListParams } from '../api/leadsApi'
 
 export function useLeadGroupOptions(token: string) {
     return useQuery({ queryKey: queryKeys.groupOptions(), queryFn: () => fetchGroupOptions(token), staleTime: 5 * 60_000 })
+}
+
+export function useLeadCourseOptions(token: string) {
+    return useQuery({ queryKey: ['lead', 'course-options'], queryFn: () => fetchLeadCourseOptions(token), staleTime: 5 * 60_000 })
 }
 
 export function useLeads(token: string, params: Pick<LeadListParams, 'size' | 'search' | 'status'>) {

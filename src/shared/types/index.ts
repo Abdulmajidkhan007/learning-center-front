@@ -160,12 +160,10 @@ export interface LessonDto {
 /**
  * Davomat statuslari.
  *
- * `LATE` ro'yxatda qoladi, chunki backend enum'ida bor va ESKI yozuvlarda
- * uchraydi — uni tipdan olib tashlasak, o'sha yozuvlar ko'rsatilmay qoladi.
- * Lekin yangi davomatda u TANLANMAYDI (pastga qarang): amalda deyarli
- * ishlatilmagan va o'qituvchini ortiqcha tanlovga majburlagan.
+ * Backenddan `LATE` o'chirilgan — yangi yozuvlarda faqat uch status
+ * qoladi, chunki kechikish holati endi alohida ma'lumot emas.
  */
-export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
+export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'EXCUSED'] as const
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
 
 /** O'qituvchi yangi davomatda tanlay oladigan statuslar. */
@@ -255,11 +253,17 @@ export type LeadSource = (typeof LEAD_SOURCES)[number]
 /**
  * `LeadDto` — potentsial o'quvchi (lid).
  *
- * Diqqat: `PUT /leads/{id}` uchun `LeadUpdateDto` boshqa shaklda (maydon
- * `name`, `fullName` emas) — bu backend nomuvofiqligi, hozircha tahrirlash
- * shu sabab ulanmagan (`docs/backend-notes.md`ga qarang).
+ * Backend `GroupLevel` enum'ini jadvalga aylantirdi. O'quvchining qiziqishi
+ * ro'yxatdan kelgan obyekt bo'lib, lekin yaratish/yangilash uchun faqat uning
+ * `id` yuboriladi.
  */
-export type LeadCourse = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
+export interface LeadCourse {
+    id: string
+    name: string
+    orderNumber: number
+    lessonCount: number
+    durationInMonths: number
+}
 
 export type LeadRejectReason = RejectionReason
 
@@ -281,7 +285,7 @@ export interface LeadCreateDto {
     fullName: string
     phone: string
     source?: LeadSource
-    preferredCourse?: LeadCourse
+    preferredCourse?: string
 }
 
 export interface LeadUpdateDto {
@@ -289,7 +293,7 @@ export interface LeadUpdateDto {
     phone?: string
     status: LeadStatus
     source?: LeadSource
-    preferredCourse?: LeadCourse
+    preferredCourse?: string
     callAt?: string
 }
 

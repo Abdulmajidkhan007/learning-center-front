@@ -14,7 +14,6 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.forStudent': 'Attendance for {{name}}',
     'attendance.PRESENT': 'Present',
     'attendance.ABSENT': 'Absent',
-    'attendance.LATE': 'Late',
     'attendance.EXCUSED': 'Excused',
     'attendance.addExcuse': 'Add a reason for {{name}}',
     'attendance.excuseReason': 'Reason',
