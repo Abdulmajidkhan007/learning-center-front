@@ -110,6 +110,11 @@ export type GroupStatus = (typeof GROUP_STATUSES)[number]
 export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
 export type GroupLevel = (typeof GROUP_LEVELS)[number]
 
+export interface GroupLevelNameDto {
+    id: string
+    name: string
+}
+
 export interface GroupDto {
     id: string
     name?: string

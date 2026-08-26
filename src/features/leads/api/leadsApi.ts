@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { GroupDto, LeadCreateDto, LeadCourse, LeadDto, LeadRejectDto, LeadStatus, LeadUpdateDto, Page } from '@/shared/types'
+import type { GroupDto, GroupLevelNameDto, LeadCreateDto, LeadDto, LeadRejectDto, LeadStatus, LeadUpdateDto, Page } from '@/shared/types'
 
 const ENDPOINT = '/leads'
 
@@ -9,7 +9,7 @@ export async function fetchGroupOptions(token: string) {
 }
 
 export async function fetchLeadCourseOptions(token: string) {
-    const data = await apiFetch<LeadCourse[]>('/group-level', { token })
+    const data = await apiFetch<GroupLevelNameDto[]>('/group-level/names', { token })
     return (data ?? []).map((level) => ({ value: level.id, label: level.name || level.id }))
 }
 
