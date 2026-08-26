@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
@@ -41,12 +41,14 @@ export function LeadsPage() {
     const [rejectReason, setRejectReason] = useState<LeadRejectDto['reason']>('OTHER')
     const [rejectNote, setRejectNote] = useState('')
     const [callAt, setCallAt] = useState('')
-    const lists = {
-        NEW: useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'NEW' }),
-        ENROLLED: useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'ENROLLED' }),
-        CALL_LATER: useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'CALL_LATER' }),
-        REJECTED: useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'REJECTED' }),
-    }
+    const newLeads = useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'NEW' })
+    const enrolledLeads = useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'ENROLLED' })
+    const callLaterLeads = useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'CALL_LATER' })
+    const rejectedLeads = useLeads(token, { size: PAGE_SIZE, search: search || undefined, status: 'REJECTED' })
+    const lists = useMemo(
+        () => ({ NEW: newLeads, ENROLLED: enrolledLeads, CALL_LATER: callLaterLeads, REJECTED: rejectedLeads }),
+        [newLeads, enrolledLeads, callLaterLeads, rejectedLeads]
+    )
     const loadMoreRefs = useRef<Partial<Record<LeadStatus, HTMLDivElement>>>({})
     const listsRef = useRef(lists)
     useEffect(() => {
@@ -113,7 +115,7 @@ export function LeadsPage() {
                     <div className="flex flex-wrap items-end justify-between gap-4"><div><Badge tone="accent">{t('lead.eyebrow')}</Badge><h1 className="mt-3 font-display text-3xl font-semibold text-fg">{t('lead.title')}</h1><p className="mt-1 text-sm text-fg-muted">{t('lead.description')}</p></div><div className="rounded-xl border border-border-base bg-surface-card px-4 py-3 text-right"><p className="text-xs text-fg-muted">{t('lead.total')}</p><p className="font-display text-2xl font-semibold text-fg">{total}</p></div></div>
                     <div className="mt-6 flex flex-col gap-2 md:flex-row"><Input aria-label={t('lead.search')} placeholder={t('lead.search')} value={search} onChange={(event) => setSearch(event.target.value)} /><Select aria-label={t('lead.allStatuses')} className="md:w-52" placeholder={t('lead.allStatuses')} value={filter} options={LEAD_STATUSES.map((status) => ({ value: status, label: t(`lead.status.${status}`) }))} onChange={(event) => setFilter(event.target.value as LeadStatus | '')} /></div>
                 </Panel>
-                {apiError && <ErrorBox>{errorMessage(apiError, 'Unable to load or update leads.')}</ErrorBox>}
+                {apiError && <ErrorBox>{t('lead.loadFailed', { message: errorMessage(apiError, t('common.somethingWrong')) })}</ErrorBox>}
                 <div className="overflow-x-auto pb-2"><div className="grid min-w-[1040px] grid-cols-4 gap-4">
                     {visibleStatuses.map((status) => { const list = lists[status]; const grouped = leadsByStatus[status]; return <section key={status} className={`flex min-h-110 flex-col rounded-2xl border p-3 ${COLUMN_TONE[status]}`} onDragOver={(event) => event.preventDefault()} onDrop={() => drop(status)}>
                         <header className="mb-3 flex items-center justify-between px-1"><div><h2 className="font-display text-base font-semibold text-fg">{t(`lead.status.${status}`)}</h2><p className="text-xs text-fg-muted">{t('lead.count', { count: grouped.length })}</p></div><Badge tone={STATUS_TONE[status]}>{grouped.length}</Badge></header>
@@ -122,7 +124,7 @@ export function LeadsPage() {
                 </div></div>
                 {visibleStatuses.every((status) => !lists[status].isLoading) && leads.length === 0 && !apiError && <EmptyState title="No leads found" description="Try a different search, or add your first lead." />}
             </div>
-            {isFormOpen && <Modal eyebrow={editing ? 'EDIT LEAD' : 'NEW LEAD'} title={editing ? 'Edit lead' : 'Add lead'} onClose={closeModal} footer={<><Button onClick={closeModal}>Cancel</Button><Button variant="primary" onClick={save} disabled={!form.fullName.trim() || !PHONE_RE.test(form.phone.trim()) || mutations.create.isPending || mutations.update.isPending}>Save lead</Button></>}><div className="space-y-4"><Field label="Full name"><Input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} required /></Field><Field label="Phone"><Input type="tel" placeholder="+998901234567" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required /><p className="mt-1 text-xs text-fg-muted">International format, e.g. +998901234567</p></Field><Field label="Source"><Select placeholder="Select source" value={form.source} options={LEAD_SOURCES.map((source) => ({ value: source, label: source }))} onChange={(event) => setForm({ ...form, source: event.target.value as LeadSource | '' })} /></Field><Field label="Preferred course"><Select placeholder="Select level" value={form.preferredCourse} options={courseOptions.data ?? []} onChange={(event) => setForm({ ...form, preferredCourse: event.target.value })} /></Field></div></Modal>}
+            {isFormOpen && <Modal eyebrow={editing ? 'EDIT LEAD' : 'NEW LEAD'} title={editing ? `${t('common.edit')} lead` : t('lead.newTitle')} onClose={closeModal} footer={<><Button onClick={closeModal}>{t('common.cancel')}</Button><Button variant="primary" onClick={save} disabled={!form.fullName.trim() || !PHONE_RE.test(form.phone.trim()) || mutations.create.isPending || mutations.update.isPending}>{t('common.save')}</Button></>}><div className="space-y-4"><Field label="Full name"><Input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} required /></Field><Field label="Phone"><Input type="tel" placeholder="+998901234567" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required /><p className="mt-1 text-xs text-fg-muted">International format, e.g. +998901234567</p></Field><Field label="Source"><Select placeholder="Select source" value={form.source} options={LEAD_SOURCES.map((source) => ({ value: source, label: source }))} onChange={(event) => setForm({ ...form, source: event.target.value as LeadSource | '' })} /></Field><Field label="Preferred course"><Select placeholder="Select level" value={form.preferredCourse} options={courseOptions.data ?? []} onChange={(event) => setForm({ ...form, preferredCourse: event.target.value })} /></Field></div></Modal>}
             {action && <Modal eyebrow={t('lead.actionEyebrow')} title={action.status === 'ENROLLED' ? t('lead.action.ENROLLED') : action.status === 'REJECTED' ? t('lead.action.REJECTED') : t('lead.action.CALL_LATER')} onClose={() => setAction(null)} footer={<><Button onClick={() => setAction(null)}>{t('common.cancel')}</Button><Button variant="primary" onClick={submitAction} disabled={(action.status === 'ENROLLED' && !groupId) || (action.status === 'CALL_LATER' && !callAt) || mutations.enroll.isPending || mutations.reject.isPending || mutations.callLater.isPending}>{t('common.save')}</Button></>}>
                 {action.status === 'ENROLLED' && <Field label={t('lead.group')}><Select aria-label={t('lead.group')} placeholder={t('lead.selectGroup')} value={groupId} options={groups.data ?? []} onChange={(event) => setGroupId(event.target.value)} /></Field>}
                 {action.status === 'REJECTED' && <div className="space-y-4"><Field label={t('lead.rejectionReason')}><Select aria-label={t('lead.rejectionReason')} options={REJECTION_REASONS.map((reason) => ({ value: reason, label: t(`lead.reason.${reason}`) }))} value={rejectReason} onChange={(event) => setRejectReason(event.target.value as LeadRejectDto['reason'])} /></Field><Field label={t('lead.note')}><Input value={rejectNote} onChange={(event) => setRejectNote(event.target.value)} /></Field></div>}
