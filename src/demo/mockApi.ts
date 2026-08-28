@@ -170,6 +170,12 @@ export function installMockApi() {
         }
 
         // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---
+        // Guruh o'quvchilari — davomat jadvalining qatorlari.
+        if (path.startsWith('/student/') && path.endsWith('/students') && method === 'GET') {
+            const groupId = path.slice('/student/'.length, -'/students'.length)
+            const ids = groupRoster[groupId] ?? []
+            return json(db.students.filter((student) => ids.includes(student.id)))
+        }
         if (path === '/student/phone') {
             const phone = url.searchParams.get('phone') ?? ''
             return json(db.students.filter((student) => student.userDto?.phone === phone))
@@ -184,6 +190,32 @@ export function installMockApi() {
         }
 
         // --- davomat ---
+        /**
+         * Guruhning oylik davomati.
+         *
+         * Demo'da oy bo'yicha filtrlash yo'q: mock ma'lumot bitta oyga tegishli,
+         * shuning uchun `previousMonths` qabul qilinadi-yu, natijani
+         * o'zgartirmaydi — ekranni ko'rsatish uchun shu yetarli.
+         */
+        if (path.startsWith('/attendance/monthly/') && method === 'GET') {
+            const groupId = path.slice('/attendance/monthly/'.length)
+            const groupLessons = db.lessons.filter((lesson) => lesson.group?.id === groupId)
+            return json(
+                groupLessons.map((lesson) => {
+                    const record = db.attendance.find((item) => item.lessonId === lesson.id)
+                    const attendanceStudentMap: Record<string, string> = {}
+                    for (const entry of record?.attendanceStudents ?? []) {
+                        if (entry.studentId && entry.status) attendanceStudentMap[entry.studentId] = entry.status
+                    }
+                    return {
+                        id: record?.id ?? lesson.id,
+                        lessonTitle: lesson.lessonName ?? lesson.lessonNumber ?? '',
+                        date: lesson.lessonDate?.slice(0, 10) ?? '',
+                        attendanceStudentMap,
+                    }
+                })
+            )
+        }
         if (path === '/attendance' && method === 'GET') return json(db.attendance)
         if (path === '/attendance' && method === 'POST') {
             const record: AttendanceDto = {
