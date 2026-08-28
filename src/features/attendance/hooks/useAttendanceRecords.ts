@@ -1,17 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
-import { fetchAttendanceByGroup } from '../api/attendanceApi'
+import { fetchMonthlyAttendance } from '../api/attendanceApi'
 
 /**
- * Guruhga tegishli davomat yozuvlari — backend `/attendance/group/{groupId}`
- * orqali faqat shu guruhning yozuvlarini qaytaradi, mijozda filtrlash kerak
- * emas (boshqacha bo'lganida boshqa guruhlarning ma'lumoti ham brauzerga
- * tushib qolardi).
+ * Guruhning oylik davomat yozuvlari.
+ *
+ * `previousMonths`: 1 — joriy oy, 2 — o'tgan oy, 3 — ikki oy oldin
+ * (`fetchMonthlyAttendance` ga qarang — backend kamida 1 ni kutadi).
  */
-export function useAttendanceRecords(token: string, groupId: string) {
+export function useAttendanceRecords(token: string, groupId: string, previousMonths: number) {
     const query = useQuery({
-        queryKey: queryKeys.attendanceByGroup(groupId),
-        queryFn: () => fetchAttendanceByGroup(token, groupId),
+        queryKey: queryKeys.attendanceMonthly(groupId, previousMonths),
+        queryFn: () => fetchMonthlyAttendance(token, groupId, previousMonths),
         enabled: Boolean(groupId),
     })
 

@@ -24,7 +24,11 @@ export const queryKeys = {
     groupInfo: (groupId: string) => ['group', 'info', groupId] as const,
 
     attendance: () => ['attendance', 'list'] as const,
-    attendanceByGroup: (groupId: string) => ['attendance', 'list', groupId] as const,
+    /** `previousMonths` ham kalitga kiradi — oy almashsa alohida so'rov/keshlanadi. */
+    attendanceMonthly: (groupId: string, previousMonths: number) =>
+        ['attendance', 'list', groupId, previousMonths] as const,
+
+    studentsByGroup: (groupId: string) => ['student', 'byGroup', groupId] as const,
 
     invoices: (params: Record<string, unknown>) => ['invoice', 'list', params] as const,
 

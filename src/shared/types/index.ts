@@ -189,6 +189,22 @@ export interface AttendanceDto {
     attendanceStudents?: AttendanceStudentDto[]
 }
 
+/**
+ * `GET /attendance/monthly/{groupId}` javobi — bitta o'tgan darsning
+ * davomati.
+ *
+ * `attendanceStudentMap` massiv emas, xarita: kalit — `studentId`. Xaritada
+ * yo'q o'quvchi hali belgilanmagan degani, "kelmadi" EMAS — jadval katagi
+ * shu farqni bo'sh qoldirib ko'rsatishi kerak.
+ */
+export interface MonthlyAttendanceDto {
+    id: string
+    lessonTitle?: string
+    /** `LocalDate`/`LocalDateTime` — jadvaldagi ustun sanasi shundan olinadi. */
+    date?: string
+    attendanceStudentMap?: Record<string, AttendanceStatus>
+}
+
 /** `OrganizationDto` — o'quv markazi (tashkilot) darajasi. */
 export interface OrganizationDto {
     id: string

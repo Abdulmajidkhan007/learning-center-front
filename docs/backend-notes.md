@@ -28,12 +28,19 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 | --- | --- | --- |
 | `BranchDto.organization` izohdan chiqarildi | ✅ | super-adminda filial qaysi tashkilotniki ekani ko'rsatilishi mumkin |
 | `OrganizationService.delete` haqiqiy `softDelete` qiladi | ✅ | tashkilotni o'chirish tugmasi qo'yilishi mumkin |
-| `GET /attendance/group/{groupId}` qo'shildi | ✅ | davomatdagi "guruh bo'yicha" filtri mijozdan serverga o'tkazilishi mumkin |
+| `GET /attendance/group/{groupId}` qo'shildi | ⚠️ o'chirildi | pastga qarang |
 | `Lead` API to'liq (`/api/v1/leads`) | ✅ | Leads bo'limi endi yozilishi mumkin |
 
 > **Eslatma:** kalitlar env'ga chiqarilgani — ularni almashtirish o'rnini
 > bosmaydi. Eski AWS va JWT kalitlari git tarixida qolgan va ochiq repoda
 > turibdi. Ular hali almashtirilmagan bo'lsa, almashtiring.
+
+> **2026-08-28:** `GET /attendance/group/{groupId}` backenddan o'chirilgan
+> (404 qaytaradi) — o'qituvchi paneli va davomat ekrani shu sabab ishlamay
+> qolgan edi. O'rniga `GET /attendance/monthly/{groupId}?previousMonths=`
+> (javob: `[{ id, lessonTitle, date, attendanceStudentMap }]`, xarita
+> kaliti — `studentId`) va o'quvchilar uchun `GET /student/{groupId}/students`
+> ishlatiladi — frontend shularga o'tkazildi.
 
 ---
 
