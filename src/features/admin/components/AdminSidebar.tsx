@@ -22,9 +22,9 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
         <aside className="hidden w-55 shrink-0 flex-col border-r border-white/10 bg-sidebar py-6 text-sidebar-fg shadow-[22px_0_60px_-42px_var(--fg)] lg:flex">
             <div className="mb-3 flex items-center gap-2 border-b border-white/10 px-5 pb-6">
                 <span className="rounded-sm bg-brand px-1.5 py-0.5 font-mono text-xs tracking-[0.1em] text-brand-fg">
-                    CLC
+                    ALIA
                 </span>
-                <span className="font-display text-base font-semibold">Cornerstone</span>
+                <span className="font-display text-base font-semibold">A.L.I.A.</span>
             </div>
 
             <nav className="flex flex-1 flex-col">

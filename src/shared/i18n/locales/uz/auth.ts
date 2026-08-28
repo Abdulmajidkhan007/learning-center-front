@@ -5,7 +5,7 @@
  * keyin `ru/` va `en/` dagi shu nomli faylga.
  */
 export const auth = {
-    'auth.brand': "Cornerstone o'quv markazi",
+    'auth.brand': 'Academic Lead & Intelligence Assistant',
     'auth.headline': 'Xush kelibsiz.',
     'auth.subtitle': "To'xtagan joyingizdan davom eting.",
     'auth.phone': 'Telefon raqami',

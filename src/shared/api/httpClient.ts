@@ -1,5 +1,6 @@
 import { ApiError } from './ApiError'
 import { getRequestLocale } from './requestLocale'
+import { refreshAccessToken } from './sessionRefresh'
 
 const API_PREFIX = '/api/v1'
 
@@ -34,22 +35,37 @@ function buildUrl(path: string, params?: RequestOptions['params']): string {
  *    `res.json()` esa bunda xato beradi — shuning uchun avval matn o'qiladi.
  *
  * Xato bo'lsa `ApiError` otiladi, ya'ni TanStack Query uni o'zi ushlaydi.
+ *
+ * Access token eskirgan bo'lsa (401/403) bir marta yangilanadi va so'rov
+ * qaytadan yuboriladi — `sessionRefresh.ts` ga qarang.
  */
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T | null> {
     const { token, body, params, headers, ...rest } = options
+    const url = buildUrl(path, params)
 
-    const res = await fetch(buildUrl(path, params), {
-        ...rest,
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            // Backend xato matnini shu sarlavhaga qarab tarjima qiladi.
-            'Accept-Language': getRequestLocale(),
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...headers,
-        },
-        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    })
+    function send(bearer?: string) {
+        return fetch(url, {
+            ...rest,
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                // Backend xato matnini shu sarlavhaga qarab tarjima qiladi.
+                'Accept-Language': getRequestLocale(),
+                ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+                ...headers,
+            },
+            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        })
+    }
+
+    let res = await send(token)
+
+    if (shouldRetryWithFreshToken(res.status, path, token)) {
+        const fresh = await refreshAccessToken()
+        // Yangi token kelmasa eski javob qoladi — chaqiruvchi 401/403 ni ko'radi
+        // va foydalanuvchi login ekraniga qaytariladi.
+        if (fresh) res = await send(fresh)
+    }
 
     if (!res.ok) {
         const { message, code } = await readError(res)
@@ -63,6 +79,19 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     } catch {
         return null
     }
+}
+
+/**
+ * Token yangilanib, so'rov qaytadan yuborilsinmi?
+ *
+ * Uch shart: javob autentifikatsiya xatosi, so'rovda token bo'lgan (tokensiz
+ * so'rovga yangi token ham yordam bermaydi) va bu `/auth/**` emas —
+ * aks holda `refresh-token` ning o'zi yiqilganda cheksiz halqa hosil bo'lardi.
+ */
+function shouldRetryWithFreshToken(status: number, path: string, token?: string): boolean {
+    if (status !== 401 && status !== 403) return false
+    if (!token) return false
+    return !path.startsWith('/auth') && !path.startsWith('/api/v1/auth')
 }
 
 /**

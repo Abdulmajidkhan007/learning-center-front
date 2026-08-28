@@ -2,7 +2,7 @@ import type { AuthKeys } from '../uz/auth'
 
 /** Kirish sahifasi. (ruscha) */
 export const auth: Record<AuthKeys, string> = {
-    'auth.brand': 'Учебный центр Cornerstone',
+    'auth.brand': 'Academic Lead & Intelligence Assistant',
     'auth.headline': 'Добро пожаловать.',
     'auth.subtitle': 'Продолжите с того места, где остановились.',
     'auth.phone': 'Номер телефона',

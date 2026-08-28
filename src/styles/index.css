@@ -29,7 +29,7 @@
     --fg-faint: #8b90a6;
     --fg-inverted: #ffffff;
 
-    /* Brend — binafsha; CTA va CLC belgisi shu rangda */
+    /* Brend — binafsha; CTA va ALIA belgisi shu rangda */
     --brand: #7c3aed;
     --brand-fg: #ffffff;
 
@@ -73,7 +73,7 @@
 }
 
 .dark {
-    /* Deyarli qora, binafsha tovlanishi bilan — EduSphere ko'rinishi */
+    /* Deyarli qora, binafsha tovlanishi bilan — A.L.I.A. ko'rinishi */
     --surface: #08070f;
     --surface-card: #12111d;
     --surface-muted: #191828;
