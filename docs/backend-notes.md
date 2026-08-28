@@ -510,6 +510,33 @@ yangilandi. Bu bandda backenddan hech narsa talab qilinmaydi, faqat yozib
 qo'yildi: enum qiymati o'zgarsa frontend filtri jim yiqiladi (400), shuning
 uchun bunday o'zgarishlarni oldindan ayting.
 
+### 18. 🟡 Autentifikatsiyadan o'tmagan so'rovga 401 emas, 403 qaytadi
+
+`SecurityConfig` da `authenticationEntryPoint` berilmagan:
+
+```java
+http.authorizeHttpRequests(auth -> auth
+        .requestMatchers(WHITE_LIST).permitAll()
+        .anyRequest().authenticated());
+```
+
+`httpBasic()`, `formLogin()` va `exceptionHandling(...)` ning hech biri yo'q,
+shuning uchun Spring Security `Http403ForbiddenEntryPoint` ni ishlatadi —
+ya'ni **token yo'q/eskirgan** holat ham **403** bo'lib qaytadi.
+
+Natijada mijoz "token eskirgan" (yangilash kerak) va "bu rolga ruxsat yo'q"
+(yangilash foydasiz) holatlarini ajrata olmaydi. Frontend hozir ikkalasini
+ham bir xil ko'radi va ikkalasida ham tokenni yangilashga uradi.
+
+Kerak:
+
+```java
+http.exceptionHandling(e -> e.authenticationEntryPoint(
+        (req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
+```
+
+Bu bizni bloklamaydi — frontend ikkalasini ham ushlaydi — lekin to'g'risi shu.
+
 ---
 
 ## Railway env o'zgaruvchilari
