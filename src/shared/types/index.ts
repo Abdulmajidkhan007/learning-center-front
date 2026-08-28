@@ -110,6 +110,11 @@ export type GroupStatus = (typeof GROUP_STATUSES)[number]
 export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
 export type GroupLevel = (typeof GROUP_LEVELS)[number]
 
+export interface GroupLevelNameDto {
+    id: string
+    name: string
+}
+
 export interface GroupDto {
     id: string
     name?: string
@@ -160,12 +165,10 @@ export interface LessonDto {
 /**
  * Davomat statuslari.
  *
- * `LATE` ro'yxatda qoladi, chunki backend enum'ida bor va ESKI yozuvlarda
- * uchraydi — uni tipdan olib tashlasak, o'sha yozuvlar ko'rsatilmay qoladi.
- * Lekin yangi davomatda u TANLANMAYDI (pastga qarang): amalda deyarli
- * ishlatilmagan va o'qituvchini ortiqcha tanlovga majburlagan.
+ * Backenddan `LATE` o'chirilgan — yangi yozuvlarda faqat uch status
+ * qoladi, chunki kechikish holati endi alohida ma'lumot emas.
  */
-export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
+export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'EXCUSED'] as const
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
 
 /** O'qituvchi yangi davomatda tanlay oladigan statuslar. */
@@ -243,8 +246,11 @@ export interface InvoiceDto {
     type?: string
 }
 
-export const LEAD_STATUSES = ['NEW', 'CONFIRMED', 'REJECTED', 'CALL_LATER'] as const
+export const LEAD_STATUSES = ['NEW', 'ENROLLED', 'REJECTED', 'CALL_LATER'] as const
 export type LeadStatus = (typeof LEAD_STATUSES)[number]
+
+export const REJECTION_REASONS = ['PRICE_TOO_HIGH', 'SCHEDULE_CONFLICT', 'LOCATION_FAR', 'CHOSE_COMPETITOR', 'UNRESPONSIVE', 'NOT_INTERESTED', 'OTHER'] as const
+export type RejectionReason = (typeof REJECTION_REASONS)[number]
 
 export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
 export type LeadSource = (typeof LEAD_SOURCES)[number]
@@ -252,10 +258,20 @@ export type LeadSource = (typeof LEAD_SOURCES)[number]
 /**
  * `LeadDto` — potentsial o'quvchi (lid).
  *
- * Diqqat: `PUT /leads/{id}` uchun `LeadUpdateDto` boshqa shaklda (maydon
- * `name`, `fullName` emas) — bu backend nomuvofiqligi, hozircha tahrirlash
- * shu sabab ulanmagan (`docs/backend-notes.md`ga qarang).
+ * Backend `GroupLevel` enum'ini jadvalga aylantirdi. O'quvchining qiziqishi
+ * ro'yxatdan kelgan obyekt bo'lib, lekin yaratish/yangilash uchun faqat uning
+ * `id` yuboriladi.
  */
+export interface LeadCourse {
+    id: string
+    name: string
+    orderNumber: number
+    lessonCount: number
+    durationInMonths: number
+}
+
+export type LeadRejectReason = RejectionReason
+
 export interface LeadDto {
     id: string
     fullName?: string
@@ -264,7 +280,7 @@ export interface LeadDto {
     callAt?: string
     status?: LeadStatus
     source?: LeadSource
-    preferredCourse?: string
+    preferredCourse?: LeadCourse
     createdAt?: string
     updatedAt?: string
 }
@@ -275,6 +291,20 @@ export interface LeadCreateDto {
     phone: string
     source?: LeadSource
     preferredCourse?: string
+}
+
+export interface LeadUpdateDto {
+    fullName?: string
+    phone?: string
+    status: LeadStatus
+    source?: LeadSource
+    preferredCourse?: string
+    callAt?: string
+}
+
+export interface LeadRejectDto {
+    reason: LeadRejectReason
+    note?: string
 }
 
 /** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */

@@ -17,7 +17,6 @@ export const attendance = {
     'attendance.forStudent': '{{name}} uchun davomat',
     'attendance.PRESENT': 'Keldi',
     'attendance.ABSENT': 'Kelmadi',
-    'attendance.LATE': 'Kechikdi',
     'attendance.EXCUSED': 'Sababli',
     'attendance.addExcuse': '{{name}} uchun sabab yozish',
     'attendance.excuseReason': 'Sabab',

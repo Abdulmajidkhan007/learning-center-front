@@ -17,7 +17,7 @@ interface DraftEdits {
 }
 
 function emptyCounts(): Record<AttendanceStatus, number> {
-    return { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 }
+    return { PRESENT: 0, ABSENT: 0, EXCUSED: 0 }
 }
 
 /**

@@ -14,7 +14,6 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.forStudent': 'Посещаемость: {{name}}',
     'attendance.PRESENT': 'Был',
     'attendance.ABSENT': 'Не был',
-    'attendance.LATE': 'Опоздал',
     'attendance.EXCUSED': 'По уважительной',
     'attendance.addExcuse': 'Указать причину для {{name}}',
     'attendance.excuseReason': 'Причина',
