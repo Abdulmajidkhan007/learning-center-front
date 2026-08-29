@@ -3,6 +3,7 @@ import {
     createBranch,
     createOrganization,
     deleteBranch,
+    fetchAnalytics,
     fetchBranches,
     fetchOrganizations,
     updateBranch,
@@ -99,5 +100,14 @@ describe('deleteBranch', () => {
         await deleteBranch(TOKEN, '1')
         expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/branch/1')
         expect(fetchMock.mock.calls[0][1].method).toBe('DELETE')
+    })
+})
+
+describe('fetchAnalytics', () => {
+    it('GET /analytics/{category} yuboradi', async () => {
+        const fetchMock = mockFetch({ text: '{"studentCount":10,"studentsAddedInMonth":2}' })
+        const res = await fetchAnalytics(TOKEN, 'student')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/analytics/student')
+        expect(res).toEqual({ studentCount: 10, studentsAddedInMonth: 2 })
     })
 })

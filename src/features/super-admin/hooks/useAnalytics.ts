@@ -20,13 +20,47 @@ export interface AnalyticsItemResult {
     error: unknown
 }
 
-export function extractThisMonthValue(data: AnalyticsStatDto | null | undefined): number | null | undefined {
-    if (!data) return undefined
-    if (data.thisMonth !== undefined) return data.thisMonth
-    if (data.addedThisMonth !== undefined) return data.addedThisMonth
-    if (data.countThisMonth !== undefined) return data.countThisMonth
-    if (data.thisMonthCount !== undefined) return data.thisMonthCount
-    return null
+function parseCategoryData(
+    category: AnalyticsCategory,
+    data: AnalyticsStatDto | null | undefined
+): { total: number | null | undefined; thisMonth: number | null | undefined } {
+    if (data === undefined) return { total: undefined, thisMonth: undefined }
+    if (data === null) return { total: null, thisMonth: null }
+
+    const record = data as Record<string, number | undefined>
+
+    switch (category) {
+        case 'student':
+            return {
+                total: record.studentCount ?? null,
+                thisMonth: record.studentsAddedInMonth ?? null,
+            }
+        case 'teacher':
+            return {
+                total: record.teacherCount ?? null,
+                thisMonth: record.teachersAddedInMonth ?? null,
+            }
+        case 'lead':
+            return {
+                total: record.leadCount ?? null,
+                thisMonth: record.leadCountInAMonth ?? null,
+            }
+        case 'invoice':
+            return {
+                total: record.invoiceAmount ?? null,
+                thisMonth: record.invoiceAmountInAMonth ?? null,
+            }
+        case 'enrollment':
+            return {
+                total: record.enrollmentCount ?? null,
+                thisMonth: record.enrollmentCountInAMonth ?? null,
+            }
+        case 'branch':
+            return {
+                total: record.branchCount ?? null,
+                thisMonth: null,
+            }
+    }
 }
 
 export function useAnalytics(token: string) {
@@ -41,9 +75,7 @@ export function useAnalytics(token: string) {
     const items: Record<AnalyticsCategory, AnalyticsItemResult> = ANALYTICS_CATEGORIES.reduce(
         (acc, category, index) => {
             const query = results[index]
-            const data = query?.data
-            const total = data === null ? null : (data?.total ?? undefined)
-            const thisMonth = data === null ? null : extractThisMonthValue(data)
+            const { total, thisMonth } = parseCategoryData(category, query?.data)
 
             acc[category] = {
                 category,

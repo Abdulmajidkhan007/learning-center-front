@@ -18,7 +18,7 @@ function mockItems(
         base[cat] = {
             category: cat,
             total: 100,
-            thisMonth: 12,
+            thisMonth: cat === 'branch' ? null : 12,
             isLoading: false,
             error: null,
             ...overrides?.[cat],
@@ -29,7 +29,7 @@ function mockItems(
 }
 
 describe('AnalyticsStatsRow', () => {
-    it('renders total counts and "+12 bu oyda" correctly', () => {
+    it('renders total counts and "+12 bu oyda" correctly (except branch which has no monthly count)', () => {
         const items = mockItems()
         renderWithProviders(<AnalyticsStatsRow items={items} />)
 
@@ -37,9 +37,9 @@ describe('AnalyticsStatsRow', () => {
         const totalElements = screen.getAllByText('100')
         expect(totalElements.length).toBe(6)
 
-        // "+12 bu oyda" visible on cards
+        // "+12 bu oyda" visible on 5 cards (excluding branch)
         const thisMonthElements = screen.getAllByText('+12 bu oyda')
-        expect(thisMonthElements.length).toBe(6)
+        expect(thisMonthElements.length).toBe(5)
     })
 
     it('renders loading indicators when values are loading', () => {
