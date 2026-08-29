@@ -35,6 +35,8 @@ type Row = Record<string, unknown> & { id: string }
 /** `GET /auth/me` javobi — demo foydalanuvchisi. */
 const demoUser = {
     id: 'u-demo',
+    // Sozlamalardagi markaz bloki shu filialni yuklaydi.
+    branchId: 'b1',
     fullName: 'Demo Foydalanuvchi',
     phone: '+998 93 100 10 01',
     birthDate: '1995-06-15',
@@ -170,6 +172,12 @@ export function installMockApi() {
         }
 
         // --- o'quvchi paneli: o'z kartasini telefon bo'yicha topish ---
+        // Guruh o'quvchilari — davomat jadvalining qatorlari.
+        if (path.startsWith('/student/') && path.endsWith('/students') && method === 'GET') {
+            const groupId = path.slice('/student/'.length, -'/students'.length)
+            const ids = groupRoster[groupId] ?? []
+            return json(db.students.filter((student) => ids.includes(student.id)))
+        }
         if (path === '/student/phone') {
             const phone = url.searchParams.get('phone') ?? ''
             return json(db.students.filter((student) => student.userDto?.phone === phone))
@@ -177,13 +185,39 @@ export function installMockApi() {
 
         // --- o'qituvchi paneli ---
         if (path === '/group/groups') {
-            return json(db.groups.filter((group) => group.status !== 'ENDED'))
+            return json(db.groups.filter((group) => group.status !== 'COMPLETED'))
         }
         if (path === '/group/groupInfo') {
             return json(fullGroup(url.searchParams.get('groupId') ?? 'g1'))
         }
 
         // --- davomat ---
+        /**
+         * Guruhning oylik davomati.
+         *
+         * Demo'da oy bo'yicha filtrlash yo'q: mock ma'lumot bitta oyga tegishli,
+         * shuning uchun `previousMonths` qabul qilinadi-yu, natijani
+         * o'zgartirmaydi — ekranni ko'rsatish uchun shu yetarli.
+         */
+        if (path.startsWith('/attendance/monthly/') && method === 'GET') {
+            const groupId = path.slice('/attendance/monthly/'.length)
+            const groupLessons = db.lessons.filter((lesson) => lesson.group?.id === groupId)
+            return json(
+                groupLessons.map((lesson) => {
+                    const record = db.attendance.find((item) => item.lessonId === lesson.id)
+                    const attendanceStudentMap: Record<string, string> = {}
+                    for (const entry of record?.attendanceStudents ?? []) {
+                        if (entry.studentId && entry.status) attendanceStudentMap[entry.studentId] = entry.status
+                    }
+                    return {
+                        id: record?.id ?? lesson.id,
+                        lessonTitle: lesson.lessonName ?? lesson.lessonNumber ?? '',
+                        date: lesson.lessonDate?.slice(0, 10) ?? '',
+                        attendanceStudentMap,
+                    }
+                })
+            )
+        }
         if (path === '/attendance' && method === 'GET') return json(db.attendance)
         if (path === '/attendance' && method === 'POST') {
             const record: AttendanceDto = {
@@ -227,6 +261,11 @@ export function installMockApi() {
             } as BranchDto
             db.branches = [...db.branches, branch]
             return json(branch)
+        }
+        if (path.startsWith('/branch/') && method === 'GET') {
+            const id = path.slice('/branch/'.length)
+            const branch = db.branches.find((item) => item.id === id)
+            return branch ? json(branch) : json({ message: 'Branch not found' }, 404)
         }
         if (path.startsWith('/branch/') && method === 'PUT') {
             const id = path.split('/')[2]

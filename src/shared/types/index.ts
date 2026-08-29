@@ -54,6 +54,8 @@ export type Role = 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'
 /** `UserDto` — diqqat: maydon nomi `imageUrl` (`imgUrl` emas). */
 export interface UserDto {
     id?: string
+    /** Foydalanuvchi biriktirilgan filial — sozlamalardagi markaz bloki shuni yuklaydi. */
+    branchId?: string
     imageUrl?: string
     fullName?: string
     phone?: string
@@ -104,11 +106,16 @@ export interface TimeTableDto {
     endTime?: string
 }
 
-export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'ENDED'] as const
+export const GROUP_STATUSES = ['STARTING', 'ONGOING', 'COMPLETED'] as const
 export type GroupStatus = (typeof GROUP_STATUSES)[number]
 
 export const GROUP_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
 export type GroupLevel = (typeof GROUP_LEVELS)[number]
+
+export interface GroupLevelNameDto {
+    id: string
+    name: string
+}
 
 export interface GroupDto {
     id: string
@@ -160,12 +167,10 @@ export interface LessonDto {
 /**
  * Davomat statuslari.
  *
- * `LATE` ro'yxatda qoladi, chunki backend enum'ida bor va ESKI yozuvlarda
- * uchraydi — uni tipdan olib tashlasak, o'sha yozuvlar ko'rsatilmay qoladi.
- * Lekin yangi davomatda u TANLANMAYDI (pastga qarang): amalda deyarli
- * ishlatilmagan va o'qituvchini ortiqcha tanlovga majburlagan.
+ * Backenddan `LATE` o'chirilgan — yangi yozuvlarda faqat uch status
+ * qoladi, chunki kechikish holati endi alohida ma'lumot emas.
  */
-export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
+export const ATTENDANCE_STATUSES = ['PRESENT', 'ABSENT', 'EXCUSED'] as const
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
 
 /** O'qituvchi yangi davomatda tanlay oladigan statuslar. */
@@ -186,6 +191,22 @@ export interface AttendanceDto {
     attendanceStudents?: AttendanceStudentDto[]
 }
 
+/**
+ * `GET /attendance/monthly/{groupId}` javobi — bitta o'tgan darsning
+ * davomati.
+ *
+ * `attendanceStudentMap` massiv emas, xarita: kalit — `studentId`. Xaritada
+ * yo'q o'quvchi hali belgilanmagan degani, "kelmadi" EMAS — jadval katagi
+ * shu farqni bo'sh qoldirib ko'rsatishi kerak.
+ */
+export interface MonthlyAttendanceDto {
+    id: string
+    lessonTitle?: string
+    /** `LocalDate`/`LocalDateTime` — jadvaldagi ustun sanasi shundan olinadi. */
+    date?: string
+    attendanceStudentMap?: Record<string, AttendanceStatus>
+}
+
 /** `OrganizationDto` — o'quv markazi (tashkilot) darajasi. */
 export interface OrganizationDto {
     id: string
@@ -204,6 +225,17 @@ export interface OrganizationDto {
  */
 export interface BranchDto {
     id: string
+    name?: string
+    address?: string
+    chargeForMonth?: number
+    googlePlaceId?: string
+    latitude?: number
+    longitude?: number
+    googleMapsUrl?: string
+}
+
+/** `PUT /branch/{id}` tanasi — `BranchDto` dan `id` va `organization` siz. */
+export interface BranchUpdatePayload {
     name?: string
     address?: string
     chargeForMonth?: number
@@ -243,31 +275,64 @@ export interface InvoiceDto {
     type?: string
 }
 
-/** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
-export const WEEK_DAYS = [
-    'MONDAY',
-    'TUESDAY',
-    'WEDNESDAY',
-    'THURSDAY',
-    'FRIDAY',
-    'SATURDAY',
-    'SUNDAY',
-] as const
-export type WeekDay = (typeof WEEK_DAYS)[number]
+export const LEAD_STATUSES = ['NEW', 'ENROLLED', 'REJECTED', 'CALL_LATER'] as const
+export type LeadStatus = (typeof LEAD_STATUSES)[number]
 
-/** Analytics statistic returned by /api/v1/analytics/{entity} */
-export interface AnalyticsStatDto {
-    total?: number | null
-    thisMonth?: number | null
-    addedThisMonth?: number | null
-    countThisMonth?: number | null
-    thisMonthCount?: number | null
+export const REJECTION_REASONS = ['PRICE_TOO_HIGH', 'SCHEDULE_CONFLICT', 'LOCATION_FAR', 'CHOSE_COMPETITOR', 'UNRESPONSIVE', 'NOT_INTERESTED', 'OTHER'] as const
+export type RejectionReason = (typeof REJECTION_REASONS)[number]
+
+export const LEAD_SOURCES = ['INSTAGRAM', 'FACEBOOK', 'TELEGRAM'] as const
+export type LeadSource = (typeof LEAD_SOURCES)[number]
+
+/**
+ * `LeadDto` — potentsial o'quvchi (lid).
+ *
+ * Backend `GroupLevel` enum'ini jadvalga aylantirdi. O'quvchining qiziqishi
+ * ro'yxatdan kelgan obyekt bo'lib, lekin yaratish/yangilash uchun faqat uning
+ * `id` yuboriladi.
+ */
+export interface LeadCourse {
+    id: string
+    name: string
+    orderNumber: number
+    lessonCount: number
+    durationInMonths: number
 }
 
-export type AnalyticsCategory =
-    | 'student'
-    | 'teacher'
-    | 'lead'
-    | 'invoice'
-    | 'enrollment'
-    | 'branch'
+export type LeadRejectReason = RejectionReason
+
+export interface LeadDto {
+    id: string
+    fullName?: string
+    phone?: string
+    /** `LocalDateTime` — qo'ng'iroq qilish rejalashtirilgan vaqt. */
+    callAt?: string
+    status?: LeadStatus
+    source?: LeadSource
+    preferredCourse?: LeadCourse
+    createdAt?: string
+    updatedAt?: string
+}
+
+/** `POST /leads` va tasdiqlangan `PUT /leads/{id}` maydonlari. */
+export interface LeadCreateDto {
+    fullName: string
+    phone: string
+    source?: LeadSource
+    preferredCourse?: string
+}
+
+export interface LeadUpdateDto {
+    fullName?: string
+    phone?: string
+    status: LeadStatus
+    source?: LeadSource
+    preferredCourse?: string
+    callAt?: string
+}
+
+export interface LeadRejectDto {
+    reason: LeadRejectReason
+    note?: string
+}
+

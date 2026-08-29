@@ -53,7 +53,7 @@ export const admin = {
     'lesson.ongoing': 'Davom etmoqda',
     'status.STARTING': 'Boshlanmoqda',
     'status.ONGOING': 'Davom etmoqda',
-    'status.ENDED': 'Tugagan',
+    'status.COMPLETED': 'Tugagan',
     'group.dayType.ODD': 'Toq kunlar',
     'group.dayType.EVEN': 'Juft kunlar',
     'field.dayType': 'Jadval turi',

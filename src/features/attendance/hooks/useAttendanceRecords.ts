@@ -1,31 +1,19 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
-import { fetchAttendance } from '../api/attendanceApi'
-import type { AttendanceDto, StudentDto } from '@/shared/types'
+import { fetchMonthlyAttendance } from '../api/attendanceApi'
 
 /**
- * Guruhga tegishli davomat yozuvlari.
+ * Guruhning oylik davomat yozuvlari.
  *
- * Backendda "guruh bo'yicha" filtr yo'q, shuning uchun hammasi olinib,
- * mijozda filtrlanadi. Endpoint qo'shilsa, filtrlash shu yerdan olib
- * tashlanadi — sahifaga tegilmaydi.
+ * `previousMonths`: 1 — joriy oy, 2 — o'tgan oy, 3 — ikki oy oldin
+ * (`fetchMonthlyAttendance` ga qarang — backend kamida 1 ni kutadi).
  */
-export function useAttendanceRecords(token: string, students: StudentDto[]) {
+export function useAttendanceRecords(token: string, groupId: string, previousMonths: number) {
     const query = useQuery({
-        queryKey: queryKeys.attendance(),
-        queryFn: () => fetchAttendance(token),
-        enabled: students.length > 0,
+        queryKey: queryKeys.attendanceMonthly(groupId, previousMonths),
+        queryFn: () => fetchMonthlyAttendance(token, groupId, previousMonths),
+        enabled: Boolean(groupId),
     })
 
-    const studentIds = useMemo(() => new Set(students.map((student) => student.id)), [students])
-
-    const records = useMemo<AttendanceDto[]>(() => {
-        if (!query.data) return []
-        return query.data.filter((record) =>
-            (record.attendanceStudents ?? []).some((entry) => studentIds.has(entry.studentId))
-        )
-    }, [query.data, studentIds])
-
-    return { ...query, records }
+    return { ...query, records: query.data ?? [] }
 }

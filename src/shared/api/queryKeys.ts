@@ -16,6 +16,7 @@ export const queryKeys = {
 
     teacherOptions: () => ['teacher', 'options'] as const,
     groupOptions: () => ['group', 'options'] as const,
+    groupLevelNameOptions: () => ['group-level', 'name-options'] as const,
 
     groupEnrollments: (groupId: string) => ['enrollments', groupId] as const,
 
@@ -23,11 +24,17 @@ export const queryKeys = {
     groupInfo: (groupId: string) => ['group', 'info', groupId] as const,
 
     attendance: () => ['attendance', 'list'] as const,
+    /** `previousMonths` ham kalitga kiradi — oy almashsa alohida so'rov/keshlanadi. */
+    attendanceMonthly: (groupId: string, previousMonths: number) =>
+        ['attendance', 'list', groupId, previousMonths] as const,
+
+    studentsByGroup: (groupId: string) => ['student', 'byGroup', groupId] as const,
 
     invoices: (params: Record<string, unknown>) => ['invoice', 'list', params] as const,
 
     organizations: (params: Record<string, unknown>) => ['organization', 'list', params] as const,
     branches: (params: Record<string, unknown>) => ['branch', 'list', params] as const,
-    analytics: (category: string) => ['analytics', category] as const,
-    analyticsAll: () => ['analytics'] as const,
+    branch: (id: string) => ['branch', 'one', id] as const,
+
+    leads: (params: Record<string, unknown>) => ['lead', 'list', params] as const,
 } as const

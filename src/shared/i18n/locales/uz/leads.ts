@@ -1,0 +1,53 @@
+/**
+ * Lidlar bo'limi.
+ *
+ * O'zbekcha — HAQIQAT MANBAI. Yangi kalit avval shu yerga qo'shiladi,
+ * keyin `ru/` va `en/` dagi shu nomli faylga.
+ */
+export const leads = {
+    'lead.title': 'Lidlar',
+    'lead.eyebrow': 'Potentsial o‘quvchilar',
+    'lead.fullName': 'F.I.Sh.',
+    'lead.phone': 'Telefon',
+    'lead.callAt': 'Qo‘ng‘iroq vaqti',
+    'lead.source': 'Manba',
+    'lead.source.INSTAGRAM': 'Instagram',
+    'lead.source.FACEBOOK': 'Facebook',
+    'lead.source.TELEGRAM': 'Telegram',
+    'lead.preferredCourse': 'Qiziqqan kursi',
+    'lead.new': '+ Yangi lid',
+    'lead.newTitle': 'Yangi lid',
+    'lead.changeStatus': 'Holatni o‘zgartirish',
+    'lead.search': 'ism yoki telefon…',
+    'lead.allStatuses': 'Barcha holatlar',
+    'lead.empty': 'Lid topilmadi',
+    'lead.loadFailed': 'Lidlarni yuklab bo‘lmadi: {{message}}',
+    'lead.deleteConfirm': '{{name}} o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
+    'lead.status.NEW': 'Yangi',
+    'lead.status.ENROLLED': 'O‘qishga qabul qilingan',
+    'lead.status.REJECTED': 'Rad etilgan',
+    'lead.status.CALL_LATER': 'Keyinroq qo‘ng‘iroq',
+    'lead.description': 'Har bir murojaatni birinchi aloqadan o‘qishga qabulgacha kuzating.',
+    'lead.total': 'Jami lidlar',
+    'lead.count': '{{count}} ta lid',
+    'lead.dropHere': 'Lidni shu yerga tashlang',
+    'lead.unnamed': 'Nomsiz lid',
+    'lead.noPhone': 'Telefon yo‘q',
+    'lead.actionEyebrow': 'LID HARAKATI',
+    'lead.action.ENROLLED': 'Guruhga yozish',
+    'lead.action.REJECTED': 'Lidni rad etish',
+    'lead.action.CALL_LATER': 'Keyinroq qo‘ng‘iroq qilish',
+    'lead.group': 'Guruh',
+    'lead.selectGroup': 'Guruhni tanlang',
+    'lead.rejectionReason': 'Rad etish sababi',
+    'lead.note': 'Izoh',
+    'lead.reason.PRICE_TOO_HIGH': 'Narx juda yuqori',
+    'lead.reason.SCHEDULE_CONFLICT': 'Jadval mos kelmaydi',
+    'lead.reason.LOCATION_FAR': 'Manzil uzoq',
+    'lead.reason.CHOSE_COMPETITOR': 'Boshqa markazni tanladi',
+    'lead.reason.UNRESPONSIVE': 'Aloqaga chiqmayapti',
+    'lead.reason.NOT_INTERESTED': 'Qiziqmaydi',
+    'lead.reason.OTHER': 'Boshqa sabab',
+} as const
+
+export type LeadsKeys = keyof typeof leads

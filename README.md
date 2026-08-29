@@ -1,4 +1,6 @@
-# Cornerstone Learning Centre — frontend
+# A.L.I.A. — frontend
+
+**A**cademic **L**ead & **I**ntelligence **A**ssistant
 
 O'quv markazi uchun veb-mijoz. Spring backend bilan `/api/v1/**` orqali
 ishlaydi va rolga qarab har xil panel ko'rsatadi:
@@ -44,7 +46,7 @@ Batafsil: [`docs/deployment.md`](docs/deployment.md).
 ## Backendsiz demo
 
 ```bash
-npm run build:demo    # → dist-demo/cornerstone-demo.html
+npm run build:demo    # → dist-demo/alia-demo.html
 ```
 
 Bitta o'zi yetarli HTML fayl: soxta API, soxta ma'lumot, shriftlar ham
@@ -82,7 +84,7 @@ src/
     providers/         Theme, Auth, QueryClient
     routes/            AppRoutes, RoleDashboard
   features/            biznes bo'limlari (har biri o'zicha to'liq)
-    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/
+    auth/  admin/  teacher/  attendance/  payments/  settings/  student/  super-admin/  leads/
       api/         shu bo'lim endpoint'lari
       hooks/       TanStack Query hooklari va holat mantiqi
       components/  shu bo'limga tegishli komponentlar
@@ -90,9 +92,8 @@ src/
       pages/       ekran
   shared/            bo'limlarga bog'liq bo'lmagan hamma narsa
     api/     apiFetch, ApiError, queryKeys
-    ui/      Button, Modal, Table, Badge, ThemeToggle …
+    ui/      AppShell, Button, Modal, Panel, Badge, ThemeToggle …
     lib/     format, jwt, cn
-    hooks/   useClickOutside
     i18n/    tarjimalar: uz/ ru/ en/ papkalari, har bo'lim alohida fayl
     types/   backend DTO tiplari
   styles/index.css   Tailwind + rang tokenlari + dark rejim
@@ -123,4 +124,5 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 | [docs/deployment.md](docs/deployment.md)               | Railway'ga deploy, `/api` proxysi, cookie masalasi |
 | [docs/backend-notes.md](docs/backend-notes.md)         | Backend jamoasiga: xavfsizlik va topilgan xatolar  |
 | [docs/backend-api-request.md](docs/backend-api-request.md) | Backend jamoasiga: kerakli API'lar, ustuvorlik bo'yicha |
+| [docs/ARXITEKTURA-TARIXI.md](docs/ARXITEKTURA-TARIXI.md) | Nega shunday qilingan + loyihaning hozirgi holati |
 | [CLAUDE.md](CLAUDE.md)                                 | Buzilmasligi kerak bo'lgan qoidalar               |

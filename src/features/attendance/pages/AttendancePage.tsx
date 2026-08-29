@@ -1,21 +1,25 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { errorMessage } from '@/shared/api'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { useT } from '@/shared/i18n'
-import { AppShell, Button, EmptyState, ErrorBox } from '@/shared/ui'
+import { AppShell, Button, EmptyState, ErrorBox, SegmentedControl } from '@/shared/ui'
 import { AttendanceTable, type PastLessonColumn } from '../components/AttendanceTable'
 import { DraftBar } from '../components/DraftBar'
 import { useAttendanceDraft } from '../hooks/useAttendanceDraft'
 import { useAttendanceRecords } from '../hooks/useAttendanceRecords'
+import { useGroupStudents } from '../hooks/useGroupStudents'
 import { useSubmitAttendance } from '../hooks/useSubmitAttendance'
-import type { LessonDto, StudentDto } from '@/shared/types'
+import type { LessonDto } from '@/shared/types'
 
 /** Dashboard'dan `navigate('/attendance', { state })` orqali keladigan yuk. */
 interface AttendanceRouteState {
-    students?: StudentDto[]
     activeLesson?: LessonDto | null
+    groupId?: string
 }
+
+/** Oy tanlagich qiymati — `fetchMonthlyAttendance` ning `previousMonths` iga to'g'ridan-to'g'ri o'tadi. */
+type MonthOption = '1' | '2' | '3'
 
 export function AttendancePage() {
     const { t } = useT()
@@ -25,10 +29,15 @@ export function AttendancePage() {
     const location = useLocation()
 
     const state = (location.state ?? null) as AttendanceRouteState | null
-    const students = useMemo(() => state?.students ?? [], [state])
     const activeLesson = state?.activeLesson ?? null
+    const groupId = state?.groupId ?? ''
 
-    const { records, error } = useAttendanceRecords(session.token, students)
+    const [month, setMonth] = useState<MonthOption>('1')
+
+    const studentsQuery = useGroupStudents(session.token, groupId)
+    const recordsQuery = useAttendanceRecords(session.token, groupId, Number(month))
+    const students = studentsQuery.students
+
     const draft = useAttendanceDraft(students, activeLesson)
     const submit = useSubmitAttendance(session.token, () => {
         draft.clearDraft()
@@ -37,12 +46,13 @@ export function AttendancePage() {
 
     const pastColumns = useMemo<PastLessonColumn[]>(
         () =>
-            records.map((record) => ({
-                lessonId: record.lessonId,
-                date: record.createdAt,
-                attendanceStudents: record.attendanceStudents ?? [],
+            recordsQuery.records.map((record) => ({
+                lessonId: record.id,
+                lessonTitle: record.lessonTitle,
+                date: record.date,
+                attendanceMap: record.attendanceStudentMap ?? {},
             })),
-        [records]
+        [recordsQuery.records]
     )
 
     function handleFinish() {
@@ -50,16 +60,29 @@ export function AttendancePage() {
         if (payload) submit.mutate(payload)
     }
 
-    const failure = submit.error ?? error
+    const isLoading = studentsQuery.isLoading || recordsQuery.isLoading
+    const failure = submit.error ?? studentsQuery.error ?? recordsQuery.error
 
     return (
         <AppShell
             subtitle={t('attendance.title')}
             onSignOut={signOut}
             actions={
-                <Button size="sm" onClick={() => navigate('/')}>
-                    ← {t('attendance.backToDashboard')}
-                </Button>
+                <>
+                    <SegmentedControl<MonthOption>
+                        label={t('attendance.monthFilter')}
+                        value={month}
+                        onChange={setMonth}
+                        options={[
+                            { value: '1', label: t('attendance.monthCurrent') },
+                            { value: '2', label: t('attendance.monthPrevious') },
+                            { value: '3', label: t('attendance.monthTwoAgo') },
+                        ]}
+                    />
+                    <Button size="sm" onClick={() => navigate('/')}>
+                        ← {t('attendance.backToDashboard')}
+                    </Button>
+                </>
             }
         >
             {failure && (
@@ -68,12 +91,16 @@ export function AttendancePage() {
                 </div>
             )}
 
-            {students.length === 0 ? (
+            {isLoading && <p className="font-mono text-sm text-fg-faint">{t('common.loading')}</p>}
+
+            {!isLoading && students.length === 0 && (
                 <EmptyState
                     title={t('attendance.noStudents')}
                     description={t('attendance.noStudentsHint')}
                 />
-            ) : (
+            )}
+
+            {!isLoading && students.length > 0 && (
                 <>
                     {pastColumns.length > 0 && (
                         <p className="mb-4 font-mono text-xs text-fg-faint">

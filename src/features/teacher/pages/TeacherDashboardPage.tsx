@@ -53,13 +53,15 @@ export function TeacherDashboardPage() {
     const group = groupInfoQuery.data?.groupDto
     const students = useMemo(() => groupInfoQuery.data?.studentDto ?? [], [groupInfoQuery.data])
 
-    const { records } = useAttendanceRecords(session.token, students)
+    // Dashboardda faqat joriy oy ko'rsatiladi — oy tanlash davomat ekranida.
+    const { records } = useAttendanceRecords(session.token, selectedGroupId, 1)
     const pastColumns = useMemo<PastLessonColumn[]>(
         () =>
             records.map((record) => ({
-                lessonId: record.lessonId,
-                date: record.createdAt,
-                attendanceStudents: record.attendanceStudents ?? [],
+                lessonId: record.id,
+                lessonTitle: record.lessonTitle,
+                date: record.date,
+                attendanceMap: record.attendanceStudentMap ?? {},
             })),
         [records]
     )
@@ -70,7 +72,8 @@ export function TeacherDashboardPage() {
     })
 
     function openAttendance() {
-        navigate('/attendance', { state: { students, activeLesson } })
+        // O'quvchilar ro'yxatini endi davomat ekrani o'zi guruh bo'yicha yuklaydi.
+        navigate('/attendance', { state: { activeLesson, groupId: selectedGroupId } })
     }
 
     function switchGroup(groupId: string) {

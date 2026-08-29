@@ -1,85 +1,54 @@
-import { useState } from 'react'
+import { useSession } from '@/app/providers/useAuth'
+import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { WEEK_DAYS, type WeekDay } from '@/shared/types'
-import { Button, Field, Input, PendingBackend, PendingTag } from '@/shared/ui'
+import { ErrorBox, PendingBackend } from '@/shared/ui'
+import { CentreForm } from './CentreForm'
 import { SettingsSection } from './SettingsSection'
-import { cn } from '@/shared/lib'
+import { useBranch } from '../hooks/useBranch'
+import { useMe } from '../hooks/useMe'
+import { useUpdateBranch } from '../hooks/useUpdateBranch'
 
-/** Markaz sozlamalari — faqat administrator ko'radi (SettingsPage tekshiradi). */
+/**
+ * Markaz (filial) sozlamalari — faqat administrator ko'radi (SettingsPage tekshiradi).
+ *
+ * Maydonlar ataylab `BranchDto` bilan bir xil: nomi, manzili, oylik to'lov va
+ * xarita havolasi. Ilgari bu yerda logotip, ish vaqti va dam olish kunlari ham
+ * bor edi — backendda ular yo'q, ya'ni forma hech qachon saqlay olmasdi.
+ */
 export function CentreSection() {
     const { t } = useT()
-    const [name, setName] = useState('')
-    const [logo, setLogo] = useState('')
-    const [start, setStart] = useState('')
-    const [end, setEnd] = useState('')
-    const [weekend, setWeekend] = useState<WeekDay[]>(['SUNDAY'])
+    const session = useSession()
 
-    function toggleDay(day: WeekDay) {
-        setWeekend((current) =>
-            current.includes(day) ? current.filter((item) => item !== day) : [...current, day]
-        )
-    }
+    const { data: me } = useMe(session.token)
+    const branch = useBranch(session.token, me?.branchId)
+    const save = useUpdateBranch(session.token, me?.branchId)
 
     return (
-        <SettingsSection
-            title={t('settings.centre')}
-            description={t('settings.centreHint')}
-            tag={<PendingTag />}
-        >
-            <div className="flex flex-col gap-3.5">
-                <Field label={t('settings.centreName')}>
-                    <Input value={name} onChange={(event) => setName(event.target.value)} />
-                </Field>
-                <Field label={t('settings.centreLogo')}>
-                    <Input
-                        type="url"
-                        placeholder="https://…"
-                        value={logo}
-                        onChange={(event) => setLogo(event.target.value)}
-                    />
-                </Field>
+        <SettingsSection title={t('settings.centre')} description={t('settings.centreHint')}>
+            {branch.error != null && (
+                <ErrorBox>
+                    {t('settings.centreLoadFailed', { message: errorMessage(branch.error) })}
+                </ErrorBox>
+            )}
 
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                    <Field label={t('settings.workStart')}>
-                        <Input type="time" value={start} onChange={(event) => setStart(event.target.value)} />
-                    </Field>
-                    <Field label={t('settings.workEnd')}>
-                        <Input type="time" value={end} onChange={(event) => setEnd(event.target.value)} />
-                    </Field>
-                </div>
+            {branch.isLoading && <p className="text-sm text-fg-faint">{t('common.loading')}</p>}
 
-                <Field label={t('settings.weekend')}>
-                    <div className="flex flex-wrap gap-1.5">
-                        {WEEK_DAYS.map((day) => {
-                            const isSelected = weekend.includes(day)
-                            return (
-                                <button
-                                    key={day}
-                                    type="button"
-                                    aria-pressed={isSelected}
-                                    onClick={() => toggleDay(day)}
-                                    className={cn(
-                                        'cursor-pointer rounded-md border px-2.5 py-1.5 font-mono text-xs uppercase transition-colors',
-                                        isSelected
-                                            ? 'border-fg bg-fg text-fg-inverted'
-                                            : 'border-border-base bg-surface-card text-fg-muted hover:border-border-strong'
-                                    )}
-                                >
-                                    {t(`day.${day}`)}
-                                </button>
-                            )
-                        })}
-                    </div>
-                </Field>
+            {/* Filial ma'lumoti kelgach forma qaytadan yaratiladi (`key`), shuning
+                uchun boshlang'ich qiymatlarni ko'chiruvchi effekt kerak emas. */}
+            {branch.data && (
+                <CentreForm
+                    key={branch.data.id}
+                    branch={branch.data}
+                    isSaving={save.isPending}
+                    isSaved={save.isSuccess}
+                    error={save.error}
+                    onSave={(payload) => save.mutate(payload)}
+                />
+            )}
 
-                <PendingBackend />
-
-                <div className="flex justify-end">
-                    <Button variant="primary" disabled>
-                        {t('common.save')}
-                    </Button>
-                </div>
-            </div>
+            {/* `branchId` faqat backend uni `/auth/me` ga qo'shgandan keyin keladi;
+                eski tokenda u bo'lmasligi mumkin. */}
+            {!branch.isLoading && !branch.data && branch.error == null && <PendingBackend />}
         </SettingsSection>
     )
 }

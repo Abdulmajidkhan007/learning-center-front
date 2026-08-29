@@ -8,6 +8,7 @@ import { payments } from './payments'
 import { superAdmin } from './superAdmin'
 import { settings } from './settings'
 import { student } from './student'
+import { leads } from './leads'
 
 /**
  * Ruscha.
@@ -30,4 +31,5 @@ export const ru: Translations = {
     ...superAdmin,
     ...settings,
     ...student,
+    ...leads,
 }

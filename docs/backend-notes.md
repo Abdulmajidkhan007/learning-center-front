@@ -1,7 +1,12 @@
-# Backend uchun eslatmalar (goodman113 ga)
+# Backend uchun eslatmalar
 
-Frontend `goodman113/learning_center` bilan solishtirib tekshiriladi.
-Oxirgi tekshiruv: commit `6eacde9`, Spring Boot **4.1.0**.
+**Qaysi repo va branch tekshiriladi.** Railway'ga joylangan backend —
+`nurulloh-coder-dev/learning-center`, branch **`main`** (backend jamoasi
+2026-08-21 da tasdiqladi). `main` o'ziga `N` ni merge qilib olgan va undan
+12 commit oldinda, ya'ni **haqiqat manbai `main`**, `N` emas.
+
+Eski `goodman113/learning_center` ga qaralmaydi. Quyidagi eslatmalar
+`nurulloh-coder-dev/learning-center@main` (`e02c464`, 2026-08-21) bo'yicha.
 
 ## Tuzatilganlar ✅
 
@@ -16,9 +21,26 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 | `GroupNameProjection` ga `dayType` | ✅ frontendda filtr o'zi ishlab ketadi |
 | Cookie `SameSite=Lax` | ✅ |
 
+**`nurulloh-coder-dev/learning-center@N` da qo'shimcha tuzalganlar
+(2026-08-19, `a8a67ca`):**
+
+| Nima | Holati | Frontendga ta'siri |
+| --- | --- | --- |
+| `BranchDto.organization` izohdan chiqarildi | ✅ | super-adminda filial qaysi tashkilotniki ekani ko'rsatilishi mumkin |
+| `OrganizationService.delete` haqiqiy `softDelete` qiladi | ✅ | tashkilotni o'chirish tugmasi qo'yilishi mumkin |
+| `GET /attendance/group/{groupId}` qo'shildi | ⚠️ o'chirildi | pastga qarang |
+| `Lead` API to'liq (`/api/v1/leads`) | ✅ | Leads bo'limi endi yozilishi mumkin |
+
 > **Eslatma:** kalitlar env'ga chiqarilgani — ularni almashtirish o'rnini
 > bosmaydi. Eski AWS va JWT kalitlari git tarixida qolgan va ochiq repoda
 > turibdi. Ular hali almashtirilmagan bo'lsa, almashtiring.
+
+> **2026-08-28:** `GET /attendance/group/{groupId}` backenddan o'chirilgan
+> (404 qaytaradi) — o'qituvchi paneli va davomat ekrani shu sabab ishlamay
+> qolgan edi. O'rniga `GET /attendance/monthly/{groupId}?previousMonths=`
+> (javob: `[{ id, lessonTitle, date, attendanceStudentMap }]`, xarita
+> kaliti — `studentId`) va o'quvchilar uchun `GET /student/{groupId}/students`
+> ishlatiladi — frontend shularga o'tkazildi.
 
 ---
 
@@ -137,11 +159,38 @@ yetib ham bormaydi.
 
 Shuning uchun: GET'lar o'tadi, faqat POST yiqiladi va xabar bo'sh bo'ladi.
 
+#### Nega "biz tuzatdik" deyilyapti, lekin baribir ishlamayapti
+
+`nurulloh-coder-dev/learning-center@N` dagi `application.yaml` da
+`frontUrl: ${FRONT_URL}` **bor** — lekin u faylning **izohga olingan**
+qismida (1–46-qatorlar hammasi `#` bilan boshlanadi). Spring izohni o'qimaydi.
+
+Faylning **haqiqiy** qismi 47-qatordan boshlanadi va 50-qatorda:
+
+```yaml
+spring:
+  application:
+    name: CRM
+    frontUrl: http://localhost:5173   # ← ishlaydigan qiymat shu
+  profiles:
+    default: prod
+```
+
+`application-prod.yaml` esa `frontUrl` ni umuman qayta belgilamaydi
+(unda faqat datasource, aws, jwt va `server.port` bor). Ya'ni `prod`
+profilida ham asosiy fayldagi `localhost:5173` kuchda qoladi.
+
 **Tuzatish — ikkita qadam:**
 
-1. `application.yaml`:
+1. `application.yaml`, **47-qatordan keyingi** (izohga olinmagan) blokda:
    ```yaml
    frontUrl: ${FRONT_URL:http://localhost:5173}
+   ```
+   — yoki `application-prod.yaml` ga qo'shish:
+   ```yaml
+   spring:
+     application:
+       frontUrl: ${FRONT_URL}
    ```
 2. Railway → backend xizmati → Variables:
    ```
@@ -149,7 +198,19 @@ Shuning uchun: GET'lar o'tadi, faqat POST yiqiladi va xabar bo'sh bo'ladi.
    ```
 
 Env o'zgaruvchisining o'zi yetmaydi — hozir yaml'da qiymat qattiq yozilgan,
-ya'ni `FRONT_URL` o'qilmaydi.
+ya'ni `FRONT_URL` o'qilmaydi. Izohga olingan blokni tuzatish ham yetmaydi —
+u baribir o'qilmaydi.
+
+**Tekshirish:** deploydan keyin
+
+```bash
+curl -i -X POST https://<backend>/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: https://robust-forgiveness-production-c350.up.railway.app' \
+  -d '{"phone":"+998000000000","password":"x"}'
+```
+
+403 va bo'sh tana o'rniga 400/401 va JSON kelsa — CORS tuzalgan.
 
 (Frontend `/api` ni o'zi uzatgani uchun CORS mantiqan kerak emas, lekin
 filtr baribir `Origin` ni tekshiradi — shuning uchun to'g'ri qiymat shart.)
@@ -276,20 +337,12 @@ Yechim ikkitadan biri:
 
 Ikkinchisi soddaroq va deyarli har doim to'g'ri.
 
-### 10. 🟠 `Branch` uchun API yo'q — super-admin paneli shu sababdan qilinmadi
+### 10. ✅ `Branch` API — qilingan
 
-Frontendda super-admin uchun placeholder ekran turibdi. Uni haqiqiy qilish
-uchun filiallar (branch) API si kerak, hozir esa:
-
-- `BranchController` **yo'q**;
-- `BranchDto`, `BranchCreateDto`, `BranchUpdateDto` — uchalasi ham **bo'sh
-  record** (`public record BranchDto() {}`);
-- `Branch` entity'sida esa maydonlar bor: `organization`, `name`, `address`,
-  `email`, `phone`, `chargeForMonth`, `googlePlaceId`, `latitude`, `longitude`.
-
-Kerak bo'ladigan minimum: `GET/POST/PUT/DELETE /api/v1/branch` va DTO'lar
-to'ldirilgan holda. Shundan keyin super-admin paneli boshqa tablar bilan
-bir xil generik jadvalga tushadi — frontendda bir kunlik ish.
+`BranchController` va to'ldirilgan `BranchDto` paydo bo'lgach super-admin
+paneli yozildi (`/super-admin`). `N` branchda `BranchDto.organization` ham
+izohdan chiqarilgan, ya'ni filial qaysi tashkilotniki ekani ko'rsatilishi
+mumkin — frontendda ustun qo'shish qoldi.
 
 ### 11. 🔴 `InvoiceMapper` da ism va rasm manzili almashib ketgan
 
@@ -326,11 +379,170 @@ uchun `new UserDto(...)` ni nomlangan qurilishga o'tkazing yoki
 `TeacherDto` uchun ham shu proyeksiyada `getTeacherFullName` /
 `getTeacherImageUrl` bor — o'sha joyni ham tekshiring.
 
-### 12. 🟡 `ddl-auto: update`
+### 12. 🟠 `LeadUpdateDto` maydonlari `LeadDto` bilan mos emas
+
+`GET /leads` (va boshqa o'qish yo'llari) `LeadDto{id, fullName, phone, callAt,
+status, source, preferredCourse, createdAt, updatedAt}` qaytaradi, lekin
+`PUT /leads/{id}` kutayotgan `LeadUpdateDto` boshqacha:
+
+- ism maydoni `fullName` emas, `name`;
+- `preferredCourse` boshqa turda (aniq qaysi — ma'lum emas, `String` deb
+  taxmin qilingan).
+
+Ikkalasi bir xil "lid" tushunchasini tasvirlaydigan bo'lsa, maydon
+nomlari ham mos kelishi kerak — aks holda frontendda ikkita alohida
+xarita saqlashga to'g'ri keladi va birortasi yangilansa ikkinchisi
+unutiladi.
+
+Shu sabab **tahrirlash (edit) funksiyasi hozircha ulanmagan**: faqat
+ro'yxat, yaratish, o'chirish va holat o'zgartirish (`PATCH .../status`)
+ishlaydi. Aniqlik kirgach `NewLeadModal` yonida `EditLeadModal` qo'shiladi
+(`src/features/leads/`).
+
+**So'rov:** `docs/backend-api-request.md`.
+
+### 13. 🟡 `ddl-auto: update`
 
 Hozircha ishlaydi, lekin productionda xavfli: ustun o'chirilsa yoki tipi
 o'zgarsa Hibernate jimgina noto'g'ri ish qilishi mumkin. Jonli ma'lumot
 paydo bo'lgach Flyway yoki Liquibase'ga o'ting, `ddl-auto: validate` bilan.
+
+### 13. 🔴 `messages*.properties` yo'q — xato matnlari kalit bo'lib chiqadi
+
+Login noto'g'ri bo'lganda javob:
+
+```json
+{"message": "MessageKey not found: illegal.phone.number.or.password"}
+```
+
+`src/main/resources` da birorta `messages.properties` /
+`messages_uz.properties` / `messages_ru.properties` fayli yo'q, shuning uchun
+`MessageSource` hech qaysi kalitni topolmaydi. Frontend serverdan kelgan
+matnni **tarjima qilmaydi va o'zgartirmaydi** (bu ataylab: server xatosi
+qanday kelsa shunday ko'rsatiladi), ya'ni foydalanuvchi shu texnik satrni
+ko'radi.
+
+Kerak: `messages_uz.properties`, `messages_ru.properties`,
+`messages_en.properties` (`Accept-Language` frontenddan `uz`/`ru`/`en` bo'lib
+keladi) va ularda ishlatilayotgan hamma kalit.
+
+### 14. 🟠 `InvoiceDto` da `type` yo'q, lekin `Invoice` da bor
+
+`Invoice` entity'sida `InvoiceType type` bor (`PAID`, `RETURNED`) va
+`InvoiceMapper` qaytarimda uni `RETURNED` qilib belgilaydi. Ammo:
+
+```java
+public record InvoiceDto(
+        String id, String invoiceNumber, StudentDto student,
+        BigDecimal amount, LocalDateTime issuedAt, InvoiceStatus status
+) {}
+```
+
+`type` DTO'da yo'q — ya'ni to'lov va qaytarim yozuvlari ro'yxatda bir xil
+ko'rinadi, faqat summasi bilan farq qiladi. Frontendda "Turi" ustuni bor,
+lekin u doim bo'sh (`—`) chiqadi.
+
+Kerak: `InvoiceDto` ga `InvoiceType type` qo'shilsin.
+
+### 15. 🔴 To'rtta `/count` endpoint'i ham admin paneliga yaramaydi
+
+Admin panelining tepasidagi to'rtta KPI kartasi (o'quvchilar, o'qituvchilar,
+guruhlar, darslar soni) hammasi `—` ko'rsatadi. Sabab — to'rttala
+endpoint ham frontend bera olmaydigan majburiy parametr talab qiladi:
+
+| Endpoint | Talab qiladi | Muammo |
+| --- | --- | --- |
+| `GET /student/count` | `groupId` | Kartaga **markazdagi jami** o'quvchi kerak, guruhdagi emas |
+| `GET /lesson/count` | `groupId` | Xuddi shunday |
+| `GET /group/count` | `organizationId` | Tokendan olinishi kerak, mijozdan emas |
+| `GET /teacher/count` | `organizationId` | Xuddi shunday |
+
+Ya'ni hozir markaz bo'yicha umumiy sonni **hech qanday yo'l bilan** olib
+bo'lmaydi.
+
+Kerak: to'rttasi ham parametrsiz ishlasin va tashkilotni tokendan olsin
+(`userValidator.authenticateAndGetOrganizationId()`). Guruh bo'yicha son
+kerak bo'lsa — `groupId` **ixtiyoriy** parametr bo'lsin
+(`@RequestParam(required = false)`), majburiy emas.
+
+Frontend `GET /<endpoint>/count` ni parametrsiz chaqiradi va javobning
+ikkala shaklini ham (`5` va `{"count": 5}`) tushunadi
+(`src/features/admin/api/adminApi.ts:24`).
+
+### 16. 🔴 `branch.organization_id` bo'sh — guruhlar ro'yxati shundan bo'sh chiqadi
+
+`GroupRepository.getAllByFilter` shunday filtrlaydi:
+
+```sql
+JOIN g.branch b
+WHERE b.organizationId = :organizationId
+```
+
+`Branch` da alohida `organization` bog'lanishi **yo'q** — uning tashkilotga
+yagona aloqasi `BaseEntity.organizationId`. U esa faqat `@PrePersist` da
+to'ladi, ya'ni **yangi qo'shilgan qatorlarda**. Bu o'zgarishdan oldin
+yaratilgan filiallarning `organization_id` ustuni `NULL` bo'lib qolgan.
+
+`NULL = 'biror-id'` hech qachon rost bo'lmaydi → ro'yxat bo'sh.
+
+Darslar ishlayotgani shuni tasdiqlaydi: `GET /lesson` tashkilot bo'yicha
+filtrlamaydi, shuning uchun ma'lumot ko'rinadi.
+
+**Tuzatish — eski qatorlarni to'ldirish:**
+
+```sql
+SELECT id, name FROM organizations;
+UPDATE branch SET organization_id = '<org-id>' WHERE organization_id IS NULL;
+```
+
+Xuddi shu muammo `BaseEntity` dan meros olgan **hamma** jadvalda bor:
+`groups`, `students`, `teachers`, `lessons`, `invoice`. Tashkilot bo'yicha
+filtr qo'shilgan har bir joyda eski ma'lumot ko'rinmay qoladi.
+
+**Diqqat — ilova orqali tuzatib bo'lmaydi:**
+
+```java
+@Column(name = "organization_id", updatable = false)
+```
+
+`updatable = false` tufayli Hibernate mavjud qatorga bu ustunni **yozmaydi**.
+Ya'ni to'ldirish faqat SQL bilan bo'ladi, yoki avval shu bayroq olib
+tashlanishi kerak.
+
+### 17. 🟡 `GroupStatus` da `ENDED` → `COMPLETED` (frontend moslashtirildi)
+
+Backend enum'i `STARTING, ONGOING, COMPLETED` bo'ldi. Frontendda `ENDED`
+turgandi — `src/shared/types/index.ts` va uch tildagi `status.*` kalitlari
+yangilandi. Bu bandda backenddan hech narsa talab qilinmaydi, faqat yozib
+qo'yildi: enum qiymati o'zgarsa frontend filtri jim yiqiladi (400), shuning
+uchun bunday o'zgarishlarni oldindan ayting.
+
+### 18. 🟡 Autentifikatsiyadan o'tmagan so'rovga 401 emas, 403 qaytadi
+
+`SecurityConfig` da `authenticationEntryPoint` berilmagan:
+
+```java
+http.authorizeHttpRequests(auth -> auth
+        .requestMatchers(WHITE_LIST).permitAll()
+        .anyRequest().authenticated());
+```
+
+`httpBasic()`, `formLogin()` va `exceptionHandling(...)` ning hech biri yo'q,
+shuning uchun Spring Security `Http403ForbiddenEntryPoint` ni ishlatadi —
+ya'ni **token yo'q/eskirgan** holat ham **403** bo'lib qaytadi.
+
+Natijada mijoz "token eskirgan" (yangilash kerak) va "bu rolga ruxsat yo'q"
+(yangilash foydasiz) holatlarini ajrata olmaydi. Frontend hozir ikkalasini
+ham bir xil ko'radi va ikkalasida ham tokenni yangilashga uradi.
+
+Kerak:
+
+```java
+http.exceptionHandling(e -> e.authenticationEntryPoint(
+        (req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
+```
+
+Bu bizni bloklamaydi — frontend ikkalasini ham ushlaydi — lekin to'g'risi shu.
 
 ---
 

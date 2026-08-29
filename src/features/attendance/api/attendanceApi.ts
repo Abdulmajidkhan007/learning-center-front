@@ -1,20 +1,31 @@
 import { apiFetch } from '@/shared/api'
-import type { AttendanceDto, AttendanceStudentDto, Page } from '@/shared/types'
+import type { AttendanceDto, AttendanceStudentDto, MonthlyAttendanceDto, StudentDto } from '@/shared/types'
 
 const ENDPOINT = '/attendance'
+const STUDENT_ENDPOINT = '/student'
 
 /**
- * Backend ba'zan massiv, ba'zan `Page` qaytaradi — ikkalasini ham qabul
- * qilamiz va bitta massivga keltiramiz. (Kontrollerlar bir xillashtirilsa,
- * shu funksiya soddalashadi.)
+ * Guruhning oylik davomati.
+ *
+ * `previousMonths`: 1 — joriy oy, 2 — o'tgan oy, 3 — ikki oy oldin.
+ * Backend kamida 1 ni kutadi, 0 yoki manfiy qiymatda 400 qaytaradi.
  */
-export async function fetchAttendance(token: string): Promise<AttendanceDto[]> {
-    const data = await apiFetch<AttendanceDto[] | Page<AttendanceDto>>(ENDPOINT, {
+export async function fetchMonthlyAttendance(
+    token: string,
+    groupId: string,
+    previousMonths: number
+): Promise<MonthlyAttendanceDto[]> {
+    const data = await apiFetch<MonthlyAttendanceDto[]>(`${ENDPOINT}/monthly/${groupId}`, {
         token,
-        params: { size: 200 },
+        params: { previousMonths },
     })
-    if (Array.isArray(data)) return data
-    return data?.content ?? []
+    return data ?? []
+}
+
+/** Guruhning o'quvchilari — davomat jadvalining qatorlari shulardan tuziladi. */
+export async function fetchStudentsByGroup(token: string, groupId: string): Promise<StudentDto[]> {
+    const data = await apiFetch<StudentDto[]>(`${STUDENT_ENDPOINT}/${groupId}/students`, { token })
+    return data ?? []
 }
 
 export interface CreateAttendancePayload {
