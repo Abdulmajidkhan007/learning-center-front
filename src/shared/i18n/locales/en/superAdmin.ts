@@ -27,4 +27,12 @@ export const superAdmin: Record<SuperAdminKeys, string> = {
     'branch.organizationLocked': 'A branch cannot be moved to another organization.',
     'branch.empty': 'No branches found',
     'branch.deleteConfirm': 'Delete branch {{name}}? This cannot be undone.',
+    'analytics.title': 'Statistics',
+    'analytics.thisMonth': '+{{count}} this month',
+    'analytics.student': 'Students',
+    'analytics.teacher': 'Teachers',
+    'analytics.lead': 'Leads',
+    'analytics.invoice': 'Invoices',
+    'analytics.enrollment': 'Enrollments',
+    'analytics.branch': 'Branches',
 }

@@ -1,8 +1,9 @@
 import { apiFetch } from '@/shared/api'
-import type { BranchDto, OrganizationDto, Page } from '@/shared/types'
+import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page } from '@/shared/types'
 
 const ORGANIZATIONS = '/organizations'
 const BRANCHES = '/branch'
+const ANALYTICS = '/analytics'
 
 export interface ListParams {
     page: number
@@ -61,4 +62,10 @@ export function updateBranch(token: string, id: string, body: Omit<BranchPayload
 
 export function deleteBranch(token: string, id: string) {
     return apiFetch(`${BRANCHES}/${id}`, { method: 'DELETE', token })
+}
+
+// --- analytics ---
+
+export function fetchAnalytics(token: string, category: AnalyticsCategory) {
+    return apiFetch<AnalyticsStatDto>(`${ANALYTICS}/${category}`, { token })
 }
