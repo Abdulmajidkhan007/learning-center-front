@@ -35,6 +35,8 @@ type Row = Record<string, unknown> & { id: string }
 /** `GET /auth/me` javobi — demo foydalanuvchisi. */
 const demoUser = {
     id: 'u-demo',
+    // Sozlamalardagi markaz bloki shu filialni yuklaydi.
+    branchId: 'b1',
     fullName: 'Demo Foydalanuvchi',
     phone: '+998 93 100 10 01',
     birthDate: '1995-06-15',
@@ -259,6 +261,11 @@ export function installMockApi() {
             } as BranchDto
             db.branches = [...db.branches, branch]
             return json(branch)
+        }
+        if (path.startsWith('/branch/') && method === 'GET') {
+            const id = path.slice('/branch/'.length)
+            const branch = db.branches.find((item) => item.id === id)
+            return branch ? json(branch) : json({ message: 'Branch not found' }, 404)
         }
         if (path.startsWith('/branch/') && method === 'PUT') {
             const id = path.split('/')[2]

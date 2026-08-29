@@ -54,6 +54,8 @@ export type Role = 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'
 /** `UserDto` — diqqat: maydon nomi `imageUrl` (`imgUrl` emas). */
 export interface UserDto {
     id?: string
+    /** Foydalanuvchi biriktirilgan filial — sozlamalardagi markaz bloki shuni yuklaydi. */
+    branchId?: string
     imageUrl?: string
     fullName?: string
     phone?: string
@@ -232,6 +234,17 @@ export interface BranchDto {
     googleMapsUrl?: string
 }
 
+/** `PUT /branch/{id}` tanasi — `BranchDto` dan `id` va `organization` siz. */
+export interface BranchUpdatePayload {
+    name?: string
+    address?: string
+    chargeForMonth?: number
+    googlePlaceId?: string
+    latitude?: number
+    longitude?: number
+    googleMapsUrl?: string
+}
+
 export const INVOICE_STATUSES = ['PAID', 'PENDING', 'OVERDUE'] as const
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
@@ -323,14 +336,3 @@ export interface LeadRejectDto {
     note?: string
 }
 
-/** Markaz sozlamalaridagi dam olish kunlari tanlagichi uchun (backendda yo'q). */
-export const WEEK_DAYS = [
-    'MONDAY',
-    'TUESDAY',
-    'WEDNESDAY',
-    'THURSDAY',
-    'FRIDAY',
-    'SATURDAY',
-    'SUNDAY',
-] as const
-export type WeekDay = (typeof WEEK_DAYS)[number]

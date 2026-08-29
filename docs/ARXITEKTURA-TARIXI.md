@@ -153,8 +153,6 @@ profil, parol), to'lovlar (`/payments`, qaytarim bilan), super-admin
 
 - Teacher paneldagi KPI kartalar, uy vazifasi, guruh progressi, ballar —
   endpoint yo'q, `PendingBackend` bilan bo'sh turibdi.
-- Sozlamalardagi **markaz** bloki: `/auth/me` (`UserDto`) `branchId`
-  qaytarmaydi.
 - O'quvchi paneli davomat/guruh: "o'zimniki" endpoint'i yo'q.
   `GET /attendance` butun markaz yozuvlarini beradi.
 - Davomatdagi "sabab" matni: `AttendanceStudentCreateDto` da maydon yo'q.
