@@ -30,6 +30,14 @@ export const superAdmin = {
     'branch.organizationLocked': 'Filialni boshqa tashkilotga ko‘chirib bo‘lmaydi.',
     'branch.empty': 'Filial topilmadi',
     'branch.deleteConfirm': '{{name}} filiali o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
+    'analytics.title': 'Statistika',
+    'analytics.thisMonth': '+{{count}} bu oyda',
+    'analytics.student': 'O‘quvchilar',
+    'analytics.teacher': 'O‘qituvchilar',
+    'analytics.lead': 'Lidlar',
+    'analytics.invoice': 'Hisob-fakturalar',
+    'analytics.enrollment': 'A‘zolar',
+    'analytics.branch': 'Filiallar',
 } as const
 
 export type SuperAdminKeys = keyof typeof superAdmin

@@ -1,0 +1,66 @@
+import { screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { renderWithProviders } from '@/test/renderWithProviders'
+import { AnalyticsStatsRow } from './AnalyticsStatsRow'
+import type { AnalyticsCategory } from '@/shared/types'
+import type { AnalyticsItemResult } from '../hooks/useAnalytics'
+
+function mockItems(
+    overrides?: Partial<Record<AnalyticsCategory, Partial<AnalyticsItemResult>>>
+): Record<AnalyticsCategory, AnalyticsItemResult> {
+    const categories: AnalyticsCategory[] = ['student', 'teacher', 'lead', 'invoice', 'enrollment', 'branch']
+    const base: Record<AnalyticsCategory, AnalyticsItemResult> = {} as Record<
+        AnalyticsCategory,
+        AnalyticsItemResult
+    >
+
+    categories.forEach((cat) => {
+        base[cat] = {
+            category: cat,
+            total: 100,
+            thisMonth: 12,
+            isLoading: false,
+            error: null,
+            ...overrides?.[cat],
+        }
+    })
+
+    return base
+}
+
+describe('AnalyticsStatsRow', () => {
+    it('renders total counts and "+12 bu oyda" correctly', () => {
+        const items = mockItems()
+        renderWithProviders(<AnalyticsStatsRow items={items} />)
+
+        // 6 cards rendered with total 100
+        const totalElements = screen.getAllByText('100')
+        expect(totalElements.length).toBe(6)
+
+        // "+12 bu oyda" visible on cards
+        const thisMonthElements = screen.getAllByText('+12 bu oyda')
+        expect(thisMonthElements.length).toBe(6)
+    })
+
+    it('renders loading indicators when values are loading', () => {
+        const items = mockItems({
+            student: { total: undefined, thisMonth: undefined, isLoading: true },
+        })
+
+        renderWithProviders(<AnalyticsStatsRow items={items} />)
+
+        // Student total should be '···' and thisMonth should be '···'
+        const loadingDots = screen.getAllByText('···')
+        expect(loadingDots.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('renders dash when count is null', () => {
+        const items = mockItems({
+            lead: { total: null, thisMonth: null, isLoading: false },
+        })
+
+        renderWithProviders(<AnalyticsStatsRow items={items} />)
+
+        expect(screen.getByText('—')).toBeInTheDocument()
+    })
+})

@@ -254,3 +254,20 @@ export const WEEK_DAYS = [
     'SUNDAY',
 ] as const
 export type WeekDay = (typeof WEEK_DAYS)[number]
+
+/** Analytics statistic returned by /api/v1/analytics/{entity} */
+export interface AnalyticsStatDto {
+    total?: number | null
+    thisMonth?: number | null
+    addedThisMonth?: number | null
+    countThisMonth?: number | null
+    thisMonthCount?: number | null
+}
+
+export type AnalyticsCategory =
+    | 'student'
+    | 'teacher'
+    | 'lead'
+    | 'invoice'
+    | 'enrollment'
+    | 'branch'
