@@ -117,6 +117,14 @@ export interface GroupLevelNameDto {
     name: string
 }
 
+export interface GroupLevelDto {
+    id: string
+    name: string
+    lessonCount: number
+    orderNumber: number
+    durationInMonths: number
+}
+
 export interface GroupDto {
     id: string
     name?: string
