@@ -1,5 +1,11 @@
 import { apiFetch } from '@/shared/api'
-import type { ChangePasswordPayload, UserDto, UserUpdatePayload } from '@/shared/types'
+import type {
+    BranchDto,
+    BranchUpdatePayload,
+    ChangePasswordPayload,
+    UserDto,
+    UserUpdatePayload,
+} from '@/shared/types'
 
 /** Kirgan foydalanuvchining o'z ma'lumoti. */
 export function fetchMe(token: string) {
@@ -29,4 +35,18 @@ export function changePassword(token: string, payload: ChangePasswordPayload) {
  */
 export function updateProfile(token: string, userId: string, payload: UserUpdatePayload) {
     return apiFetch<UserDto>(`/user/${userId}`, { method: 'PUT', token, body: payload })
+}
+
+/**
+ * Foydalanuvchining o'z filiali.
+ *
+ * `id` `/auth/me` dagi `branchId` dan olinadi — "meniki" degan alohida
+ * endpoint yo'q, `GET /branch` esa tashkilotdagi hammasini qaytaradi.
+ */
+export function fetchBranch(token: string, branchId: string) {
+    return apiFetch<BranchDto>(`/branch/${branchId}`, { token })
+}
+
+export function updateBranch(token: string, branchId: string, payload: BranchUpdatePayload) {
+    return apiFetch<BranchDto>(`/branch/${branchId}`, { method: 'PUT', token, body: payload })
 }
