@@ -2,20 +2,18 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
-import type { LeadCreateDto, LeadDto, LeadRejectDto, LeadSource, LeadStatus, LeadUpdateDto } from '@/shared/types'
-import { LEAD_SOURCES, LEAD_STATUSES, REJECTION_REASONS } from '@/shared/types'
+import type { LeadCreateDto, LeadDto, LeadRejectDto, LeadStatus, LeadUpdateDto } from '@/shared/types'
+import { LEAD_STATUSES, REJECTION_REASONS } from '@/shared/types'
 import { useT } from '@/shared/i18n'
 import { AppShell, Badge, Button, EmptyState, ErrorBox, Field, Input, Modal, Panel, Select } from '@/shared/ui'
-import { useLeadCourseOptions, useLeadGroupOptions, useLeadMutations, useLeads } from '../hooks/useLeads'
+import { EditLeadModal } from '../components/EditLeadModal'
+import { NewLeadModal } from '../components/NewLeadModal'
+import { useLeadGroupOptions, useLeadMutations, useLeads } from '../hooks/useLeads'
 
 const PAGE_SIZE = 50
 const EMPTY_LEADS: LeadDto[] = []
-const PHONE_RE = /^\+?[1-9]\d{1,14}$/
 const STATUS_TONE: Record<LeadStatus, 'accent' | 'success' | 'warning' | 'danger'> = { NEW: 'accent', ENROLLED: 'success', CALL_LATER: 'warning', REJECTED: 'danger' }
 const COLUMN_TONE: Record<LeadStatus, string> = { NEW: 'border-accent/30 bg-accent-soft', ENROLLED: 'border-success/30 bg-success-soft', CALL_LATER: 'border-warning/30 bg-warning-soft', REJECTED: 'border-danger/30 bg-danger-soft' }
-
-type FormState = { fullName: string; phone: string; source: LeadSource | ''; preferredCourse: string }
-const emptyForm: FormState = { fullName: '', phone: '', source: '', preferredCourse: '' }
 
 function formatDate(value?: string | null) {
     if (!value) return null
@@ -33,8 +31,7 @@ export function LeadsPage() {
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState<LeadStatus | ''>('')
     const [editing, setEditing] = useState<LeadDto | null>(null)
-    const [form, setForm] = useState<FormState>(emptyForm)
-    const [isFormOpen, setIsFormOpen] = useState(false)
+    const [isCreateOpen, setIsCreateOpen] = useState(false)
     const [draggedId, setDraggedId] = useState<string | null>(null)
     const [action, setAction] = useState<{ lead: LeadDto; status: LeadStatus } | null>(null)
     const [groupId, setGroupId] = useState('')
@@ -71,22 +68,19 @@ export function LeadsPage() {
     const leads = visibleStatuses.flatMap((status) => leadsByStatus[status])
     const mutations = useLeadMutations(token)
     const groups = useLeadGroupOptions(token)
-    const courseOptions = useLeadCourseOptions(token)
     const total = leads.length
     const apiError = LEAD_STATUSES.map((status) => lists[status].error).find(Boolean) ?? mutations.create.error ?? mutations.update.error ?? mutations.enroll.error ?? mutations.reject.error ?? mutations.callLater.error ?? mutations.remove.error
 
-    function openCreate() { setEditing(null); setForm(emptyForm); setIsFormOpen(true) }
-    function openEdit(lead: LeadDto) {
-        setEditing(lead)
-        setForm({ fullName: lead.fullName ?? '', phone: lead.phone ?? '', source: lead.source ?? '', preferredCourse: lead.preferredCourse?.id ?? '' })
-        setIsFormOpen(true)
+    function openCreate() { setEditing(null); setIsCreateOpen(true) }
+    function openEdit(lead: LeadDto) { setEditing(lead); setIsCreateOpen(false) }
+    function closeCreate() { setIsCreateOpen(false) }
+    function closeEdit() { setEditing(null) }
+    function handleCreate(body: LeadCreateDto) {
+        mutations.create.mutate(body, { onSuccess: closeCreate })
     }
-    function closeModal() { setEditing(null); setForm(emptyForm); setIsFormOpen(false) }
-    function save() {
-        const body: LeadCreateDto = { fullName: form.fullName.trim(), phone: form.phone.trim(), source: form.source || undefined, preferredCourse: form.preferredCourse.trim() || undefined }
-        if (!body.fullName || !PHONE_RE.test(body.phone)) return
-        if (editing) mutations.update.mutate({ id: editing.id, body: { ...body, status: asStatus(editing.status) } as LeadUpdateDto }, { onSuccess: closeModal })
-        else mutations.create.mutate(body, { onSuccess: closeModal })
+    function handleUpdate(body: LeadUpdateDto) {
+        if (!editing) return
+        mutations.update.mutate({ id: editing.id, body }, { onSuccess: closeEdit })
     }
     function changeStatus(lead: LeadDto, status: LeadStatus) {
         if (asStatus(lead.status) === status || status === 'NEW') return
@@ -124,7 +118,8 @@ export function LeadsPage() {
                 </div></div>
                 {visibleStatuses.every((status) => !lists[status].isLoading) && leads.length === 0 && !apiError && <EmptyState title="No leads found" description="Try a different search, or add your first lead." />}
             </div>
-            {isFormOpen && <Modal eyebrow={editing ? 'EDIT LEAD' : 'NEW LEAD'} title={editing ? `${t('common.edit')} lead` : t('lead.newTitle')} onClose={closeModal} footer={<><Button onClick={closeModal}>{t('common.cancel')}</Button><Button variant="primary" onClick={save} disabled={!form.fullName.trim() || !PHONE_RE.test(form.phone.trim()) || mutations.create.isPending || mutations.update.isPending}>{t('common.save')}</Button></>}><div className="space-y-4"><Field label="Full name"><Input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} required /></Field><Field label="Phone"><Input type="tel" placeholder="+998901234567" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required /><p className="mt-1 text-xs text-fg-muted">International format, e.g. +998901234567</p></Field><Field label="Source"><Select placeholder="Select source" value={form.source} options={LEAD_SOURCES.map((source) => ({ value: source, label: source }))} onChange={(event) => setForm({ ...form, source: event.target.value as LeadSource | '' })} /></Field><Field label="Preferred course"><Select placeholder="Select level" value={form.preferredCourse} options={courseOptions.data ?? []} onChange={(event) => setForm({ ...form, preferredCourse: event.target.value })} /></Field></div></Modal>}
+            {isCreateOpen && <NewLeadModal token={token} isPending={mutations.create.isPending} onClose={closeCreate} onSubmit={handleCreate} />}
+            {editing && <EditLeadModal token={token} lead={editing} isPending={mutations.update.isPending} onClose={closeEdit} onSubmit={handleUpdate} />}
             {action && <Modal eyebrow={t('lead.actionEyebrow')} title={action.status === 'ENROLLED' ? t('lead.action.ENROLLED') : action.status === 'REJECTED' ? t('lead.action.REJECTED') : t('lead.action.CALL_LATER')} onClose={() => setAction(null)} footer={<><Button onClick={() => setAction(null)}>{t('common.cancel')}</Button><Button variant="primary" onClick={submitAction} disabled={(action.status === 'ENROLLED' && !groupId) || (action.status === 'CALL_LATER' && !callAt) || mutations.enroll.isPending || mutations.reject.isPending || mutations.callLater.isPending}>{t('common.save')}</Button></>}>
                 {action.status === 'ENROLLED' && <Field label={t('lead.group')}><Select aria-label={t('lead.group')} placeholder={t('lead.selectGroup')} value={groupId} options={groups.data ?? []} onChange={(event) => setGroupId(event.target.value)} /></Field>}
                 {action.status === 'REJECTED' && <div className="space-y-4"><Field label={t('lead.rejectionReason')}><Select aria-label={t('lead.rejectionReason')} options={REJECTION_REASONS.map((reason) => ({ value: reason, label: t(`lead.reason.${reason}`) }))} value={rejectReason} onChange={(event) => setRejectReason(event.target.value as LeadRejectDto['reason'])} /></Field><Field label={t('lead.note')}><Input value={rejectNote} onChange={(event) => setRejectNote(event.target.value)} /></Field></div>}
