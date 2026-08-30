@@ -14,6 +14,8 @@ export const leads: Record<LeadsKeys, string> = {
     'lead.preferredCourse': 'Preferred course',
     'lead.new': '+ New lead',
     'lead.newTitle': 'New lead',
+    'lead.edit': 'Edit',
+    'lead.editTitle': 'Edit lead',
     'lead.changeStatus': 'Change status',
     'lead.search': 'name or phone…',
     'lead.allStatuses': 'All statuses',

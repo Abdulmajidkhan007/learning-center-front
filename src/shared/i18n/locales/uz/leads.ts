@@ -17,6 +17,8 @@ export const leads = {
     'lead.preferredCourse': 'Qiziqqan kursi',
     'lead.new': '+ Yangi lid',
     'lead.newTitle': 'Yangi lid',
+    'lead.edit': 'Tahrirlash',
+    'lead.editTitle': 'Lidni tahrirlash',
     'lead.changeStatus': 'Holatni o‘zgartirish',
     'lead.search': 'ism yoki telefon…',
     'lead.allStatuses': 'Barcha holatlar',
