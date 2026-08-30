@@ -12,9 +12,11 @@ import {
     Panel,
     SegmentedControl,
 } from '@/shared/ui'
+import { AnalyticsStatsRow } from '../components/AnalyticsStatsRow'
 import { BranchFormModal } from '../components/BranchFormModal'
 import { OrganizationFormModal } from '../components/OrganizationFormModal'
 import { SimpleTable, type SimpleColumn } from '../components/SimpleTable'
+import { useAnalytics } from '../hooks/useAnalytics'
 import {
     useBranchMutations,
     useBranches,
@@ -47,6 +49,8 @@ export function SuperAdminDashboardPage() {
     const branches = useBranches(session.token, tab === 'branches' ? page : 0, search)
     const saveOrganization = useOrganizationMutations(session.token)
     const branchMutations = useBranchMutations(session.token)
+
+    const analytics = useAnalytics(session.token)
 
     const organizationOptions = useMemo(
         () => organizations.rows.map((org) => ({ value: org.id, label: org.name || org.id })),
@@ -110,6 +114,8 @@ export function SuperAdminDashboardPage() {
                 </>
             }
         >
+            <AnalyticsStatsRow items={analytics.items} />
+
             <Panel>
                 <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
                     <div className="min-w-0">

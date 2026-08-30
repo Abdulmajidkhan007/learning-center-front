@@ -27,4 +27,12 @@ export const superAdmin: Record<SuperAdminKeys, string> = {
     'branch.organizationLocked': 'Перенести филиал в другую организацию нельзя.',
     'branch.empty': 'Филиалы не найдены',
     'branch.deleteConfirm': 'Удалить филиал {{name}}? Это необратимо.',
+    'analytics.title': 'Статистика',
+    'analytics.thisMonth': '+{{count}} в этом месяце',
+    'analytics.student': 'Студенты',
+    'analytics.teacher': 'Учителя',
+    'analytics.lead': 'Лиды',
+    'analytics.invoice': 'Инвойсы',
+    'analytics.enrollment': 'Зачисления',
+    'analytics.branch': 'Филиалы',
 }
