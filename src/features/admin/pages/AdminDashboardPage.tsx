@@ -118,6 +118,9 @@ export function AdminDashboardPage() {
                     onSignOut={signOut}
                     actions={
                         <>
+                            <Button variant="purple" size="sm" onClick={() => navigate('/group-levels')}>
+                                {t('groupLevel.title')}
+                            </Button>
                             <Button variant="purple" size="sm" onClick={() => navigate('/leads')}>
                                 {t('lead.title')}
                             </Button>

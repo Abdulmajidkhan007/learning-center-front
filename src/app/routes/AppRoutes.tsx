@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/app/providers/useAuth'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { AttendancePage } from '@/features/attendance/pages/AttendancePage'
+import { GroupLevelsPage } from '@/features/group-levels/pages/GroupLevelsPage'
 import { LeadsPage } from '@/features/leads/pages/LeadsPage'
 import { PaymentsPage } from '@/features/payments/pages/PaymentsPage'
 import { SettingsPage } from '@/features/settings/pages/SettingsPage'
@@ -44,6 +45,14 @@ export function AppRoutes() {
                 element={
                     <RequireRole roles={['ADMINISTRATOR', 'TEACHER', 'SUPER_ADMIN']}>
                         <PaymentsPage />
+                    </RequireRole>
+                }
+            />
+            <Route
+                path="/group-levels"
+                element={
+                    <RequireRole roles={['ADMINISTRATOR', 'SUPER_ADMIN']}>
+                        <GroupLevelsPage />
                     </RequireRole>
                 }
             />
