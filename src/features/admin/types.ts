@@ -1,5 +1,5 @@
 import type { TranslationKey } from '@/shared/i18n'
-import type { GroupDto, GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
+import type { AdminPermission, GroupDto, GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
 
 export type EntityKey = 'students' | 'teachers' | 'groups' | 'lessons'
 
@@ -9,6 +9,8 @@ export interface EntityConfig {
     pluralKey: TranslationKey
     singularKey: TranslationKey
     endpoint: string
+    /** Bo'lmasa — hammaga ko'rinadi (guruhlar, darslar). */
+    permission?: AdminPermission
 }
 
 /**

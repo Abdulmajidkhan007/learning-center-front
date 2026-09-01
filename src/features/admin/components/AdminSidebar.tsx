@@ -1,9 +1,9 @@
 import { useT } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
-import { ENTITIES } from '../config/entities'
-import type { EntityKey } from '../types'
+import type { EntityConfig, EntityKey } from '../types'
 
 interface AdminNavProps {
+    entities: EntityConfig[]
     activeTab: EntityKey
     onTabChange: (tab: EntityKey) => void
 }
@@ -15,7 +15,7 @@ interface AdminNavProps {
  * Ikkita alohida komponent — bitta komponentni CSS bilan ikki xil qilishdan
  * ko'ra shu tushunarliroq va har biri o'z holatida to'g'ri ishlaydi.
  */
-export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
+export function AdminSidebar({ entities, activeTab, onTabChange }: AdminNavProps) {
     const { t } = useT()
 
     return (
@@ -28,7 +28,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
             </div>
 
             <nav className="flex flex-1 flex-col">
-                {ENTITIES.map((entity) => (
+                {entities.map((entity) => (
                     <button
                         key={entity.key}
                         type="button"
@@ -55,12 +55,12 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminNavProps) {
 }
 
 /** Mobil variant — sarlavha ostidagi tasma. */
-export function AdminTabStrip({ activeTab, onTabChange }: AdminNavProps) {
+export function AdminTabStrip({ entities, activeTab, onTabChange }: AdminNavProps) {
     const { t } = useT()
 
     return (
         <div className="flex gap-2 overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {ENTITIES.map((entity) => (
+            {entities.map((entity) => (
                 <button
                     key={entity.key}
                     type="button"

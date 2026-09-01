@@ -13,6 +13,7 @@ import { StatsRow } from '../components/StatsRow'
 import { COLUMN_CONFIGS, inferColumns } from '../config/columns'
 import { entityByKey } from '../config/entities'
 import { FORM_CONFIGS } from '../config/forms'
+import { useAdminPermissions } from '../hooks/useAdminPermissions'
 import { useEntityCounts } from '../hooks/useEntityCounts'
 import { useEntityList } from '../hooks/useEntityList'
 import { useEntityMutations } from '../hooks/useEntityMutations'
@@ -33,7 +34,9 @@ export function AdminDashboardPage() {
     const { signOut } = useAuth()
     const navigate = useNavigate()
 
-    const [activeTab, setActiveTab] = useState<EntityKey>('students')
+    const { visibleEntities, hasLeadPermission, hasInvoicePermission } = useAdminPermissions()
+
+    const [activeTab, setActiveTab] = useState<EntityKey>(() => visibleEntities[0]?.key ?? 'groups')
     const [page, setPage] = useState(0)
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('STARTING')
@@ -53,7 +56,7 @@ export function AdminDashboardPage() {
         // Status filtri faqat guruhlarda ma'noga ega.
         status: activeTab === 'groups' ? statusFilter : undefined,
     })
-    const counts = useEntityCounts(session.token)
+    const counts = useEntityCounts(session.token, visibleEntities)
     const teacherOptions = useTeacherOptions(session.token)
     const groupOptions = useGroupOptions(session.token)
     const { save, remove } = useEntityMutations(entity, session.token)
@@ -109,7 +112,7 @@ export function AdminDashboardPage() {
 
     return (
         <div className="flex min-h-screen bg-surface">
-            <AdminSidebar activeTab={activeTab} onTabChange={changeTab} />
+            <AdminSidebar entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />
 
             {/* `min-w-0` shart: busiz keng jadval flex elementni cho'zib yuboradi */}
             <div className="min-w-0 flex-1">
@@ -121,17 +124,21 @@ export function AdminDashboardPage() {
                             <Button variant="purple" size="sm" onClick={() => navigate('/group-levels')}>
                                 {t('groupLevel.title')}
                             </Button>
-                            <Button variant="purple" size="sm" onClick={() => navigate('/leads')}>
-                                {t('lead.title')}
-                            </Button>
-                            <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
-                                {t('invoice.title')}
-                            </Button>
+                            {hasLeadPermission && (
+                                <Button variant="purple" size="sm" onClick={() => navigate('/leads')}>
+                                    {t('lead.title')}
+                                </Button>
+                            )}
+                            {hasInvoicePermission && (
+                                <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
+                                    {t('invoice.title')}
+                                </Button>
+                            )}
                         </>
                     }
-                    secondary={<AdminTabStrip activeTab={activeTab} onTabChange={changeTab} />}
+                    secondary={<AdminTabStrip entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />}
                 >
-                    <StatsRow counts={counts} />
+                    <StatsRow entities={visibleEntities} counts={counts} />
 
                     <Panel>
                         <header className="mb-5 flex flex-wrap items-end justify-between gap-3">

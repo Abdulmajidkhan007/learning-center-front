@@ -22,7 +22,6 @@ export const superAdmin: Record<SuperAdminKeys, string> = {
     'branch.editTitle': 'Edit branch',
     'branch.name': 'Branch name',
     'branch.address': 'Address',
-    'branch.chargeForMonth': 'Monthly fee',
     'branch.organization': 'Organization',
     'branch.organizationLocked': 'A branch cannot be moved to another organization.',
     'branch.empty': 'No branches found',

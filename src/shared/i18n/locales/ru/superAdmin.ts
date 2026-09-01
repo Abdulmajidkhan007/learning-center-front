@@ -22,7 +22,6 @@ export const superAdmin: Record<SuperAdminKeys, string> = {
     'branch.editTitle': 'Изменить филиал',
     'branch.name': 'Название филиала',
     'branch.address': 'Адрес',
-    'branch.chargeForMonth': 'Оплата в месяц',
     'branch.organization': 'Организация',
     'branch.organizationLocked': 'Перенести филиал в другую организацию нельзя.',
     'branch.empty': 'Филиалы не найдены',

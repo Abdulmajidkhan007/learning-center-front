@@ -47,7 +47,6 @@ export function fetchBranches(token: string, params: ListParams) {
 export interface BranchPayload {
     name: string
     address?: string
-    chargeForMonth?: number
     /** Faqat yaratishda: qaysi tashkilotga tegishli. */
     organizationId?: string
 }

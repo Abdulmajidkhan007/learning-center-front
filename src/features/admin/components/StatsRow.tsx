@@ -1,18 +1,23 @@
 import { useT } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
-import { ENTITIES, ENTITY_ACCENT } from '../config/entities'
-import type { EntityKey } from '../types'
+import { ENTITY_ACCENT } from '../config/entities'
+import type { EntityConfig, EntityKey } from '../types'
+
+interface StatsRowProps {
+    entities: EntityConfig[]
+    counts: Partial<Record<EntityKey, number | null | undefined>>
+}
 
 /**
  * `null` — sonini o'qib bo'lmadi ("—"), `undefined` — hali yuklanmoqda ("···").
  * Ikkalasini ajratish muhim: nol emas, xato ekanini ko'rsatish kerak.
  */
-export function StatsRow({ counts }: { counts: Record<EntityKey, number | null | undefined> }) {
+export function StatsRow({ entities, counts }: StatsRowProps) {
     const { t } = useT()
 
     return (
         <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
-            {ENTITIES.map((entity) => (
+            {entities.map((entity) => (
                 <div
                     key={entity.key}
                     className={cn(

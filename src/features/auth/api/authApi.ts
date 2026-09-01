@@ -22,5 +22,5 @@ export function toSession(response: AuthResponse | null): Session | null {
     if (!response?.token) return null
     const claims = decodeJwt(response.token)
     if (!claims?.role) return null
-    return { token: response.token, role: claims.role, claims }
+    return { token: response.token, role: claims.role, claims, permissions: claims.permissions ?? [] }
 }

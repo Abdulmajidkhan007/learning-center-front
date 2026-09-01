@@ -17,11 +17,24 @@ export interface Page<T> {
 }
 
 /**
+ * Administrator ruxsatlari — faqat `ADMINISTRATOR` rolida ma'noga ega.
+ * `SUPER_ADMIN` da bu ro'yxat umuman kelmaydi (unga cheklov yo'q).
+ */
+export const ADMIN_PERMISSIONS = [
+    'LEAD_MANAGEMENT',
+    'TEACHER_MANAGEMENT',
+    'STUDENT_MANAGEMENT',
+    'INVOICE_MANAGEMENT',
+] as const
+export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number]
+
+/**
  * JWT ichidagi claim'lar. `role` ataylab oddiy string: backend yangi rol
  * qo'shsa build yiqilmasligi, balki App'dagi `default` shoxiga tushishi kerak.
  */
 export interface JwtClaims {
     role?: string
+    permissions?: AdminPermission[]
     [claim: string]: unknown
 }
 
@@ -30,6 +43,8 @@ export interface Session {
     token: string
     role: string
     claims: JwtClaims
+    /** Faqat `ADMINISTRATOR` uchun ma'noli; boshqa rollarda bo'sh massiv. */
+    permissions: AdminPermission[]
 }
 
 /**
@@ -230,12 +245,12 @@ export interface OrganizationDto {
  * Diqqat: DTO'da `organization` YO'Q (backendda izohga olingan), shuning
  * uchun filial qaysi tashkilotga tegishli ekanini ro'yxatdan bilib
  * bo'lmaydi. `email`/`phone` ham entity'da bor, lekin DTO'ga chiqmagan.
+ * Oylik to'lov (`chargeForMonth`) endi bu yerda yo'q — u `Level`ga ko'chdi.
  */
 export interface BranchDto {
     id: string
     name?: string
     address?: string
-    chargeForMonth?: number
     googlePlaceId?: string
     latitude?: number
     longitude?: number
@@ -246,7 +261,6 @@ export interface BranchDto {
 export interface BranchUpdatePayload {
     name?: string
     address?: string
-    chargeForMonth?: number
     googlePlaceId?: string
     latitude?: number
     longitude?: number
