@@ -16,6 +16,7 @@ export const attendance = {
     'attendance.monthPrevious': "O'tgan oy",
     'attendance.monthTwoAgo': '2 oy oldin',
     'attendance.finish': 'Davomatni yakunlash',
+    'attendance.save': 'Saqlash',
     'attendance.submitting': 'Yuborilmoqda…',
     'attendance.lessonNumber': '{{number}}-dars',
     'attendance.forStudent': '{{name}} uchun davomat',
@@ -25,7 +26,7 @@ export const attendance = {
     'attendance.addExcuse': '{{name}} uchun sabab yozish',
     'attendance.excuseReason': 'Sabab',
     'attendance.excusePlaceholder': 'Masalan: kasal, oilaviy sabab',
-    'attendance.excuseNotStored': 'Izoh hozircha serverda saqlanmaydi — backendga maydon qo‘shilishi kerak.',
+    'attendance.editPastLesson': '{{title}} darsini qayta tahrirlash',
     'attendance.hint': 'Kvadratni bossangiz keldi/kelmadi almashadi. Burchakdagi nuqta — sababli qilish.',
 } as const
 

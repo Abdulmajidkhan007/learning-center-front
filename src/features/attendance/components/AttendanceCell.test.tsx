@@ -58,13 +58,4 @@ describe('AttendanceCell', () => {
 
         expect(onChange).toHaveBeenCalledWith('EXCUSED', undefined)
     })
-
-    // Backendda izoh maydoni yo'q — foydalanuvchi buni bilishi kerak.
-    it('izoh saqlanmasligi haqida ogohlantiradi', async () => {
-        const { user } = setup('PRESENT')
-
-        await user.click(screen.getByRole('button', { name: /sabab yozish/i }))
-
-        expect(screen.getByText(/serverda saqlanmaydi/i)).toBeInTheDocument()
-    })
 })

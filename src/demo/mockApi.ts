@@ -205,11 +205,14 @@ export function installMockApi() {
             return json(
                 groupLessons.map((lesson) => {
                     const record = db.attendance.find((item) => item.lessonId === lesson.id)
-                    const attendanceStudentMap: Record<string, string> = {}
+                    const attendanceStudentMap: Record<string, { status: string; reason?: string }> = {}
                     for (const entry of record?.attendanceStudents ?? []) {
-                        if (entry.studentId && entry.status) attendanceStudentMap[entry.studentId] = entry.status
+                        if (entry.studentId && entry.status) {
+                            attendanceStudentMap[entry.studentId] = { status: entry.status, reason: entry.reason }
+                        }
                     }
                     return {
+                        // `id` — davomat yozuvining o'zi (PUT shu yerga boradi), dars emas.
                         id: record?.id ?? lesson.id,
                         lessonTitle: lesson.lessonName ?? lesson.lessonNumber ?? '',
                         date: lesson.lessonDate?.slice(0, 10) ?? '',
@@ -228,6 +231,15 @@ export function installMockApi() {
             }
             db.attendance = [...db.attendance, record]
             return json(record)
+        }
+        if (path.startsWith('/attendance/') && method === 'PUT') {
+            const id = path.slice('/attendance/'.length)
+            const students = body.attendanceStudents as AttendanceDto['attendanceStudents']
+            db.attendance = db.attendance.map((item) =>
+                item.id === id ? { ...item, attendanceStudents: students } : item
+            )
+            const updated = db.attendance.find((item) => item.id === id)
+            return updated ? json(updated) : json({ message: 'Attendance not found' }, 404)
         }
 
         // --- super-admin: tashkilotlar va filiallar ---

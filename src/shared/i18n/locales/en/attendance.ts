@@ -13,6 +13,7 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.monthPrevious': 'Previous month',
     'attendance.monthTwoAgo': '2 months ago',
     'attendance.finish': 'Finish attendance',
+    'attendance.save': 'Save',
     'attendance.submitting': 'Submitting…',
     'attendance.lessonNumber': 'Lesson {{number}}',
     'attendance.forStudent': 'Attendance for {{name}}',
@@ -22,6 +23,6 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.addExcuse': 'Add a reason for {{name}}',
     'attendance.excuseReason': 'Reason',
     'attendance.excusePlaceholder': 'e.g. illness, family reasons',
-    'attendance.excuseNotStored': 'The reason is not stored on the server yet — the backend needs a field.',
+    'attendance.editPastLesson': 'Edit lesson {{title}}',
     'attendance.hint': 'Click a square to toggle present/absent. The corner dot marks it excused.',
 }
