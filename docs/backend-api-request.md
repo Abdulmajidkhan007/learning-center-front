@@ -468,24 +468,12 @@ Uni ixtiyoriy qilsangiz yaxshi — sabab har doim ham bo'lavermaydi.
 
 ---
 
-## P0-5. Davomatda "sabab" matni uchun joy yo'q
+## P0-5. ✅ Davomatda "sabab" matni uchun joy yo'q — bajarildi
 
-Interfeys kelishilganidek o'zgardi: bosiladigan kvadrat (yashil = keldi,
-bosilsa qizil = kelmadi), burchakdagi tugma esa sabab yozish oynasini
-ochadi va statusni `EXCUSED` qiladi.
-
-`AttendanceStudentCreateDto` faqat `studentId` va `status` ni oladi —
-sababni yuboradigan joy yo'q. Hozir frontend uni yig'adi, yubormaydi va
-foydalanuvchiga "izoh serverda saqlanmaydi" deb ochiq yozib qo'yadi.
-
-```java
-public record AttendanceStudentCreateDto(@NotBlank String studentId,
-                                         @NotNull AttendanceStatus status,
-                                         String reason) {}
-```
-
-`AttendanceStudentDto` ga ham qo'shilsin — aks holda eski davomatni ochganda
-sabab ko'rinmaydi.
+2026-09-01: `AttendanceStudentCreateDto`/`AttendanceStudentDto` ga `reason`
+qo'shildi, `attendanceStudentMap` ham `{ status, reason }` qaytaradi.
+Frontend `reason`ni yuborishga o'tkazildi — tafsilot uchun
+[`backend-notes.md`](backend-notes.md) dagi 2026-09-01 yozuviga qarang.
 
 ---
 

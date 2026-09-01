@@ -13,6 +13,7 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.monthPrevious': 'Прошлый месяц',
     'attendance.monthTwoAgo': '2 месяца назад',
     'attendance.finish': 'Завершить',
+    'attendance.save': 'Сохранить',
     'attendance.submitting': 'Отправка…',
     'attendance.lessonNumber': 'Занятие {{number}}',
     'attendance.forStudent': 'Посещаемость: {{name}}',
@@ -22,6 +23,6 @@ export const attendance: Record<AttendanceKeys, string> = {
     'attendance.addExcuse': 'Указать причину для {{name}}',
     'attendance.excuseReason': 'Причина',
     'attendance.excusePlaceholder': 'Например: болезнь, семейные обстоятельства',
-    'attendance.excuseNotStored': 'Причина пока не сохраняется на сервере — нужно поле в backend.',
+    'attendance.editPastLesson': 'Изменить занятие «{{title}}»',
     'attendance.hint': 'Клик по квадрату переключает был/не был. Точка в углу — уважительная причина.',
 }

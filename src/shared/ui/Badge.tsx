@@ -27,9 +27,19 @@ export function Badge({
 }
 
 /** Davomat jadvalidagi dumaloq bitta harfli nishon. */
-export function DotBadge({ tone = 'neutral', children }: { tone?: BadgeTone; children: ReactNode }) {
+export function DotBadge({
+    tone = 'neutral',
+    title,
+    children,
+}: {
+    tone?: BadgeTone
+    /** Sichqoncha ustiga borganda ko'rinadigan matn — masalan, sababli bo'lish izohi. */
+    title?: string
+    children: ReactNode
+}) {
     return (
         <span
+            title={title}
             className={cn(
                 'inline-flex size-7.5 items-center justify-center rounded-full border font-mono text-sm font-bold shadow-[0_10px_24px_-24px_var(--fg)]',
                 badgeToneClasses[tone]

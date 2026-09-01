@@ -1,11 +1,23 @@
 import { useCallback, useMemo, useState } from 'react'
-import { SELECTABLE_ATTENDANCE_STATUSES, type AttendanceStatus, type LessonDto, type StudentDto } from '@/shared/types'
+import {
+    SELECTABLE_ATTENDANCE_STATUSES,
+    type AttendanceStatus,
+    type AttendanceStudentDto,
+    type LessonDto,
+    type StudentDto,
+} from '@/shared/types'
 
 export interface AttendanceDraft {
     lesson: LessonDto
     /** studentId → status */
     statuses: Record<string, AttendanceStatus>
     /** studentId → sabab matni (faqat EXCUSED uchun). */
+    reasons: Record<string, string>
+}
+
+/** Mavjud yozuvni qayta tahrirlashda qoralamani shundan boshlab to'ldirish uchun. */
+export interface AttendanceDraftInitial {
+    statuses: Record<string, AttendanceStatus>
     reasons: Record<string, string>
 }
 
@@ -32,8 +44,16 @@ function emptyCounts(): Record<AttendanceStatus, number> {
  *
  * Standart status `PRESENT`: odatda deyarli hamma keladi, o'qituvchi faqat
  * istisnolarni belgilaydi.
+ *
+ * `initial` — mavjud yozuvni qayta tahrirlashda boshlang'ich qiymatlar
+ * (server nima qaytargan bo'lsa). Qo'lda o'zgartirilgan (`edits`) bo'lsa,
+ * u ustun turadi — `initial` faqat birinchi ochilishda ishlatiladi.
  */
-export function useAttendanceDraft(students: StudentDto[], activeLesson: LessonDto | null) {
+export function useAttendanceDraft(
+    students: StudentDto[],
+    activeLesson: LessonDto | null,
+    initial: AttendanceDraftInitial | null = null
+) {
     const [edits, setEdits] = useState<DraftEdits | null>(null)
     // Yuborilgan dars uchun qoralama qayta ochilmasligi kerak.
     const [submittedLessonId, setSubmittedLessonId] = useState<string | null>(null)
@@ -43,20 +63,26 @@ export function useAttendanceDraft(students: StudentDto[], activeLesson: LessonD
         if (activeLesson.id === submittedLessonId) return null
 
         const sameLesson = edits?.lessonId === activeLesson.id
-        const applied = sameLesson ? edits.statuses : {}
+        const appliedStatuses = sameLesson ? edits.statuses : (initial?.statuses ?? {})
+        const appliedReasons = sameLesson ? edits.reasons : (initial?.reasons ?? {})
         const statuses: Record<string, AttendanceStatus> = {}
         students.forEach((student) => {
-            statuses[student.id] = applied[student.id] ?? 'PRESENT'
+            statuses[student.id] = appliedStatuses[student.id] ?? 'PRESENT'
         })
-        return { lesson: activeLesson, statuses, reasons: sameLesson ? edits.reasons : {} }
-    }, [activeLesson, students, edits, submittedLessonId])
+        return { lesson: activeLesson, statuses, reasons: appliedReasons }
+    }, [activeLesson, students, edits, submittedLessonId, initial])
 
     const setStatus = useCallback(
         (studentId: string, status: AttendanceStatus, reason?: string) => {
             if (!activeLesson) return
             setEdits((current) => {
                 const sameLesson = current?.lessonId === activeLesson.id
-                const reasons = { ...(sameLesson ? current.reasons : {}) }
+                // Shu darsdagi BIRINCHI o'zgarish — boshqa o'quvchilarning holati
+                // bo'sh joydan emas, `initial` dan (tahrirlanayotgan yozuvdan)
+                // boshlanishi kerak, aks holda ular PRESENT ga qaytib qoladi.
+                const baseStatuses = sameLesson ? current.statuses : (initial?.statuses ?? {})
+                const baseReasons = sameLesson ? current.reasons : (initial?.reasons ?? {})
+                const reasons = { ...baseReasons }
                 // Sabab faqat EXCUSED bilan mantiqli — status o'zgarsa u tozalanadi,
                 // aks holda eski izoh ko'rinib turaveradi.
                 if (status === 'EXCUSED' && reason) reasons[studentId] = reason
@@ -65,14 +91,14 @@ export function useAttendanceDraft(students: StudentDto[], activeLesson: LessonD
                 return {
                     lessonId: activeLesson.id,
                     statuses: {
-                        ...(sameLesson ? current.statuses : {}),
+                        ...baseStatuses,
                         [studentId]: status,
                     },
                     reasons,
                 }
             })
         },
-        [activeLesson]
+        [activeLesson, initial]
     )
 
     const clearDraft = useCallback(() => {
@@ -89,17 +115,18 @@ export function useAttendanceDraft(students: StudentDto[], activeLesson: LessonD
         return result
     }, [draft])
 
-    /**
-     * Backendga yuboriladigan ko'rinish.
-     *
-     * Sabab matni YUBORILMAYDI: `AttendanceStudentCreateDto` da bunday maydon
-     * yo'q. Maydon qo'shilgach shu yerga bitta qator qo'shiladi.
-     */
+    /** Backendga yuboriladigan ko'rinish — `lessonId` yaratishda, `id` tahrirlashda ishlatiladi. */
     const toPayload = useCallback(() => {
         if (!draft) return null
         return {
             lessonId: draft.lesson.id,
-            students: Object.entries(draft.statuses).map(([studentId, status]) => ({ studentId, status })),
+            students: Object.entries(draft.statuses).map(
+                ([studentId, status]): AttendanceStudentDto => ({
+                    studentId,
+                    status,
+                    reason: draft.reasons[studentId],
+                })
+            ),
         }
     }, [draft])
 

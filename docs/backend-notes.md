@@ -42,6 +42,20 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 > kaliti — `studentId`) va o'quvchilar uchun `GET /student/{groupId}/students`
 > ishlatiladi — frontend shularga o'tkazildi.
 
+> **2026-09-01:** `attendanceStudentMap` javobi o'zgardi — endi qiymat
+> `AttendanceStatus` emas, `{ status, reason }` obyekti (6-band pastda —
+> ✅ deb belgilandi). `AttendanceStudentDto`/`AttendanceStudentCreateDto`
+> ga `reason` qo'shilgani ham tasdiqlandi. Frontend yangi shaklga
+> o'tkazildi (`StatusReasonDto`, `src/shared/types/index.ts`).
+>
+> Shu bilan birga davomatni tuzatish uchun `PUT /attendance/{id}` ham
+> ishlatilmoqda — tana: `{ attendanceStudents: [{ studentId, status,
+> reason }] }`, `{id}` — `MonthlyAttendanceDto.id` (yozuv id si, dars id
+> emas). Backend BUTUN ro'yxatni almashtiradi, shuning uchun frontend
+> har safar guruhdagi HAMMA o'quvchini yuboradi. Bu endpoint hali
+> `backend-api-request.md` da so'ralmagan edi — agar aynan shu imzo bilan
+> ishlamasa, aytilsin.
+
 ---
 
 ## Qolgan va yangi topilganlar
@@ -224,32 +238,16 @@ foydalanadi (o'quvchi paneli), lekin backendda tekshiruv yo'q.
 1-banddagi `@PreAuthorize` ishi qilinganda shu endpoint "o'zi yoki xodim"
 qoidasiga bo'ysunsin.
 
-### 6. 🟠 Davomat izohi: `AttendanceStudentCreateDto` da maydon yo'q
+### 6. ✅ Davomat izohi — `AttendanceStudentCreateDto` ga `reason` qo'shildi
 
-Kelishilganidek davomat interfeysi o'zgartirildi: ochiladigan ro'yxat
-o'rniga bosiladigan kvadrat (yashil = keldi, bosilsa qizil = kelmadi),
-burchagidagi tugma esa **sabab yozish** oynasini ochadi va statusni
-`EXCUSED` qilib qo'yadi.
+**2026-09-01: bajarildi.** `AttendanceStudentCreateDto` va
+`AttendanceStudentDto` ga `reason` maydoni qo'shilgan, `attendanceStudentMap`
+ham endi `{ status, reason }` obyekti qaytaradi. Frontend `reason`ni yig'ib
+yuborishga o'tkazildi (`AttendanceCell` → `useAttendanceDraft.toPayload` →
+`POST /attendance` / `PUT /attendance/{id}`), "izoh serverda saqlanmaydi"
+ogohlantirishi olib tashlandi.
 
-Muammo: `AttendanceStudentCreateDto` faqat `studentId` va `status` ni
-oladi — **sabab matnini yuboradigan joy yo'q.** Hozir frontend uni yig'adi,
-lekin yubormaydi va foydalanuvchiga "izoh hozircha serverda saqlanmaydi"
-deb ochiq yozib qo'yadi.
-
-**So'rov:**
-
-```java
-public record AttendanceStudentCreateDto(
-        @NotBlank String studentId,
-        @NotNull AttendanceStatus status,
-        String reason          // ← EXCUSED uchun
-) {}
-```
-
-`AttendanceStudentDto` ga ham qaytishi kerak, aks holda eski davomatda
-sabab ko'rinmaydi.
-
-Yana: `LATE` statusi interfeysdan olib tashlandi (amalda ishlatilmagan).
+Yana: `LATE` statusi interfeysdan olib tashlangan (amalda ishlatilmagan).
 Enum'da qolaversin — eski yozuvlarda uchraydi va ular ko'rsatilishi kerak.
 
 ### 7. 🟠 `EnrollmentDto` da `id` yo'q
@@ -594,4 +592,6 @@ ayting — kompilyator qaysi ekranga tegishini o'zi ko'rsatadi.
 
 `UserDto.imageUrl` · `TimeTableDto.dayType` (ODD/EVEN) ·
 `LessonDto.lessonNumber` (String) · `GroupDto.level/currentMonth/lessonsCount` ·
-`GroupNameProjection` (id, name, dayType) · `AttendanceCreateDto{lessonId, students}`
+`GroupNameProjection` (id, name, dayType) · `AttendanceCreateDto{lessonId, students}` ·
+`StatusReasonDto{status, reason}` (`MonthlyAttendanceDto.attendanceStudentMap` qiymati) ·
+`AttendanceStudentDto.reason`

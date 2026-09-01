@@ -15,7 +15,16 @@ const pastColumns: PastLessonColumn[] = [
         lessonTitle: '1-dars',
         date: '2026-08-01',
         // s2 xaritada yo'q — hali belgilanmagan, "kelmadi" EMAS.
-        attendanceMap: { s1: 'ABSENT' },
+        attendanceMap: { s1: { status: 'ABSENT' } },
+    },
+]
+
+const pastColumnsWithReason: PastLessonColumn[] = [
+    {
+        lessonId: 'l1',
+        lessonTitle: '1-dars',
+        date: '2026-08-01',
+        attendanceMap: { s1: { status: 'EXCUSED', reason: 'Kasal' } },
     },
 ]
 
@@ -36,5 +45,14 @@ describe('AttendanceTable', () => {
         const cells = within(row).getAllByRole('cell')
 
         expect(cells[1]).toBeEmptyDOMElement()
+    })
+
+    it("sababi bor katakda title atributida sabab matni chiqadi", () => {
+        renderWithProviders(<AttendanceTable students={students} pastColumns={pastColumnsWithReason} />)
+
+        const row = screen.getByRole('row', { name: /aziza karimova/i })
+        const cells = within(row).getAllByRole('cell')
+
+        expect(cells[1].querySelector('[title="Kasal"]')).toBeInTheDocument()
     })
 })
