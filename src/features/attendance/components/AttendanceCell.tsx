@@ -94,9 +94,6 @@ export function AttendanceCell({ studentName, status, reason, onChange }: Attend
                             placeholder={t('attendance.excusePlaceholder')}
                             className="w-full resize-none rounded-md border border-border-base bg-surface px-2.5 py-1.5 text-sm text-fg focus:border-accent focus:ring-3 focus:ring-accent/20 focus:outline-none"
                         />
-                        <p className="mt-1.5 text-[0.68rem] leading-snug text-fg-faint">
-                            {t('attendance.excuseNotStored')}
-                        </p>
                         <div className="mt-2 flex justify-end gap-2">
                             <Button size="sm" onClick={() => setIsNoteOpen(false)}>
                                 {t('common.cancel')}

@@ -36,3 +36,23 @@ export interface CreateAttendancePayload {
 export function createAttendance(token: string, payload: CreateAttendancePayload) {
     return apiFetch<AttendanceDto>(ENDPOINT, { method: 'POST', token, body: payload })
 }
+
+export interface UpdateAttendancePayload {
+    /** Tahrirlanayotgan yozuvning id si (`MonthlyAttendanceDto.id`), dars id emas. */
+    id: string
+    students: AttendanceStudentDto[]
+}
+
+/**
+ * Mavjud davomat yozuvini tuzatadi.
+ *
+ * Backend BUTUN ro'yxatni almashtiradi, bittadan emas — shuning uchun
+ * `students` da guruhdagi HAMMA o'quvchi bo'lishi kerak.
+ */
+export function updateAttendance(token: string, payload: UpdateAttendancePayload) {
+    return apiFetch<AttendanceDto>(`${ENDPOINT}/${payload.id}`, {
+        method: 'PUT',
+        token,
+        body: { attendanceStudents: payload.students },
+    })
+}

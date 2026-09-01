@@ -115,7 +115,7 @@ export const attendance: AttendanceDto[] = [
             { studentId: 's1', status: 'PRESENT' },
             { studentId: 's2', status: 'ABSENT' },
             { studentId: 's3', status: 'PRESENT' },
-            { studentId: 's4', status: 'EXCUSED' },
+            { studentId: 's4', status: 'EXCUSED', reason: 'Kasal' },
             { studentId: 's5', status: 'PRESENT' },
         ],
     },
@@ -126,7 +126,7 @@ export const attendance: AttendanceDto[] = [
         attendanceStudents: [
             { studentId: 's1', status: 'PRESENT' },
             { studentId: 's2', status: 'PRESENT' },
-            { studentId: 's3', status: 'EXCUSED' },
+            { studentId: 's3', status: 'EXCUSED', reason: 'Oilaviy sabab' },
             { studentId: 's4', status: 'PRESENT' },
             { studentId: 's5', status: 'PRESENT' },
         ],

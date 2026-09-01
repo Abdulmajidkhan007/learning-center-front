@@ -6,11 +6,11 @@ import { useT } from '@/shared/i18n'
 import { AppShell, Button, EmptyState, ErrorBox, SegmentedControl } from '@/shared/ui'
 import { AttendanceTable, type PastLessonColumn } from '../components/AttendanceTable'
 import { DraftBar } from '../components/DraftBar'
-import { useAttendanceDraft } from '../hooks/useAttendanceDraft'
+import { useAttendanceDraft, type AttendanceDraftInitial } from '../hooks/useAttendanceDraft'
 import { useAttendanceRecords } from '../hooks/useAttendanceRecords'
 import { useGroupStudents } from '../hooks/useGroupStudents'
 import { useSubmitAttendance } from '../hooks/useSubmitAttendance'
-import type { LessonDto } from '@/shared/types'
+import type { AttendanceStatus, LessonDto } from '@/shared/types'
 
 /** Dashboard'dan `navigate('/attendance', { state })` orqali keladigan yuk. */
 interface AttendanceRouteState {
@@ -33,16 +33,12 @@ export function AttendancePage() {
     const groupId = state?.groupId ?? ''
 
     const [month, setMonth] = useState<MonthOption>('1')
+    // O'tgan darslardan biri qayta tahrirlanayotgan bo'lsa shu yerda turadi.
+    const [editingColumn, setEditingColumn] = useState<PastLessonColumn | null>(null)
 
     const studentsQuery = useGroupStudents(session.token, groupId)
     const recordsQuery = useAttendanceRecords(session.token, groupId, Number(month))
     const students = studentsQuery.students
-
-    const draft = useAttendanceDraft(students, activeLesson)
-    const submit = useSubmitAttendance(session.token, () => {
-        draft.clearDraft()
-        navigate('/')
-    })
 
     const pastColumns = useMemo<PastLessonColumn[]>(
         () =>
@@ -55,9 +51,47 @@ export function AttendancePage() {
         [recordsQuery.records]
     )
 
+    // Tahrirlash rejimida qoralama shu "soxta dars" ustida ochiladi — id si
+    // xuddi tahrirlanayotgan yozuvniki bilan bir xil, shuning uchun jadval
+    // uni o'sha ustunning o'zida ko'rsatadi (yangi ustun qo'shilmaydi).
+    const effectiveActiveLesson: LessonDto | null = editingColumn
+        ? { id: editingColumn.lessonId, lessonName: editingColumn.lessonTitle, lessonDate: editingColumn.date }
+        : activeLesson
+
+    const editingInitial = useMemo<AttendanceDraftInitial | null>(() => {
+        if (!editingColumn) return null
+        const statuses: Record<string, AttendanceStatus> = {}
+        const reasons: Record<string, string> = {}
+        Object.entries(editingColumn.attendanceMap).forEach(([studentId, entry]) => {
+            statuses[studentId] = entry.status
+            if (entry.reason) reasons[studentId] = entry.reason
+        })
+        return { statuses, reasons }
+    }, [editingColumn])
+
+    const draft = useAttendanceDraft(students, effectiveActiveLesson, editingInitial)
+    const submit = useSubmitAttendance(session.token, () => {
+        if (editingColumn) {
+            setEditingColumn(null)
+        } else {
+            draft.clearDraft()
+            navigate('/')
+        }
+    })
+
+    function handleEditPastLesson(column: PastLessonColumn) {
+        // Sarlavhaga qayta bosilsa — tahrirlashdan chiqadi (bekor qilish).
+        setEditingColumn((current) => (current?.lessonId === column.lessonId ? null : column))
+    }
+
     function handleFinish() {
         const payload = draft.toPayload()
-        if (payload) submit.mutate(payload)
+        if (!payload) return
+        if (editingColumn) {
+            submit.mutate({ id: editingColumn.lessonId, students: payload.students })
+        } else {
+            submit.mutate({ lessonId: payload.lessonId, students: payload.students })
+        }
     }
 
     const isLoading = studentsQuery.isLoading || recordsQuery.isLoading
@@ -114,6 +148,7 @@ export function AttendancePage() {
                             statuses={draft.statuses}
                             isSubmitting={submit.isPending}
                             onFinish={handleFinish}
+                            finishLabel={editingColumn ? t('attendance.save') : undefined}
                         />
                     )}
 
@@ -122,6 +157,7 @@ export function AttendancePage() {
                         pastColumns={pastColumns}
                         draft={draft.draft}
                         onStatusChange={draft.setStatus}
+                        onEditPastLesson={handleEditPastLesson}
                     />
                 </>
             )}

@@ -8,10 +8,12 @@ interface DraftBarProps {
     statuses: readonly AttendanceStatus[]
     isSubmitting: boolean
     onFinish: () => void
+    /** O'tgan darsni tahrirlashda "Davomatni yakunlash" o'rniga ko'rsatiladi. */
+    finishLabel?: string
 }
 
 /** Qoralama xulosasi + yakunlash tugmasi. Nol bo'lgan statuslar ko'rsatilmaydi. */
-export function DraftBar({ counts, statuses, isSubmitting, onFinish }: DraftBarProps) {
+export function DraftBar({ counts, statuses, isSubmitting, onFinish, finishLabel }: DraftBarProps) {
     const { t } = useT()
 
     return (
@@ -26,7 +28,7 @@ export function DraftBar({ counts, statuses, isSubmitting, onFinish }: DraftBarP
                 )}
             </div>
             <Button variant="success" size="sm" onClick={onFinish} disabled={isSubmitting}>
-                {isSubmitting ? t('attendance.submitting') : t('attendance.finish')}
+                {isSubmitting ? t('attendance.submitting') : (finishLabel ?? t('attendance.finish'))}
             </Button>
         </div>
     )

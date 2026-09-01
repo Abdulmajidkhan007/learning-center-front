@@ -62,16 +62,16 @@ describe('useAttendanceDraft', () => {
         expect(result.current.hasDraft).toBe(false)
     })
 
-    it('sababli qilinganda izoh saqlanadi, lekin yuborilmaydi', () => {
+    it('sababli qilinganda izoh saqlanadi va yuboriladi', () => {
         const { result } = renderHook(() => useAttendanceDraft(students, lesson))
 
         act(() => result.current.setStatus('s2', 'EXCUSED', 'kasal'))
 
         expect(result.current.draft?.reasons.s2).toBe('kasal')
-        // Backendda izoh maydoni yo'q — yuboriladigan yukda u bo'lmasligi kerak.
         expect(result.current.toPayload()?.students[1]).toEqual({
             studentId: 's2',
             status: 'EXCUSED',
+            reason: 'kasal',
         })
     })
 
@@ -107,5 +107,43 @@ describe('useAttendanceDraft', () => {
     it('qoralama yo’q bo’lsa yuboriladigan yuk ham yo’q', () => {
         const { result } = renderHook(() => useAttendanceDraft(students, null))
         expect(result.current.toPayload()).toBeNull()
+    })
+
+    it('initial berilsa qoralama shundan boshlanadi (mavjud yozuvni tahrirlash)', () => {
+        const { result } = renderHook(() =>
+            useAttendanceDraft(students, lesson, {
+                statuses: { s1: 'ABSENT', s2: 'EXCUSED' },
+                reasons: { s2: 'kasal' },
+            })
+        )
+
+        expect(result.current.draft?.statuses).toEqual({ s1: 'ABSENT', s2: 'EXCUSED', s3: 'PRESENT' })
+        expect(result.current.draft?.reasons.s2).toBe('kasal')
+    })
+
+    it('qo’lda o’zgartirilgan qiymat initial dan ustun turadi', () => {
+        const { result } = renderHook(() =>
+            useAttendanceDraft(students, lesson, { statuses: { s1: 'ABSENT' }, reasons: {} })
+        )
+
+        act(() => result.current.setStatus('s1', 'PRESENT'))
+
+        expect(result.current.draft?.statuses.s1).toBe('PRESENT')
+    })
+
+    // Regressiya: bitta o'quvchi o'zgartirilganda qolganlar PRESENT ga
+    // qaytib qolmasligi kerak — initial dagi holatlarini saqlashi shart.
+    it('initial dan bittasi o’zgartirilganda qolganlarning initial holati saqlanadi', () => {
+        const { result } = renderHook(() =>
+            useAttendanceDraft(students, lesson, {
+                statuses: { s1: 'ABSENT', s3: 'EXCUSED' },
+                reasons: { s3: 'kasal' },
+            })
+        )
+
+        act(() => result.current.setStatus('s2', 'ABSENT'))
+
+        expect(result.current.draft?.statuses).toEqual({ s1: 'ABSENT', s2: 'ABSENT', s3: 'EXCUSED' })
+        expect(result.current.draft?.reasons.s3).toBe('kasal')
     })
 })

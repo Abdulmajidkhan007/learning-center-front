@@ -1,17 +1,18 @@
 import { useT } from '@/shared/i18n'
 import { DotBadge } from '@/shared/ui'
-import { formatDate } from '@/shared/lib'
-import type { AttendanceStatus, StudentDto } from '@/shared/types'
+import { cn, formatDate } from '@/shared/lib'
+import type { AttendanceStatus, StatusReasonDto, StudentDto } from '@/shared/types'
 import { STATUS_TONE } from '../lib/attendanceStatus'
 import { AttendanceCell } from './AttendanceCell'
 import type { AttendanceDraft } from '../hooks/useAttendanceDraft'
 
 export interface PastLessonColumn {
+    /** Davomat yozuvining id si (`MonthlyAttendanceDto.id`), dars id emas. */
     lessonId: string
     lessonTitle?: string
     date?: string
-    /** studentId → status. Xaritada yo'q o'quvchi hali belgilanmagan, "kelmadi" EMAS. */
-    attendanceMap: Record<string, AttendanceStatus>
+    /** studentId → { status, reason }. Xaritada yo'q o'quvchi hali belgilanmagan, "kelmadi" EMAS. */
+    attendanceMap: Record<string, StatusReasonDto>
 }
 
 interface AttendanceTableProps {
@@ -22,6 +23,11 @@ interface AttendanceTableProps {
     onStatusChange?: (studentId: string, status: AttendanceStatus, reason?: string) => void
     /** Ism ustiga bosilganda — o'quvchi kartasi. */
     onSelectStudent?: (student: StudentDto) => void
+    /**
+     * O'tgan dars ustuni sarlavhasiga bosilganda — o'sha yozuvni qayta
+     * tahrirlashga o'tish. Berilmasa ustunlar bosilmaydigan bo'lib qoladi.
+     */
+    onEditPastLesson?: (column: PastLessonColumn) => void
 }
 
 /**
@@ -36,8 +42,14 @@ export function AttendanceTable({
     draft = null,
     onStatusChange,
     onSelectStudent,
+    onEditPastLesson,
 }: AttendanceTableProps) {
     const { t } = useT()
+
+    // Qoralama o'tgan dars ustunlaridan biriga tegishli bo'lsa — bu ustun
+    // tahrirlanmoqda, alohida oxirgi ustun qo'shilmaydi (ikkilanish bo'lmasin).
+    const editingPastLessonId =
+        draft && pastColumns.some((column) => column.lessonId === draft.lesson.id) ? draft.lesson.id : null
 
     return (
         <div className="overflow-x-auto rounded-lg border border-border-base bg-surface-card">
@@ -47,20 +59,44 @@ export function AttendanceTable({
                         <th className="sticky left-0 z-20 border-b border-border-base bg-surface px-4 py-3 text-left font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase">
                             {t('attendance.student')}
                         </th>
-                        {pastColumns.map((column) => (
-                            <th
-                                key={column.lessonId}
-                                className="min-w-25 border-b border-border-base bg-surface px-3.5 py-2.5 text-center whitespace-nowrap"
-                            >
-                                <span className="block text-sm font-semibold text-fg-muted">
-                                    {column.lessonTitle}
-                                </span>
-                                <span className="block font-mono text-[0.62rem] tabular-nums text-fg-faint">
-                                    {formatDate(column.date)}
-                                </span>
-                            </th>
-                        ))}
-                        {draft && (
+                        {pastColumns.map((column) => {
+                            const isEditing = column.lessonId === editingPastLessonId
+                            const label = (
+                                <>
+                                    <span className="block text-sm font-semibold text-fg-muted">
+                                        {column.lessonTitle}
+                                    </span>
+                                    <span className="block font-mono text-[0.62rem] tabular-nums text-fg-faint">
+                                        {formatDate(column.date)}
+                                    </span>
+                                </>
+                            )
+                            return (
+                                <th
+                                    key={column.lessonId}
+                                    className={cn(
+                                        'min-w-25 border-b px-3.5 py-2.5 text-center whitespace-nowrap',
+                                        isEditing ? 'border-brand bg-brand/10' : 'border-border-base bg-surface'
+                                    )}
+                                >
+                                    {onEditPastLesson ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => onEditPastLesson(column)}
+                                            aria-label={t('attendance.editPastLesson', {
+                                                title: column.lessonTitle ?? '',
+                                            })}
+                                            className="w-full cursor-pointer"
+                                        >
+                                            {label}
+                                        </button>
+                                    ) : (
+                                        label
+                                    )}
+                                </th>
+                            )
+                        })}
+                        {draft && !editingPastLessonId && (
                             <th className="min-w-28 border-b border-brand bg-brand/10 px-3.5 py-2.5 text-center whitespace-nowrap">
                                 <span className="block text-sm font-semibold tabular-nums text-fg-muted">
                                     {formatDate(draft.lesson.lessonDate)}
@@ -95,7 +131,25 @@ export function AttendanceTable({
                             </td>
 
                             {pastColumns.map((column) => {
-                                const status = column.attendanceMap[student.id]
+                                if (column.lessonId === editingPastLessonId && draft && onStatusChange) {
+                                    return (
+                                        <td
+                                            key={column.lessonId}
+                                            className="border-b border-border-base px-3 py-2 text-center"
+                                        >
+                                            <AttendanceCell
+                                                studentName={student.userDto?.fullName ?? student.id}
+                                                status={draft.statuses[student.id] ?? 'PRESENT'}
+                                                reason={draft.reasons[student.id]}
+                                                onChange={(status, reason) =>
+                                                    onStatusChange(student.id, status, reason)
+                                                }
+                                            />
+                                        </td>
+                                    )
+                                }
+
+                                const entry = column.attendanceMap[student.id]
                                 return (
                                     <td
                                         key={column.lessonId}
@@ -103,12 +157,16 @@ export function AttendanceTable({
                                     >
                                         {/* Xaritada yo'q o'quvchi — katak bo'sh va rangsiz qoladi, bu
                                             "kelmadi" bilan chalkashmasligi kerak. */}
-                                        {status && <DotBadge tone={STATUS_TONE[status]}>{status.charAt(0)}</DotBadge>}
+                                        {entry && (
+                                            <DotBadge tone={STATUS_TONE[entry.status]} title={entry.reason}>
+                                                {entry.status.charAt(0)}
+                                            </DotBadge>
+                                        )}
                                     </td>
                                 )
                             })}
 
-                            {draft && onStatusChange && (
+                            {draft && onStatusChange && !editingPastLessonId && (
                                 <td className="border-b border-border-base px-3 py-2 text-center">
                                     <AttendanceCell
                                         studentName={student.userDto?.fullName ?? student.id}
