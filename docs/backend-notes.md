@@ -55,6 +55,14 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 > har safar guruhdagi HAMMA o'quvchini yuboradi. Bu endpoint hali
 > `backend-api-request.md` da so'ralmagan edi — agar aynan shu imzo bilan
 > ishlamasa, aytilsin.
+>
+> **2026-09-01:** `Branch` entity'sida `chargeForMonth` endi YO'Q — u
+> `Level`ga ko'chdi, `BranchDto`/`BranchUpdatePayload` bu maydonni umuman
+> qaytarmaydi (ilgari maydon turardi-yu, doim `null` kelardi). Frontend
+> `chargeForMonth`ni `BranchDto`/`BranchUpdatePayload`dan hamda Sozlamalar
+> (`CentreForm`) va super-admin (`BranchFormModal`,
+> `SuperAdminDashboardPage`) ekranlaridan olib tashladi. `Level`dagi oylik
+> to'lov hali frontendda ko'rsatilmaydi — kerak bo'lsa alohida vazifa.
 
 ---
 
@@ -90,6 +98,17 @@ mos kelmasa `hasAuthority('ADMINISTRATOR')` ishlating.
 
 Minimal qamrov: `POST`, `PUT`, `DELETE` — administratorga; `GET` ro'yxatlar —
 xodimlarga; o'quvchi faqat o'zinikini.
+
+> **2026-09-01:** Backend jamoasi tasdiqladi — kamida `LeadController`da
+> `@PreAuthorize` paydo bo'ldi (`hasRole('SUPER_ADMIN') or (hasRole('ADMINISTRATOR')
+> and hasAuthority('LEAD_MANAGEMENT'))` shaklida) va JWT'ga `permissions`
+> claim'i qo'shildi (`["LEAD_MANAGEMENT","TEACHER_MANAGEMENT",
+> "STUDENT_MANAGEMENT","INVOICE_MANAGEMENT"]`). Frontend mos keldi —
+> `src/shared/types/index.ts` (`AdminPermission`), `src/app/providers/useAuth.ts`
+> (`useHasPermission`), `src/app/routes/RequirePermission.tsx` va admin
+> panelidagi tab/tugmalar shu asosda yashirinadi. **Diqqat:** boshqa
+> controller'larning holati bu yerda TEKSHIRILMAGAN — yuqoridagi jadval
+> ularga hali ham tegishli bo'lishi mumkin.
 
 ### 2. 🟠 `/swagger**` naqshi Spring Boot 4 da ishlamaydi
 

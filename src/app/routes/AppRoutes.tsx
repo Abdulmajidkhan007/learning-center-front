@@ -7,6 +7,7 @@ import { LeadsPage } from '@/features/leads/pages/LeadsPage'
 import { PaymentsPage } from '@/features/payments/pages/PaymentsPage'
 import { SettingsPage } from '@/features/settings/pages/SettingsPage'
 import { NotFoundPage } from './NotFoundPage'
+import { RequirePermission } from './RequirePermission'
 import { RequireRole } from './RequireRole'
 import { RoleDashboard } from './RoleDashboard'
 
@@ -44,7 +45,9 @@ export function AppRoutes() {
                 path="/payments"
                 element={
                     <RequireRole roles={['ADMINISTRATOR', 'TEACHER', 'SUPER_ADMIN']}>
-                        <PaymentsPage />
+                        <RequirePermission permission="INVOICE_MANAGEMENT">
+                            <PaymentsPage />
+                        </RequirePermission>
                     </RequireRole>
                 }
             />
@@ -60,7 +63,9 @@ export function AppRoutes() {
                 path="/leads"
                 element={
                     <RequireRole roles={['ADMINISTRATOR', 'SUPER_ADMIN']}>
-                        <LeadsPage />
+                        <RequirePermission permission="LEAD_MANAGEMENT">
+                            <LeadsPage />
+                        </RequirePermission>
                     </RequireRole>
                 }
             />

@@ -107,8 +107,9 @@ Batafsil qoidalar: [`docs/architecture.md`](docs/architecture.md).
 1. Sahifa ochilganda `AuthProvider` `/auth/refresh-token` ga POST yuboradi
    (`credentials: 'include'`) — httpOnly refresh cookie yangi access token beradi.
 2. Access token payload'i **imzo tekshirilmasdan** ochiladi (`shared/lib/jwt.ts`),
-   faqat `role` ni bilib kerakli panelni ko'rsatish uchun. Avtorizatsiya —
-   backendning ishi.
+   faqat `role` (va `ADMINISTRATOR` uchun — `permissions`) ni bilib kerakli
+   panel/tab/tugmani ko'rsatish uchun (`useHasPermission`,
+   `RequirePermission`). Avtorizatsiya — backendning ishi.
 3. Token faqat React state'da yashaydi, `localStorage` da **emas**.
 
 ## Hujjatlar

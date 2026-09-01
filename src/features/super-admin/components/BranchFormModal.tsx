@@ -27,9 +27,6 @@ export function BranchFormModal({
     const [organizationId, setOrganizationId] = useState('')
     const [name, setName] = useState(branch?.name ?? '')
     const [address, setAddress] = useState(branch?.address ?? '')
-    const [chargeForMonth, setChargeForMonth] = useState(
-        branch?.chargeForMonth === undefined ? '' : String(branch.chargeForMonth)
-    )
 
     // Yaratishda tashkilot shart: `BranchCreateDto.organizationId` busiz
     // filial hech qaysi tashkilotga bog'lanmay qoladi.
@@ -41,7 +38,6 @@ export function BranchFormModal({
         onSubmit({
             name: name.trim(),
             address,
-            chargeForMonth: chargeForMonth === '' ? undefined : Number(chargeForMonth),
             organizationId: isEdit ? undefined : organizationId,
         })
     }
@@ -69,16 +65,6 @@ export function BranchFormModal({
                 </Field>
                 <Field label={t('branch.address')}>
                     <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-                </Field>
-                <Field label={t('branch.chargeForMonth')}>
-                    <Input
-                        type="number"
-                        min="0"
-                        step="any"
-                        inputMode="decimal"
-                        value={chargeForMonth}
-                        onChange={(e) => setChargeForMonth(e.target.value)}
-                    />
                 </Field>
 
                 {isEdit && (

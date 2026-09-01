@@ -75,14 +75,6 @@ export function SuperAdminDashboardPage() {
     const branchColumns: SimpleColumn<BranchDto>[] = [
         { key: 'name', label: t('branch.name'), render: (row) => row.name || '—' },
         { key: 'address', label: t('branch.address'), render: (row) => row.address || '—' },
-        {
-            key: 'charge',
-            label: t('branch.chargeForMonth'),
-            render: (row) =>
-                row.chargeForMonth === undefined || row.chargeForMonth === null
-                    ? '—'
-                    : new Intl.NumberFormat('ru-RU').format(row.chargeForMonth),
-        },
     ]
 
     return (

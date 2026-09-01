@@ -9,7 +9,6 @@ const branch: BranchDto = {
     id: 'b1',
     name: 'Chilonzor filiali',
     address: 'Toshkent, Chilonzor 5',
-    chargeForMonth: 450000,
     googleMapsUrl: 'https://maps.example/1',
 }
 
@@ -31,7 +30,7 @@ describe('CentreForm', () => {
         renderForm()
         expect(screen.getByDisplayValue('Chilonzor filiali')).toBeInTheDocument()
         expect(screen.getByDisplayValue('Toshkent, Chilonzor 5')).toBeInTheDocument()
-        expect(screen.getByDisplayValue('450000')).toBeInTheDocument()
+        expect(screen.getByDisplayValue('https://maps.example/1')).toBeInTheDocument()
     })
 
     it('saqlaganda o’zgargan qiymatni uzatadi', async () => {
@@ -43,17 +42,7 @@ describe('CentreForm', () => {
         await userEvent.click(screen.getByRole('button', { name: /saqlash/i }))
 
         expect(onSave).toHaveBeenCalledWith(
-            expect.objectContaining({ name: 'Yunusobod filiali', chargeForMonth: 450000 })
-        )
-    })
-
-    // Bo'sh summani `0` deb yuborsak, oylik to'lov bilmasdan nolga tushardi.
-    it('summa bo’sh bo’lsa uni umuman yubormaydi', async () => {
-        const onSave = renderForm(vi.fn(), { chargeForMonth: undefined })
-        await userEvent.click(screen.getByRole('button', { name: /saqlash/i }))
-
-        expect(onSave).toHaveBeenCalledWith(
-            expect.objectContaining({ chargeForMonth: undefined })
+            expect.objectContaining({ name: 'Yunusobod filiali' })
         )
     })
 })

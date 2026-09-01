@@ -101,9 +101,9 @@ export const organizations: OrganizationDto[] = [
 ]
 
 export const branches: BranchDto[] = [
-    { id: 'b1', name: 'Chilonzor', address: 'Chilonzor 9, Toshkent', chargeForMonth: 450000 },
-    { id: 'b2', name: 'Yunusobod', address: 'Amir Temur 108, Toshkent', chargeForMonth: 500000 },
-    { id: 'b3', name: 'Samarqand', address: 'Registon 4, Samarqand', chargeForMonth: 380000 },
+    { id: 'b1', name: 'Chilonzor', address: 'Chilonzor 9, Toshkent' },
+    { id: 'b2', name: 'Yunusobod', address: 'Amir Temur 108, Toshkent' },
+    { id: 'b3', name: 'Samarqand', address: 'Registon 4, Samarqand' },
 ]
 
 export const attendance: AttendanceDto[] = [

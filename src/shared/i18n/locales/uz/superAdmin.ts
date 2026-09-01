@@ -25,7 +25,6 @@ export const superAdmin = {
     'branch.editTitle': 'Filialni tahrirlash',
     'branch.name': 'Filial nomi',
     'branch.address': 'Manzil',
-    'branch.chargeForMonth': 'Oylik to‘lov',
     'branch.organization': 'Tashkilot',
     'branch.organizationLocked': 'Filialni boshqa tashkilotga ko‘chirib bo‘lmaydi.',
     'branch.empty': 'Filial topilmadi',

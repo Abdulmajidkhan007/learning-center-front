@@ -21,7 +21,6 @@ export const settings: Record<SettingsKeys, string> = {
     'settings.centreHint': 'Для всего центра — видит только администратор.',
     'settings.centreName': 'Название центра',
     'settings.centreAddress': "Адрес",
-    'settings.centreCharge': "Оплата в месяц",
     'settings.centreMapsUrl': "Ссылка на Google Maps",
     'settings.centreSaved': "Настройки центра сохранены.",
     'settings.centreLoadFailed': "Не удалось загрузить данные центра: {{message}}",

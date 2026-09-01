@@ -10,6 +10,7 @@ import {
     students,
     teachers,
 } from './mockData'
+import { ADMIN_PERMISSIONS } from '@/shared/types'
 import type {
     AttendanceDto,
     BranchDto,
@@ -55,7 +56,12 @@ const db = {
     branches: [...branches] as BranchDto[],
 }
 
-/** Imzosiz, lekin to'g'ri tuzilgan JWT (ilova faqat payload'ni o'qiydi). */
+/**
+ * Imzosiz, lekin to'g'ri tuzilgan JWT (ilova faqat payload'ni o'qiydi).
+ *
+ * `ADMINISTRATOR` uchun BARCHA ruxsatlar beriladi — demo cheklangan
+ * administratorni emas, ilovaning to'liq imkoniyatini ko'rsatishi kerak.
+ */
 function makeToken(role: string): string {
     const encode = (value: object) => {
         const bytes = new TextEncoder().encode(JSON.stringify(value))
@@ -64,7 +70,8 @@ function makeToken(role: string): string {
             .replace(/\//g, '_')
             .replace(/=+$/, '')
     }
-    return `${encode({ alg: 'none' })}.${encode({ role, sub: 'demo', name: 'Demo user' })}.demo`
+    const permissions = role === 'ADMINISTRATOR' ? ADMIN_PERMISSIONS : undefined
+    return `${encode({ alg: 'none' })}.${encode({ role, permissions, sub: 'demo', name: 'Demo user' })}.demo`
 }
 
 function json(body: unknown, status = 200): Response {
@@ -269,7 +276,6 @@ export function installMockApi() {
                 id: nextId('b'),
                 name: body.name,
                 address: body.address,
-                chargeForMonth: body.chargeForMonth,
             } as BranchDto
             db.branches = [...db.branches, branch]
             return json(branch)

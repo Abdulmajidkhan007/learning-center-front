@@ -24,7 +24,6 @@ export const settings = {
     'settings.centreHint': "Butun markaz uchun — faqat administrator ko'radi.",
     'settings.centreName': 'Markaz nomi',
     'settings.centreAddress': "Manzil",
-    'settings.centreCharge': "Oylik to'lov",
     'settings.centreMapsUrl': "Google Maps havolasi",
     'settings.centreSaved': "Markaz sozlamalari saqlandi.",
     'settings.centreLoadFailed': "Markaz ma'lumotini yuklab bo‘lmadi: {{message}}",

@@ -21,7 +21,6 @@ export const settings: Record<SettingsKeys, string> = {
     'settings.centreHint': 'Centre-wide — administrators only.',
     'settings.centreName': 'Centre name',
     'settings.centreAddress': "Address",
-    'settings.centreCharge': "Monthly charge",
     'settings.centreMapsUrl': "Google Maps link",
     'settings.centreSaved': "Centre settings saved.",
     'settings.centreLoadFailed': "Couldn’t load the centre: {{message}}",

@@ -84,7 +84,6 @@ export function useBranchMutations(token: string) {
                 return updateBranch(token, id, {
                     name: body.name,
                     address: body.address,
-                    chargeForMonth: body.chargeForMonth,
                 })
             }
             return createBranch(token, body)
