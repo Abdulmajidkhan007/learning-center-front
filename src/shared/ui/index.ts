@@ -1,4 +1,6 @@
 export { AppShell } from './AppShell'
+export { AttendanceCell } from './AttendanceCell'
+export { AttendanceTable, type PastLessonColumn } from './AttendanceTable'
 export { Avatar } from './Avatar'
 export { Badge, DotBadge, type BadgeTone } from './Badge'
 export { Brand } from './Brand'
