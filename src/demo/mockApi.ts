@@ -190,6 +190,42 @@ export function installMockApi() {
             return json(db.students.filter((student) => student.userDto?.phone === phone))
         }
 
+        // O'quvchi panelidagi guruh va davomat bloklari — demo'da kirgan
+        // "o'quvchi" telefon raqami bo'yicha topiladi (haqiqiy backendda esa
+        // token orqali).
+        if (path === '/group/my' && method === 'GET') {
+            const me = db.students.find((student) => student.userDto?.phone === demoUser.phone)
+            const myGroupIds = Object.entries(groupRoster)
+                .filter(([, ids]) => (me ? ids.includes(me.id) : false))
+                .map(([groupId]) => groupId)
+            // Backend `lessonsCount` ni bu endpoint uchun doim `null` qaytaradi —
+            // demo ham shu xatti-harakatni takrorlaydi.
+            return json(
+                db.groups
+                    .filter((group) => myGroupIds.includes(group.id))
+                    .map((group) => ({ ...group, lessonsCount: null }))
+            )
+        }
+        if (path.startsWith('/attendance/my/') && method === 'GET') {
+            const me = db.students.find((student) => student.userDto?.phone === demoUser.phone)
+            const groupId = path.slice('/attendance/my/'.length)
+            const groupLessons = db.lessons.filter((lesson) => lesson.group?.id === groupId)
+            const entries = groupLessons
+                .map((lesson) => {
+                    const record = db.attendance.find((item) => item.lessonId === lesson.id)
+                    const mine = record?.attendanceStudents?.find((entry) => entry.studentId === me?.id)
+                    if (!mine) return null
+                    return {
+                        title: lesson.lessonName ?? lesson.lessonNumber ?? '',
+                        date: lesson.lessonDate?.slice(0, 10) ?? '',
+                        status: mine.status,
+                        reason: mine.reason,
+                    }
+                })
+                .filter((entry) => entry !== null)
+            return json(entries)
+        }
+
         // --- o'qituvchi paneli ---
         if (path === '/group/groups') {
             return json(db.groups.filter((group) => group.status !== 'COMPLETED'))

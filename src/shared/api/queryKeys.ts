@@ -13,6 +13,11 @@ export const queryKeys = {
 
     me: () => ['auth', 'me'] as const,
     myStudentRecord: (phone: string) => ['student', 'byPhone', phone] as const,
+    myGroups: () => ['group', 'my'] as const,
+    /** `previousMonths` ham kalitga kiradi — oy almashsa alohida so'rov/keshlanadi. */
+    myAttendance: (groupId: string, previousMonths: number) =>
+        ['attendance', 'my', groupId, previousMonths] as const,
+    myBalance: () => ['student', 'my-balance'] as const,
 
     teacherOptions: () => ['teacher', 'options'] as const,
     groupOptions: () => ['group', 'options'] as const,

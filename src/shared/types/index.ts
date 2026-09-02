@@ -99,6 +99,17 @@ export interface StudentDto {
     parentPhone?: string
 }
 
+/**
+ * `GET /student/my/balance` javobi.
+ *
+ * Manfiy son — o'quvchining qarzi borligini bildiradi, nol — balans toza,
+ * musbat son — avans. Endpoint hali backendda yo'q
+ * (`docs/backend-api-request.md` ga qarang).
+ */
+export interface StudentBalanceDto {
+    balance: number
+}
+
 export interface TeacherDto {
     id: string
     userDto?: UserDto
@@ -239,6 +250,20 @@ export interface MonthlyAttendanceDto {
     /** `LocalDate`/`LocalDateTime` — jadvaldagi ustun sanasi shundan olinadi. */
     date?: string
     attendanceStudentMap?: Record<string, StatusReasonDto>
+}
+
+/**
+ * `GET /attendance/my/{groupId}` javobidagi bitta yozuv.
+ *
+ * `MonthlyAttendanceDto` dan farqli o'laroq — bu allaqachon SO'RAGAN
+ * o'quvchining o'zi uchun tekislangan ro'yxat, xarita emas.
+ */
+export interface MyAttendanceDto {
+    title?: string
+    /** `LocalDate` — "yyyy-MM-dd". */
+    date?: string
+    status: AttendanceStatus
+    reason?: string
 }
 
 /** `OrganizationDto` — o'quv markazi (tashkilot) darajasi. */
