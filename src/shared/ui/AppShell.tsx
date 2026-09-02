@@ -10,6 +10,9 @@ import { SettingsIcon, SignOutIcon } from './icons'
 interface AppShellProps {
     subtitle: string
     onSignOut: () => void
+    /** Tema va almashtirish funksiyasi. */
+    theme?: string
+    toggleTheme?: () => void
     /** Sahifaga xos tugmalar — mobil ekranda alohida qatorga tushadi. */
     actions?: ReactNode
     /** Sarlavha ostidagi qo'shimcha qator (guruh almashtirgich va h.k.). */
@@ -30,6 +33,8 @@ interface AppShellProps {
 export function AppShell({
     subtitle,
     onSignOut,
+    theme,
+    toggleTheme,
     actions,
     secondary,
     mainClassName,
@@ -45,7 +50,7 @@ export function AppShell({
                     <Brand subtitle={subtitle} className="min-w-0 [&>span:last-child]:truncate" />
 
                     <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                        <ThemeToggle />
+                        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                         <IconButton label={t('nav.settings')} onClick={() => navigate('/settings')}>
                             <SettingsIcon />
                         </IconButton>

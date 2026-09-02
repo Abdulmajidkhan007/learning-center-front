@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/providers/useTheme'
 import { LOCALE_LABELS, LOCALES, useT } from '@/shared/i18n'
 import { Brand, SegmentedControl, ThemeToggle } from '@/shared/ui'
 import { LoginForm } from '../components/LoginForm'
@@ -13,13 +14,14 @@ import type { Session } from '@/shared/types'
  */
 export function LoginPage({ onLoggedIn }: { onLoggedIn: (session: Session) => void }) {
     const { t, locale, setLocale } = useT()
+    const { theme, toggleTheme } = useTheme()
 
     return (
         <div className="grid min-h-screen lg:grid-cols-[minmax(360px,460px)_1fr]">
             <div className="flex flex-col justify-center bg-surface px-6 py-10 sm:px-14">
                 <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
                     <Brand subtitle={t('auth.brand')} className="min-w-0" />
-                    <ThemeToggle />
+                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                 </div>
 
                 <h1 className="mb-2 font-display text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
