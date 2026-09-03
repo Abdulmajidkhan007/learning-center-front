@@ -1,8 +1,8 @@
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
+import { useMe } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { AppShell, EmptyState, ErrorBox, Eyebrow, Panel, PendingBackend } from '@/shared/ui'
-import { useMe } from '@/features/settings/hooks/useMe'
 import { ProfileCard } from '../components/ProfileCard'
 import { useMyStudentRecord } from '../hooks/useMyStudentRecord'
 
