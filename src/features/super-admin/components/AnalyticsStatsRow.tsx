@@ -49,7 +49,7 @@ export function AnalyticsStatsRow({
                             </div>
                         </div>
 
-                        <div className="mt-2 min-h-5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                        <div className="mt-2 min-h-5 text-xs font-medium text-success-fg">
                             {thisMonthText ?? (item?.isLoading ? '···' : '')}
                         </div>
                     </div>

@@ -47,7 +47,11 @@ export function StudentDashboardPage() {
     return (
         <AppShell subtitle={t('student.role')} onSignOut={signOut}>
             <div className="mx-auto max-w-2xl">
-                {isLoading && <p className="text-sm text-fg-faint">{t('common.loading')}</p>}
+                {isLoading && (
+                    <Panel className="mb-5 py-8 text-center font-mono text-sm text-fg-faint">
+                        {t('common.loading')}
+                    </Panel>
+                )}
 
                 {error != null && (
                     <div className="mb-5">
@@ -55,9 +59,9 @@ export function StudentDashboardPage() {
                     </div>
                 )}
 
-                {me && <ProfileCard user={me} student={student ?? null} />}
+                {!isLoading && me && <ProfileCard user={me} student={student ?? null} />}
 
-                {me && !student && (
+                {!isLoading && me && !student && (
                     <div className="mb-5">
                         <EmptyState title={t('student.notFound')} description={t('student.notFoundHint')} />
                     </div>
@@ -71,6 +75,10 @@ export function StudentDashboardPage() {
                         </div>
                         <GroupPicker groups={groups} selectedId={selectedGroupId} onSelect={setPickedGroupId} />
                     </div>
+
+                    {groupsQuery.isLoading && (
+                        <p className="py-4 text-center font-mono text-sm text-fg-faint">{t('common.loading')}</p>
+                    )}
 
                     {groupsQuery.error != null && <ErrorBox>{errorMessage(groupsQuery.error)}</ErrorBox>}
 
