@@ -14,10 +14,18 @@ export function GroupLevelTable({ rows, isLoading, onEdit, onDelete }: GroupLeve
     const { t } = useT()
 
     const columns: DataTableColumn<GroupLevelDto>[] = [
-        { key: 'name', header: t('groupLevel.name'), render: (row) => row.name },
-        { key: 'lessonCount', header: t('groupLevel.lessonCount'), render: (row) => String(row.lessonCount ?? '') },
-        { key: 'orderNumber', header: t('groupLevel.orderNumber'), render: (row) => String(row.orderNumber ?? '') },
-        { key: 'durationInMonths', header: t('groupLevel.durationInMonths'), render: (row) => String(row.durationInMonths ?? '') },
+        {
+            key: 'name',
+            header: t('groupLevel.name'),
+            render: (row) => (
+                <span className="inline-block max-w-48 truncate font-medium text-fg" title={row.name || '—'}>
+                    {row.name || '—'}
+                </span>
+            ),
+        },
+        { key: 'lessonCount', header: t('groupLevel.lessonCount'), render: (row) => String(row.lessonCount ?? '—') },
+        { key: 'orderNumber', header: t('groupLevel.orderNumber'), render: (row) => String(row.orderNumber ?? '—') },
+        { key: 'durationInMonths', header: t('groupLevel.durationInMonths'), render: (row) => String(row.durationInMonths ?? '—') },
     ]
 
     return (

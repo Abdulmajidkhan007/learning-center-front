@@ -22,8 +22,8 @@ export function ProfileCard({ user, student }: ProfileCardProps) {
         <Panel className="mb-5">
             <div className="mb-4 flex items-center gap-3.5">
                 <Avatar name={user.fullName} src={user.imageUrl} size="lg" />
-                <div className="min-w-0">
-                    <h2 className="truncate font-display text-xl font-semibold text-fg">
+                <div className="min-w-0 flex-1">
+                    <h2 className="truncate font-display text-xl font-semibold text-fg" title={user.fullName}>
                         {user.fullName || '—'}
                     </h2>
                     <p className="font-mono text-xs text-fg-faint">{t('student.role')}</p>
@@ -36,10 +36,12 @@ export function ProfileCard({ user, student }: ProfileCardProps) {
                         key={row.labelKey}
                         className="flex items-center justify-between gap-3 border-b border-border-base py-2.5 text-sm last:border-b-0"
                     >
-                        <dt className="font-mono text-[0.68rem] tracking-[0.06em] text-fg-faint uppercase">
+                        <dt className="shrink-0 font-mono text-[0.68rem] tracking-[0.06em] text-fg-faint uppercase">
                             {t(row.labelKey)}
                         </dt>
-                        <dd className="truncate text-fg">{row.value || '—'}</dd>
+                        <dd className="truncate text-right text-fg" title={row.value || '—'}>
+                            {row.value || '—'}
+                        </dd>
                     </div>
                 ))}
             </dl>
