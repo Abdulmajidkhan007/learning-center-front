@@ -42,10 +42,12 @@ export function AttendanceList({ entries, isLoading, month, onMonthChange }: Att
                 />
             </div>
 
-            {isLoading && <p className="font-mono text-sm text-fg-faint">{t('common.loading')}</p>}
+            {isLoading && <p className="font-mono text-sm text-fg-faint py-4 text-center">{t('common.loading')}</p>}
 
             {!isLoading && entries.length === 0 && (
-                <p className="text-sm text-fg-faint">{t('student.noAttendance')}</p>
+                <div className="py-2">
+                    <p className="text-center font-mono text-sm text-fg-faint">{t('student.noAttendance')}</p>
+                </div>
             )}
 
             {!isLoading && entries.length > 0 && (
