@@ -66,15 +66,55 @@ export function SuperAdminDashboardPage() {
     }
 
     const orgColumns: SimpleColumn<OrganizationDto>[] = [
-        { key: 'name', label: t('org.name'), render: (row) => row.name || '—' },
+        {
+            key: 'name',
+            label: t('org.name'),
+            render: (row) => (
+                <span className="inline-block max-w-48 truncate font-medium text-fg" title={row.name || '—'}>
+                    {row.name || '—'}
+                </span>
+            ),
+        },
         { key: 'phone', label: t('org.phone'), render: (row) => row.phone || '—' },
-        { key: 'email', label: t('org.email'), render: (row) => row.email || '—' },
-        { key: 'website', label: t('org.website'), render: (row) => row.website || '—' },
+        {
+            key: 'email',
+            label: t('org.email'),
+            render: (row) => (
+                <span className="inline-block max-w-48 truncate text-fg-muted" title={row.email || '—'}>
+                    {row.email || '—'}
+                </span>
+            ),
+        },
+        {
+            key: 'website',
+            label: t('org.website'),
+            render: (row) => (
+                <span className="inline-block max-w-48 truncate text-fg-muted" title={row.website || '—'}>
+                    {row.website || '—'}
+                </span>
+            ),
+        },
     ]
 
     const branchColumns: SimpleColumn<BranchDto>[] = [
-        { key: 'name', label: t('branch.name'), render: (row) => row.name || '—' },
-        { key: 'address', label: t('branch.address'), render: (row) => row.address || '—' },
+        {
+            key: 'name',
+            label: t('branch.name'),
+            render: (row) => (
+                <span className="inline-block max-w-48 truncate font-medium text-fg" title={row.name || '—'}>
+                    {row.name || '—'}
+                </span>
+            ),
+        },
+        {
+            key: 'address',
+            label: t('branch.address'),
+            render: (row) => (
+                <span className="inline-block max-w-60 truncate text-fg-muted" title={row.address || '—'}>
+                    {row.address || '—'}
+                </span>
+            ),
+        },
     ]
 
     return (
