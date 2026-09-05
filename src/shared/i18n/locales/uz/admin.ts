@@ -59,7 +59,6 @@ export const admin = {
     'groupLevel.orderNumber': 'Tartib raqami',
     'groupLevel.durationInMonths': 'Muddati (oy)',
     'groupLevel.monthlyFee': 'Oylik to‘lov',
-    'groupLevel.nameLocked': 'Nomni hozircha o‘zgartirib bo‘lmaydi',
     'groupLevel.moveUp': 'Yuqoriga surish',
     'groupLevel.moveDown': 'Pastga surish',
     'groupLevel.empty': 'Daraja topilmadi.',

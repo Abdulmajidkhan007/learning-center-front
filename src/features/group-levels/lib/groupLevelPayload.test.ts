@@ -32,7 +32,7 @@ describe('group level payloads', () => {
         ).toBe(0)
     })
 
-    it('builds the update DTO without name and orderNumber', () => {
+    it('builds the update DTO with name but without orderNumber', () => {
         expect(
             toUpdateGroupLevelPayload({
                 id: 'lvl-2',
@@ -43,6 +43,7 @@ describe('group level payloads', () => {
                 monthlyFee: '450000',
             })
         ).toEqual({
+            name: 'B2',
             lessonCount: 24,
             durationInMonths: 6,
             monthlyFee: 450000,

@@ -56,7 +56,6 @@ export const admin: Record<AdminKeys, string> = {
     'groupLevel.orderNumber': 'Order number',
     'groupLevel.durationInMonths': 'Duration (months)',
     'groupLevel.monthlyFee': 'Monthly fee',
-    'groupLevel.nameLocked': "The name can't be changed yet",
     'groupLevel.moveUp': 'Move up',
     'groupLevel.moveDown': 'Move down',
     'groupLevel.empty': 'No levels found.',

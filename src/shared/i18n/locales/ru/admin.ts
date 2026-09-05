@@ -56,7 +56,6 @@ export const admin: Record<AdminKeys, string> = {
     'groupLevel.orderNumber': 'Порядок',
     'groupLevel.durationInMonths': 'Срок (месяцев)',
     'groupLevel.monthlyFee': 'Ежемесячная плата',
-    'groupLevel.nameLocked': 'Название пока нельзя изменить',
     'groupLevel.moveUp': 'Переместить вверх',
     'groupLevel.moveDown': 'Переместить вниз',
     'groupLevel.empty': 'Уровни не найдены.',
