@@ -90,16 +90,14 @@ export function GroupLevelFormModal({
                     />
                 </Field>
 
-                {mode === 'edit' && (
-                    <Field label={t('groupLevel.monthlyFee')}>
-                        <Input
-                            type="number"
-                            min="0"
-                            value={values.monthlyFee}
-                            onChange={(event) => setValue('monthlyFee', event.target.value)}
-                        />
-                    </Field>
-                )}
+                <Field label={t('groupLevel.monthlyFee')}>
+                    <Input
+                        type="number"
+                        min="0"
+                        value={values.monthlyFee}
+                        onChange={(event) => setValue('monthlyFee', event.target.value)}
+                    />
+                </Field>
 
                 {row && <p className="text-[0.72rem] leading-snug text-fg-faint">ID: {row.id}</p>}
 

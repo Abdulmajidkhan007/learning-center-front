@@ -9,14 +9,27 @@ describe('group level payloads', () => {
                 lessonCount: '20',
                 orderNumber: '2',
                 durationInMonths: '4',
-                monthlyFee: '',
+                monthlyFee: '450000',
             })
         ).toEqual({
             name: 'B1',
             lessonCount: 20,
             orderNumber: 2,
             durationInMonths: 4,
+            monthlyFee: 450000,
         })
+    })
+
+    it('oylik to‘lov bo‘sh bo‘lsa 0 yuboradi', () => {
+        expect(
+            toCreateGroupLevelPayload({
+                name: 'B1',
+                lessonCount: '20',
+                orderNumber: '2',
+                durationInMonths: '4',
+                monthlyFee: '',
+            }).monthlyFee
+        ).toBe(0)
     })
 
     it('builds the update DTO without name and orderNumber', () => {
