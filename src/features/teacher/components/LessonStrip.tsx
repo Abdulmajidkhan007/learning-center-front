@@ -12,7 +12,7 @@ export function LessonStrip({ group }: { group?: GroupDto }) {
     const { t } = useT()
 
     const cells = [
-        { key: 'level', label: t('teacher.level'), value: group?.level },
+        { key: 'level', label: t('teacher.level'), value: group?.level?.name },
         {
             key: 'month',
             label: t('teacher.currentUnit'),

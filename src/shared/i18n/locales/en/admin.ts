@@ -55,6 +55,8 @@ export const admin: Record<AdminKeys, string> = {
     'groupLevel.lessonCount': 'Lesson count',
     'groupLevel.orderNumber': 'Order number',
     'groupLevel.durationInMonths': 'Duration (months)',
+    'groupLevel.monthlyFee': 'Monthly fee',
+    'groupLevel.nameLocked': "The name can't be changed yet",
     'groupLevel.empty': 'No levels found.',
     'groupLevel.deleteConfirm': 'Delete the {{name}} level? This cannot be undone.',
     'groupLevel.loadFailed': "Couldn't load levels: {{message}}",

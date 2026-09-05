@@ -1,4 +1,5 @@
 import { useT } from '@/shared/i18n'
+import { formatAmount } from '@/shared/lib'
 import { DataTable, EditIcon, IconButton, TrashIcon } from '@/shared/ui'
 import type { DataTableColumn } from '@/shared/ui'
 import type { GroupLevelDto } from '@/shared/types'
@@ -26,6 +27,12 @@ export function GroupLevelTable({ rows, isLoading, onEdit, onDelete }: GroupLeve
         { key: 'lessonCount', header: t('groupLevel.lessonCount'), render: (row) => String(row.lessonCount ?? '—') },
         { key: 'orderNumber', header: t('groupLevel.orderNumber'), render: (row) => String(row.orderNumber ?? '—') },
         { key: 'durationInMonths', header: t('groupLevel.durationInMonths'), render: (row) => String(row.durationInMonths ?? '—') },
+        {
+            key: 'monthlyFee',
+            header: t('groupLevel.monthlyFee'),
+            // DIQQAT: backend hozircha bosh harf bilan `MonthlyFee` qaytaradi.
+            render: (row) => formatAmount(row.monthlyFee ?? row.MonthlyFee),
+        },
     ]
 
     return (

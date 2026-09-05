@@ -14,6 +14,7 @@ const emptyForm = (): GroupLevelFormValues => ({
     lessonCount: '',
     orderNumber: '',
     durationInMonths: '',
+    monthlyFee: '',
 })
 
 export function GroupLevelsPage() {
@@ -34,6 +35,8 @@ export function GroupLevelsPage() {
             lessonCount: String(modal.row.lessonCount ?? ''),
             orderNumber: String(modal.row.orderNumber ?? ''),
             durationInMonths: String(modal.row.durationInMonths ?? ''),
+            // Backend hozircha `MonthlyFee` deb bosh harf bilan qaytaradi.
+            monthlyFee: String(modal.row.monthlyFee ?? modal.row.MonthlyFee ?? ''),
         }
     }, [modal])
 
@@ -48,17 +51,16 @@ export function GroupLevelsPage() {
     function handleSubmit(values: GroupLevelFormValues) {
         if (!modal) return
 
-        const payload =
-            modal.mode === 'create'
-                ? toCreateGroupLevelPayload(values)
-                : toUpdateGroupLevelPayload(values)
-
         if (modal.mode === 'create') {
-            mutations.create.mutate(payload, { onSuccess: () => setModal(null) })
+            mutations.create.mutate(toCreateGroupLevelPayload(values), { onSuccess: () => setModal(null) })
             return
         }
 
-        mutations.update.mutate(payload, { onSuccess: () => setModal(null) })
+        if (!modal.row) return
+        mutations.update.mutate(
+            { id: modal.row.id, body: toUpdateGroupLevelPayload(values) },
+            { onSuccess: () => setModal(null) }
+        )
     }
 
     function handleDelete(row: GroupLevelDto) {

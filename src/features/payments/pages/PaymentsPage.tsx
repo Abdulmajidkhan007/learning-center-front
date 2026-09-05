@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
+import { formatAmount } from '@/shared/lib'
 import { INVOICE_STATUSES } from '@/shared/types'
 import {
     AppShell,
@@ -18,7 +19,6 @@ import {
     Select,
 } from '@/shared/ui'
 import { InvoiceTable } from '../components/InvoiceTable'
-import { formatAmount } from '../lib/format'
 import { NewInvoiceModal } from '../components/NewInvoiceModal'
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations'
 import { useInvoices } from '../hooks/useInvoices'
