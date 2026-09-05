@@ -59,7 +59,6 @@ export const admin = {
     'groupLevel.orderNumber': 'Tartib raqami',
     'groupLevel.durationInMonths': 'Muddati (oy)',
     'groupLevel.monthlyFee': 'Oylik to‘lov',
-    'groupLevel.nameLocked': 'Nomni hozircha o‘zgartirib bo‘lmaydi',
     'groupLevel.empty': 'Daraja topilmadi.',
     'groupLevel.deleteConfirm': '{{name}} darajasi o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
     'groupLevel.loadFailed': "Darajalarni yuklab bo'lmadi: {{message}}",
