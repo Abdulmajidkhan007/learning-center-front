@@ -9,6 +9,7 @@ describe('group level payloads', () => {
                 lessonCount: '20',
                 orderNumber: '2',
                 durationInMonths: '4',
+                monthlyFee: '',
             })
         ).toEqual({
             name: 'B1',
@@ -18,7 +19,7 @@ describe('group level payloads', () => {
         })
     })
 
-    it('updates the existing record with id in the body', () => {
+    it('builds the update DTO without name and orderNumber', () => {
         expect(
             toUpdateGroupLevelPayload({
                 id: 'lvl-2',
@@ -26,13 +27,12 @@ describe('group level payloads', () => {
                 lessonCount: '24',
                 orderNumber: '3',
                 durationInMonths: '6',
+                monthlyFee: '450000',
             })
         ).toEqual({
-            id: 'lvl-2',
-            name: 'B2',
             lessonCount: 24,
-            orderNumber: 3,
             durationInMonths: 6,
+            monthlyFee: 450000,
         })
     })
 })

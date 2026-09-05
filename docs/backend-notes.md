@@ -64,6 +64,27 @@ Birinchi ro'yxatdagi narsalar bajarilgani kodda tekshirildi:
 > `SuperAdminDashboardPage`) ekranlaridan olib tashladi. `Level`dagi oylik
 > to'lov hali frontendda ko'rsatilmaydi — kerak bo'lsa alohida vazifa.
 
+> **2026-09-05:** `Level`dagi oylik to'lov ulandi. `GET /group-level`
+> maydonni endi qaytaradi, lekin **bosh harf bilan** — `MonthlyFee`, DTO'dagi
+> qolgan barcha maydonlar (`lessonCount`, `orderNumber`, `durationInMonths`)
+> kabi kichik harfda emas. Backend jamoasi buni tan oldi, tuzatiladi.
+> Tuzalguncha frontend ikkalasini ham qabul qiladi
+> (`GroupLevelDto.monthlyFee ?? GroupLevelDto.MonthlyFee`,
+> `src/shared/types/index.ts`) — tuzatilgach `MonthlyFee` olib tashlanadi.
+>
+> Shu bilan birga `PUT /group-level/{id}` qo'shildi — tanasi
+> `{ lessonCount, durationInMonths, monthlyFee }`, **`name` yo'q** (nomni
+> tahrirlab bo'lmaydi, faqat yaratishda beriladi). Eski `PUT /group-level`
+> (butun jadval tanasi `{ levels: [{ id, orderNumber }] }`) o'zgarishsiz
+> qoldi — u faqat tartibni yangilaydi, frontendda `reorderGroupLevels` deb
+> nomlandi (`updateGroupLevel` bilan adashtirilmasin uchun).
+>
+> Yana: `GroupDto.level` endi `GroupLevel` enum satri emas, to'liq
+> `GroupLevelDto` obyekti (`{ id, name, lessonCount, orderNumber,
+> durationInMonths, monthlyFee }`). O'quvchi va o'qituvchi panelidagi
+> darajani ko'rsatuvchi ikki joy (`GroupCard`, `LessonStrip`)
+> `group.level?.name` ga o'tkazildi.
+
 ---
 
 ## Qolgan va yangi topilganlar
@@ -610,7 +631,11 @@ Bu shakllar `src/shared/types/index.ts` ga ko'chirilgan. O'zgartirsangiz
 ayting — kompilyator qaysi ekranga tegishini o'zi ko'rsatadi.
 
 `UserDto.imageUrl` · `TimeTableDto.dayType` (ODD/EVEN) ·
-`LessonDto.lessonNumber` (String) · `GroupDto.level/currentMonth/lessonsCount` ·
+`LessonDto.lessonNumber` (String) ·
+`GroupDto.level` (endi `GroupLevelDto` obyekti, enum satr emas) ·
+`GroupDto.currentMonth/lessonsCount` ·
+`GroupLevelDto.monthlyFee` (backend `MonthlyFee` deb bosh harf bilan
+qaytaradi — tuzatilguncha ikkalasi ham qabul qilinadi) ·
 `GroupNameProjection` (id, name, dayType) · `AttendanceCreateDto{lessonId, students}` ·
 `StatusReasonDto{status, reason}` (`MonthlyAttendanceDto.attendanceStudentMap` qiymati) ·
 `AttendanceStudentDto.reason`

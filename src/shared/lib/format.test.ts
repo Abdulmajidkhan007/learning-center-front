@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { formatCell, formatDate, formatHeader, formatTime, initials, singular, titleCase } from './format'
+import { formatAmount, formatCell, formatDate, formatHeader, formatTime, initials, singular, titleCase } from './format'
+
+/** `Intl` razryadlarni uzuq bo'shliq (U+00A0) bilan ajratadi. */
+const normalizeAmount = (value: string) => value.replace(/\u00a0/g, ' ')
 
 describe('formatTime', () => {
     it('LocalTime dan soniyalarni olib tashlaydi', () => {
@@ -74,5 +77,25 @@ describe('titleCase / singular', () => {
     it('ko’plikdan birlikka o’tadi', () => {
         expect(singular('Students')).toBe('Student')
         expect(singular('Group')).toBe('Group')
+    })
+})
+
+describe('formatAmount', () => {
+    it('razryadlarga ajratadi', () => {
+        expect(normalizeAmount(formatAmount(450000))).toBe('450 000')
+    })
+
+    it('kasr qismini saqlaydi', () => {
+        expect(normalizeAmount(formatAmount(1234.5))).toBe('1 234,5')
+    })
+
+    // Backend `amount`/`monthlyFee` ni bermasligi mumkin — jadval bo'sh katak ko'rsatsin.
+    it('qiymat yo’q bo’lsa chiziqcha', () => {
+        expect(formatAmount(undefined)).toBe('—')
+        expect(formatAmount(null)).toBe('—')
+    })
+
+    it('nolni chiziqcha deb hisoblamaydi', () => {
+        expect(formatAmount(0)).toBe('0')
     })
 })

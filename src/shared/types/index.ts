@@ -149,6 +149,13 @@ export interface GroupLevelDto {
     lessonCount: number
     orderNumber: number
     durationInMonths: number
+    /**
+     * Oylik to'lov. Backend hozircha bosh harf bilan `MonthlyFee` qaytaradi —
+     * bu backend'dagi xato, tan olingan va tuzatiladi. Tuzatilgunga qadar
+     * ikkalasini ham qabul qilamiz; keyin `MonthlyFee` olib tashlanadi.
+     */
+    monthlyFee?: number
+    MonthlyFee?: number
 }
 
 export interface GroupDto {
@@ -158,7 +165,7 @@ export interface GroupDto {
     teacher?: TeacherDto
     timeTable?: TimeTableDto
     status?: GroupStatus
-    level?: GroupLevel
+    level?: GroupLevelDto
     /** Kurs boshlanganidan beri nechanchi oy. */
     currentMonth?: number
     /** Guruhda o'tilgan darslar soni. */

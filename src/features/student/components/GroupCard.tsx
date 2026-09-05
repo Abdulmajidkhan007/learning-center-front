@@ -13,7 +13,7 @@ export function GroupCard({ group }: { group: GroupDto }) {
         <div>
             <div className="mb-4 flex items-center justify-between gap-3">
                 <h3 className="truncate font-display text-lg font-semibold text-fg">{group.name || '—'}</h3>
-                {group.level && <Badge tone="accent">{group.level}</Badge>}
+                {group.level?.name && <Badge tone="accent">{group.level.name}</Badge>}
             </div>
 
             <div className="mb-4 flex items-center gap-3">

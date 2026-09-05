@@ -40,7 +40,7 @@ export const groups: GroupDto[] = [
         name: 'Beginners A',
         room: '12',
         status: 'ONGOING',
-        level: 'A2',
+        level: { id: 'lvl-a2', name: 'A2', lessonCount: 20, orderNumber: 2, durationInMonths: 4, monthlyFee: 450000 },
         currentMonth: 2,
         lessonsCount: 14,
         teacher: teachers[0],

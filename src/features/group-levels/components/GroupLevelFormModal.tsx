@@ -10,6 +10,7 @@ export interface GroupLevelFormValues {
     lessonCount: string
     orderNumber: string
     durationInMonths: string
+    monthlyFee: string
 }
 
 interface GroupLevelFormModalProps {
@@ -51,8 +52,14 @@ export function GroupLevelFormModal({
         >
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <Field label={t('groupLevel.name')}>
-                    <Input value={values.name} onChange={(event) => setValue('name', event.target.value)} />
+                    <Input
+                        value={values.name}
+                        onChange={(event) => setValue('name', event.target.value)}
+                        disabled={mode === 'edit'}
+                    />
                 </Field>
+                {/* PUT /group-level/{id} tanasida `name` yo'q — nomni faqat yaratishda belgilash mumkin. */}
+                {mode === 'edit' && <p className="-mt-2 text-[0.72rem] leading-snug text-fg-faint">{t('groupLevel.nameLocked')}</p>}
 
                 <Field label={t('groupLevel.lessonCount')}>
                     <Input
@@ -63,14 +70,16 @@ export function GroupLevelFormModal({
                     />
                 </Field>
 
-                <Field label={t('groupLevel.orderNumber')}>
-                    <Input
-                        type="number"
-                        min="0"
-                        value={values.orderNumber}
-                        onChange={(event) => setValue('orderNumber', event.target.value)}
-                    />
-                </Field>
+                {mode === 'create' && (
+                    <Field label={t('groupLevel.orderNumber')}>
+                        <Input
+                            type="number"
+                            min="0"
+                            value={values.orderNumber}
+                            onChange={(event) => setValue('orderNumber', event.target.value)}
+                        />
+                    </Field>
+                )}
 
                 <Field label={t('groupLevel.durationInMonths')}>
                     <Input
@@ -80,6 +89,17 @@ export function GroupLevelFormModal({
                         onChange={(event) => setValue('durationInMonths', event.target.value)}
                     />
                 </Field>
+
+                {mode === 'edit' && (
+                    <Field label={t('groupLevel.monthlyFee')}>
+                        <Input
+                            type="number"
+                            min="0"
+                            value={values.monthlyFee}
+                            onChange={(event) => setValue('monthlyFee', event.target.value)}
+                        />
+                    </Field>
+                )}
 
                 {row && <p className="text-[0.72rem] leading-snug text-fg-faint">ID: {row.id}</p>}
 

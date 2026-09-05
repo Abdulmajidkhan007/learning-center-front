@@ -1,8 +1,7 @@
 import { useT } from '@/shared/i18n'
-import { formatDate } from '@/shared/lib'
+import { formatAmount, formatDate } from '@/shared/lib'
 import { Button, DataTable, IconButton, TrashIcon } from '@/shared/ui'
 import type { DataTableColumn } from '@/shared/ui'
-import { formatAmount } from '../lib/format'
 import { InvoiceStatusBadge } from './InvoiceStatusBadge'
 import type { InvoiceDto } from '@/shared/types'
 

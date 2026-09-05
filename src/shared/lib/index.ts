@@ -1,6 +1,7 @@
 export { cn } from './cn'
 export { decodeJwt } from './jwt'
 export {
+    formatAmount,
     formatCell,
     formatDate,
     formatHeader,

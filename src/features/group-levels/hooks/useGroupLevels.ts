@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
+import type { GroupLevelUpdatePayload } from '../lib/groupLevelPayload'
 import { createGroupLevel, deleteGroupLevel, fetchGroupLevels, updateGroupLevel } from '../api/groupLevelsApi'
 
 export function useGroupLevels(token: string) {
@@ -24,7 +25,7 @@ export function useGroupLevelMutations(token: string) {
     })
 
     const update = useMutation({
-        mutationFn: (body: unknown) => updateGroupLevel(token, body),
+        mutationFn: ({ id, body }: { id: string; body: GroupLevelUpdatePayload }) => updateGroupLevel(token, id, body),
         onSuccess: invalidate,
     })
 

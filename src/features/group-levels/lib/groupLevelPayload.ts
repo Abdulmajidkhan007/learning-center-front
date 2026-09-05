@@ -4,6 +4,7 @@ export interface GroupLevelFormInput {
     lessonCount: string
     orderNumber: string
     durationInMonths: string
+    monthlyFee: string
 }
 
 export interface GroupLevelCreatePayload {
@@ -13,8 +14,11 @@ export interface GroupLevelCreatePayload {
     durationInMonths: number
 }
 
-export interface GroupLevelUpdatePayload extends GroupLevelCreatePayload {
-    id: string
+/** `PUT /group-level/{id}` tanasi — `name` va `orderNumber` bu yerda YO'Q. */
+export interface GroupLevelUpdatePayload {
+    lessonCount: number
+    durationInMonths: number
+    monthlyFee: number
 }
 
 function parsePositiveNumber(raw: string): number {
@@ -35,7 +39,8 @@ export function toCreateGroupLevelPayload(values: GroupLevelFormInput): GroupLev
 
 export function toUpdateGroupLevelPayload(values: GroupLevelFormInput): GroupLevelUpdatePayload {
     return {
-        id: values.id ?? '',
-        ...toCreateGroupLevelPayload(values),
+        lessonCount: parsePositiveNumber(values.lessonCount),
+        durationInMonths: parsePositiveNumber(values.durationInMonths),
+        monthlyFee: parsePositiveNumber(values.monthlyFee),
     }
 }
