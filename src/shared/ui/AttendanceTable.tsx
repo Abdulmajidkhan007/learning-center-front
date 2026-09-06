@@ -18,7 +18,7 @@ interface AttendanceDraftLike {
     lesson: {
         id: string
         lessonDate?: string
-        lessonNumber?: number | string
+        title?: number | string
     }
     statuses: Record<string, AttendanceStatus>
     reasons: Record<string, string | undefined>
@@ -111,7 +111,7 @@ export function AttendanceTable({
                                     {formatDate(draft.lesson.lessonDate)}
                                 </span>
                                 <span className="block font-mono text-[0.62rem] text-fg-faint">
-                                    {t('attendance.lessonNumber', { number: draft.lesson.lessonNumber ?? '' })}
+                                    {t('attendance.lessonNumber', { number: draft.lesson.title ?? '' })}
                                 </span>
                             </th>
                         )}

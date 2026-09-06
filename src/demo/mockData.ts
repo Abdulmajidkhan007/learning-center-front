@@ -82,12 +82,12 @@ export const groupRoster: Record<string, string[]> = {
     g4: ['s4', 's5'],
 }
 
-// Backend `lessonName` va `lessonNumber` ni ALOHIDA maydon qilib berdi:
+// Backend ikkita alohida maydon beradi: `topic` — mavzu, `title` — tartib raqami:
 // jadvalda nom, o'qituvchi panelidagi "{{number}}-dars" matnida esa raqam.
 export const lessons: LessonDto[] = [
-    { id: 'l1', lessonNumber: '12', lessonName: 'Unit 12 — Past perfect', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
-    { id: 'l2', lessonNumber: '13', lessonName: 'Unit 13 — Reported speech', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
-    { id: 'l3', lessonNumber: '14', lessonName: 'Unit 14 — Conditionals', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
+    { id: 'l1', title: '12', topic: 'Unit 12 — Past perfect', lessonDate: '2026-08-03T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l2', title: '13', topic: 'Unit 13 — Reported speech', lessonDate: '2026-08-05T09:00:00', isComplete: true, group: groups[0], teacherDto: teachers[0] },
+    { id: 'l3', title: '14', topic: 'Unit 14 — Conditionals', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
 ]
 
 export const invoices: InvoiceDto[] = [

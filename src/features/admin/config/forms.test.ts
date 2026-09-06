@@ -123,30 +123,30 @@ describe('lessons form config', () => {
         expect(groupField?.optionsSource).toBe('groups')
     })
 
-    // LessonUpdateDto faqat `lessonName` ni oladi — guruhni almashtirib bo'lmaydi.
+    // LessonUpdateDto faqat `topic` ni oladi — guruhni almashtirib bo'lmaydi.
     it('tahrirlashda guruh maydoni ko’rsatilmaydi', () => {
-        expect(fieldsFor('edit').map((field) => field.key)).toEqual(['lessonName'])
+        expect(fieldsFor('edit').map((field) => field.key)).toEqual(['topic'])
     })
 
     it('create payload LessonCreateDto shaklida', () => {
-        expect(config.buildCreatePayload({ groupId: 'g1', lessonName: 'Unit 3' })).toEqual({
+        expect(config.buildCreatePayload({ groupId: 'g1', topic: 'Unit 3' })).toEqual({
             groupId: 'g1',
-            lessonName: 'Unit 3',
+            topic: 'Unit 3',
         })
     })
 
     it('update payload faqat nomni yuboradi', () => {
-        expect(config.buildUpdatePayload({ groupId: 'g1', lessonName: 'Unit 3' })).toEqual({
-            lessonName: 'Unit 3',
+        expect(config.buildUpdatePayload({ groupId: 'g1', topic: 'Unit 3' })).toEqual({
+            topic: 'Unit 3',
         })
     })
 
     it('tahrirlashda guruh id si qatordan olinadi', () => {
         const row: AdminRow = { id: 'l1', group: { id: 'g7', name: 'Beginners A' } }
-        expect(config.getInitialValues(row)).toEqual({ groupId: 'g7', lessonName: '' })
+        expect(config.getInitialValues(row)).toEqual({ groupId: 'g7', topic: '' })
     })
 
     it('yangi dars uchun bo’sh forma beradi', () => {
-        expect(config.getInitialValues(null)).toEqual({ groupId: '', lessonName: '' })
+        expect(config.getInitialValues(null)).toEqual({ groupId: '', topic: '' })
     })
 })

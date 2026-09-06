@@ -54,7 +54,7 @@ export function AttendancePage() {
     // xuddi tahrirlanayotgan yozuvniki bilan bir xil, shuning uchun jadval
     // uni o'sha ustunning o'zida ko'rsatadi (yangi ustun qo'shilmaydi).
     const effectiveActiveLesson: LessonDto | null = editingColumn
-        ? { id: editingColumn.lessonId, lessonName: editingColumn.lessonTitle, lessonDate: editingColumn.date }
+        ? { id: editingColumn.lessonId, topic: editingColumn.lessonTitle, lessonDate: editingColumn.date }
         : activeLesson
 
     const editingInitial = useMemo<AttendanceDraftInitial | null>(() => {

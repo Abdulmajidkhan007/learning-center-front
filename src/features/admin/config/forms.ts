@@ -158,10 +158,10 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
     },
 
     lessons: {
-        // `LessonCreateDto{groupId, lessonName}` va `LessonUpdateDto{lessonName}`:
+        // `LessonCreateDto{groupId, topic}` va `LessonUpdateDto{topic}`:
         // guruh faqat yaratishda tanlanadi, keyin uni almashtirib bo'lmaydi.
         fields: (mode) => {
-            const name: FormField = { key: 'lessonName', labelKey: 'field.lessonName', type: 'text' }
+            const name: FormField = { key: 'topic', labelKey: 'field.lessonName', type: 'text' }
             if (mode === 'edit') return [name]
             return [
                 { key: 'groupId', labelKey: 'field.groupName', type: 'select', optionsSource: 'groups' },
@@ -171,17 +171,17 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
         getInitialValues(row) {
             return {
                 groupId: row?.group?.id ?? '',
-                lessonName: row?.lessonName ?? '',
+                topic: row?.topic ?? '',
             }
         },
         buildCreatePayload(values) {
             return {
                 groupId: values.groupId,
-                lessonName: values.lessonName,
+                topic: values.topic,
             }
         },
         buildUpdatePayload(values) {
-            return { lessonName: values.lessonName }
+            return { topic: values.topic }
         },
     },
 }
