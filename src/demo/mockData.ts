@@ -3,7 +3,9 @@ import type {
     BranchDto,
     FullGroupDto,
     GroupDto,
+    GroupLevelDto,
     InvoiceDto,
+    LeadDto,
     OrganizationDto,
     LessonDto,
     StudentDto,
@@ -104,6 +106,62 @@ export const branches: BranchDto[] = [
     { id: 'b1', name: 'Chilonzor', address: 'Chilonzor 9, Toshkent' },
     { id: 'b2', name: 'Yunusobod', address: 'Amir Temur 108, Toshkent' },
     { id: 'b3', name: 'Samarqand', address: 'Registon 4, Samarqand' },
+]
+
+export const groupLevels: GroupLevelDto[] = [
+    { id: 'lvl-a1', name: 'A1 Beginner', lessonCount: 16, orderNumber: 1, durationInMonths: 3, monthlyFee: 400000 },
+    { id: 'lvl-a2', name: 'A2 Elementary', lessonCount: 20, orderNumber: 2, durationInMonths: 4, monthlyFee: 450000 },
+    { id: 'lvl-b1', name: 'B1 Intermediate', lessonCount: 24, orderNumber: 3, durationInMonths: 4, monthlyFee: 500000 },
+    { id: 'lvl-b2', name: 'B2 Upper-Intermediate', lessonCount: 24, orderNumber: 4, durationInMonths: 5, monthlyFee: 550000 },
+]
+
+export const leads: LeadDto[] = [
+    {
+        id: 'ld1',
+        fullName: 'Jasur Salimov',
+        phone: '+998 90 123 45 67',
+        status: 'NEW',
+        source: 'INSTAGRAM',
+        preferredCourse: groupLevels[0],
+        createdAt: '2026-08-01T10:00:00',
+    },
+    {
+        id: 'ld2',
+        fullName: 'Madina Umarova',
+        phone: '+998 91 234 56 78',
+        status: 'NEW',
+        source: 'TELEGRAM',
+        preferredCourse: groupLevels[1],
+        createdAt: '2026-08-02T11:30:00',
+    },
+    {
+        id: 'ld3',
+        fullName: 'Sardor Aliyev',
+        phone: '+998 93 345 67 89',
+        status: 'CALL_LATER',
+        source: 'FACEBOOK',
+        preferredCourse: groupLevels[2],
+        callAt: '2026-08-15T15:00:00',
+        createdAt: '2026-08-03T14:20:00',
+    },
+    {
+        id: 'ld4',
+        fullName: 'Nigora Abdullayeva',
+        phone: '+998 94 456 78 90',
+        status: 'ENROLLED',
+        source: 'INSTAGRAM',
+        preferredCourse: groupLevels[1],
+        createdAt: '2026-08-04T09:10:00',
+    },
+    {
+        id: 'ld5',
+        fullName: 'Bobur Rakhimov',
+        phone: '+998 97 567 89 01',
+        status: 'REJECTED',
+        source: 'TELEGRAM',
+        preferredCourse: groupLevels[0],
+        createdAt: '2026-08-05T16:45:00',
+    },
 ]
 
 export const attendance: AttendanceDto[] = [
