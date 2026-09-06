@@ -163,7 +163,7 @@ export function TeacherDashboardPage() {
                     groupName={group?.name}
                     isPending={startLesson.isPending}
                     error={startLesson.error}
-                    onSubmit={(lessonName) => startLesson.mutate({ groupId: selectedGroupId, lessonName })}
+                    onSubmit={(topic) => startLesson.mutate({ groupId: selectedGroupId, topic })}
                     onClose={() => setIsLessonModalOpen(false)}
                 />
             )}

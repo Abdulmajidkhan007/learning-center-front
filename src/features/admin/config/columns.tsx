@@ -42,7 +42,7 @@ export const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
         { key: 'status', labelKey: 'field.status', render: (row) => <GroupStatusBadge status={row.status} /> },
     ],
     lessons: [
-        { key: 'lessonName', labelKey: 'field.lessonName', get: (row) => row.lessonName },
+        { key: 'topic', labelKey: 'field.lessonName', get: (row) => row.topic },
         { key: 'lessonDate', labelKey: 'field.lessonDate', get: (row) => formatDate(row.lessonDate) || undefined },
         { key: 'group', labelKey: 'field.groupName', get: (row) => row.group?.name },
         { key: 'teacher', labelKey: 'field.teacher', get: (row) => row.teacherDto?.userDto?.fullName },

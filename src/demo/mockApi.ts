@@ -233,7 +233,7 @@ export function installMockApi() {
                     const mine = record?.attendanceStudents?.find((entry) => entry.studentId === me?.id)
                     if (!mine) return null
                     return {
-                        title: lesson.lessonName ?? lesson.lessonNumber ?? '',
+                        title: lesson.topic ?? lesson.title ?? '',
                         date: lesson.lessonDate?.slice(0, 10) ?? '',
                         status: mine.status,
                         reason: mine.reason,
@@ -274,7 +274,7 @@ export function installMockApi() {
                     return {
                         // `id` — davomat yozuvining o'zi (PUT shu yerga boradi), dars emas.
                         id: record?.id ?? lesson.id,
-                        lessonTitle: lesson.lessonName ?? lesson.lessonNumber ?? '',
+                        lessonTitle: lesson.topic ?? lesson.title ?? '',
                         date: lesson.lessonDate?.slice(0, 10) ?? '',
                         attendanceStudentMap,
                     }
@@ -598,7 +598,7 @@ export function installMockApi() {
                 const group = db.groups.find((item) => item.id === String(body.groupId))
                 const lesson: LessonDto = {
                     id: nextId('l'),
-                    lessonNumber: String(db.lessons.length + 12),
+                    title: String(db.lessons.length + 12),
                     lessonDate: new Date().toISOString().slice(0, 19),
                     isComplete: false,
                     group,

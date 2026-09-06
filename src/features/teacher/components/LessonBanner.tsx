@@ -13,7 +13,7 @@ export function LessonBanner({ lesson, onMarkAttendance }: { lesson: LessonDto; 
             </span>
             <div className="min-w-40 flex-1">
                 <div className="font-display text-base font-semibold text-fg">
-                    {t('teacher.lessonStarted', { number: lesson.lessonNumber ?? '' })}
+                    {t('teacher.lessonStarted', { number: lesson.title ?? '' })}
                 </div>
                 <div className="mt-0.5 text-sm tabular-nums text-fg-muted">{lesson.lessonDate}</div>
             </div>

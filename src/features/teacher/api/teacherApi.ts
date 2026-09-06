@@ -21,7 +21,7 @@ export function fetchGroupInfo(token: string, groupId: string) {
 
 export interface StartLessonPayload {
     groupId: string
-    lessonName: string
+    topic: string
 }
 
 export function startLesson(token: string, payload: StartLessonPayload) {

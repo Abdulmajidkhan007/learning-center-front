@@ -7,17 +7,17 @@ interface StartLessonModalProps {
     groupName?: string
     isPending: boolean
     error: unknown
-    onSubmit: (lessonName: string) => void
+    onSubmit: (topic: string) => void
     onClose: () => void
 }
 
 export function StartLessonModal({ groupName, isPending, error, onSubmit, onClose }: StartLessonModalProps) {
     const { t } = useT()
-    const [lessonName, setLessonName] = useState('')
+    const [topic, setTopic] = useState('')
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        onSubmit(lessonName)
+        onSubmit(topic)
     }
 
     return (
@@ -29,8 +29,8 @@ export function StartLessonModal({ groupName, isPending, error, onSubmit, onClos
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 <Field label={t('teacher.lessonName')}>
                     <Input
-                        value={lessonName}
-                        onChange={(event) => setLessonName(event.target.value)}
+                        value={topic}
+                        onChange={(event) => setTopic(event.target.value)}
                         placeholder={t('teacher.lessonNamePlaceholder')}
                         autoFocus
                     />
