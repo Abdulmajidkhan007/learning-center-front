@@ -490,6 +490,10 @@ export function installMockApi() {
                 id: nextId('b'),
                 name: body.name,
                 address: body.address,
+                googleMapsUrl: body.googleMapsUrl,
+                latitude: body.latitude,
+                longitude: body.longitude,
+                googlePlaceId: body.googlePlaceId,
             } as BranchDto
             db.branches = [...db.branches, branch]
             return json(branch)

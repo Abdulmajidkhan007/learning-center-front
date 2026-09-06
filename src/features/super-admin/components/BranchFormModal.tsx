@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
 import type { BranchPayload } from '../api/superAdminApi'
+import { isShortGoogleMapsUrl, parseGoogleMapsUrl } from '../lib/googleMapsUrl'
 import type { BranchDto } from '@/shared/types'
 
 interface Props {
@@ -27,6 +28,12 @@ export function BranchFormModal({
     const [organizationId, setOrganizationId] = useState('')
     const [name, setName] = useState(branch?.name ?? '')
     const [address, setAddress] = useState(branch?.address ?? '')
+    const [mapsUrl, setMapsUrl] = useState(branch?.googleMapsUrl ?? '')
+
+    const parsedLocation = useMemo(() => parseGoogleMapsUrl(mapsUrl), [mapsUrl])
+    const hasCoordinates = parsedLocation.latitude !== undefined
+    // Qisqartirilgan havola ichida koordinata yo'q — ochib, to'liq havolani olish kerak.
+    const needsFullUrl = mapsUrl.trim() !== '' && !hasCoordinates && isShortGoogleMapsUrl(mapsUrl)
 
     // Yaratishda tashkilot shart: `BranchCreateDto.organizationId` busiz
     // filial hech qaysi tashkilotga bog'lanmay qoladi.
@@ -39,6 +46,8 @@ export function BranchFormModal({
             name: name.trim(),
             address,
             organizationId: isEdit ? undefined : organizationId,
+            googleMapsUrl: mapsUrl.trim() || undefined,
+            ...parsedLocation,
         })
     }
 
@@ -65,6 +74,25 @@ export function BranchFormModal({
                 </Field>
                 <Field label={t('branch.address')}>
                     <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+                </Field>
+
+                <Field label={t('branch.mapsUrl')}>
+                    <Input
+                        type="url"
+                        placeholder="https://www.google.com/maps/place/..."
+                        value={mapsUrl}
+                        onChange={(e) => setMapsUrl(e.target.value)}
+                    />
+                    <p className="mt-1 text-[0.72rem] leading-snug text-fg-faint">{t('branch.mapsUrlHint')}</p>
+                    {hasCoordinates && (
+                        <p className="mt-1 text-[0.72rem] leading-snug text-fg-muted">
+                            {t('branch.mapsUrlParsed', {
+                                latitude: String(parsedLocation.latitude),
+                                longitude: String(parsedLocation.longitude),
+                            })}
+                        </p>
+                    )}
+                    {needsFullUrl && <ErrorBox>{t('branch.mapsUrlShort')}</ErrorBox>}
                 </Field>
 
                 {isEdit && (

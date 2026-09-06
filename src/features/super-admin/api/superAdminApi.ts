@@ -49,6 +49,11 @@ export interface BranchPayload {
     address?: string
     /** Faqat yaratishda: qaysi tashkilotga tegishli. */
     organizationId?: string
+    /** Administrator nusxalab qo'ygan Google Maps havolasi. */
+    googleMapsUrl?: string
+    latitude?: number
+    longitude?: number
+    googlePlaceId?: string
 }
 
 export function createBranch(token: string, body: BranchPayload) {
