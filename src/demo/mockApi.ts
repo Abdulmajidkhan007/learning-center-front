@@ -2,9 +2,11 @@ import {
     attendance,
     branches,
     fullGroup,
+    groupLevels,
     groupRoster,
     groups,
     invoices,
+    leads,
     lessons,
     organizations,
     students,
@@ -15,8 +17,11 @@ import type {
     AttendanceDto,
     BranchDto,
     GroupDto,
+    GroupLevelDto,
     InvoiceDto,
     InvoiceStatus,
+    LeadDto,
+    LeadStatus,
     LessonDto,
     OrganizationDto,
     StudentDto,
@@ -54,6 +59,8 @@ const db = {
     invoices: [...invoices] as InvoiceDto[],
     organizations: [...organizations] as OrganizationDto[],
     branches: [...branches] as BranchDto[],
+    groupLevels: [...groupLevels] as GroupLevelDto[],
+    leads: [...leads] as LeadDto[],
 }
 
 /**
@@ -122,18 +129,28 @@ export function setDemoRole(role: string) {
     currentRole = role
 }
 
+/** Testing helper: allows reinstalling mock in test runners. */
+export function resetMockApiInstalledFlag() {
+    installed = false
+}
+
 /** `fetch` ni bir marta almashtiradi (qayta chaqirilsa hech narsa qilmaydi). */
 export function installMockApi() {
     if (installed) return
     installed = true
 
-    const original = window.fetch.bind(window)
+    const fetchImpl = typeof window !== 'undefined' ? window.fetch : globalThis.fetch
+    const original = fetchImpl.bind(typeof window !== 'undefined' ? window : globalThis)
 
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const mockFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
         const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
         if (!raw.includes('/api/v1/')) return original(input as RequestInfo, init)
 
-        const url = new URL(raw, window.location.origin)
+        const origin =
+            typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null'
+                ? window.location.origin
+                : 'http://localhost'
+        const url = new URL(raw, origin)
         const path = url.pathname.replace('/api/v1', '')
         const method = (init?.method ?? 'GET').toUpperCase()
         const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {}
@@ -285,6 +302,167 @@ export function installMockApi() {
             return updated ? json(updated) : json({ message: 'Attendance not found' }, 404)
         }
 
+        // --- leads ---
+        if (path === '/leads' && method === 'GET') {
+            const status = url.searchParams.get('status')
+            const rows = status
+                ? db.leads.filter((lead) => lead.status === status)
+                : db.leads
+            return page(rows as unknown as Row[], url)
+        }
+        if (path === '/leads' && method === 'POST') {
+            const level = db.groupLevels.find((item) => item.id === String(body.preferredCourse))
+            const newLead: LeadDto = {
+                id: nextId('ld'),
+                fullName: String(body.fullName ?? ''),
+                phone: String(body.phone ?? ''),
+                status: 'NEW',
+                source: body.source as LeadDto['source'],
+                preferredCourse: level,
+                createdAt: new Date().toISOString(),
+            }
+            db.leads = [newLead, ...db.leads]
+            return json(newLead)
+        }
+        if (path.startsWith('/leads/') && method === 'PUT') {
+            const id = path.slice('/leads/'.length)
+            const level = body.preferredCourse
+                ? db.groupLevels.find((item) => item.id === String(body.preferredCourse))
+                : undefined
+            db.leads = db.leads.map((lead) => {
+                if (lead.id !== id) return lead
+                return {
+                    ...lead,
+                    fullName: body.fullName !== undefined ? String(body.fullName) : lead.fullName,
+                    phone: body.phone !== undefined ? String(body.phone) : lead.phone,
+                    status: (body.status as LeadStatus) ?? lead.status,
+                    source: body.source ? (body.source as LeadDto['source']) : lead.source,
+                    preferredCourse: level ?? lead.preferredCourse,
+                    callAt: body.callAt !== undefined ? String(body.callAt) : lead.callAt,
+                    updatedAt: new Date().toISOString(),
+                }
+            })
+            const updated = db.leads.find((lead) => lead.id === id)
+            return updated ? json(updated) : json({ message: 'Lead not found' }, 404)
+        }
+        if (path.startsWith('/leads/') && path.endsWith('/enroll') && method === 'POST') {
+            const id = path.slice('/leads/'.length, -'/enroll'.length)
+            db.leads = db.leads.map((lead) => (lead.id === id ? { ...lead, status: 'ENROLLED' } : lead))
+            const updated = db.leads.find((lead) => lead.id === id)
+            return updated ? json(updated) : json({ message: 'Lead not found' }, 404)
+        }
+        if (path.startsWith('/leads/') && path.endsWith('/reject') && method === 'POST') {
+            const id = path.slice('/leads/'.length, -'/reject'.length)
+            db.leads = db.leads.map((lead) => (lead.id === id ? { ...lead, status: 'REJECTED' } : lead))
+            const updated = db.leads.find((lead) => lead.id === id)
+            return updated ? json(updated) : json({ message: 'Lead not found' }, 404)
+        }
+        if (path.startsWith('/leads/') && path.endsWith('/callLater') && method === 'PATCH') {
+            const id = path.slice('/leads/'.length, -'/callLater'.length)
+            const callAtParam = url.searchParams.get('callAt') ?? undefined
+            db.leads = db.leads.map((lead) =>
+                lead.id === id ? { ...lead, status: 'CALL_LATER', callAt: callAtParam } : lead
+            )
+            const updated = db.leads.find((lead) => lead.id === id)
+            return updated ? json(updated) : json({ message: 'Lead not found' }, 404)
+        }
+        if (path.startsWith('/leads/') && method === 'DELETE') {
+            const id = path.slice('/leads/'.length)
+            db.leads = db.leads.filter((lead) => lead.id !== id)
+            return noContent()
+        }
+
+        // --- group-level ---
+        if (path === '/group-level/names' && method === 'GET') {
+            return json(db.groupLevels.map((gl) => ({ id: gl.id, name: gl.name })))
+        }
+        if (path === '/group-level' && method === 'GET') {
+            return json(db.groupLevels)
+        }
+        if (path === '/group-level' && method === 'POST') {
+            const level: GroupLevelDto = {
+                id: nextId('lvl'),
+                name: String(body.name ?? ''),
+                lessonCount: Number(body.lessonCount ?? 0),
+                orderNumber: db.groupLevels.length + 1,
+                durationInMonths: Number(body.durationInMonths ?? 0),
+                monthlyFee: Number(body.monthlyFee ?? 0),
+            }
+            db.groupLevels = [...db.groupLevels, level]
+            return json(level)
+        }
+        if (path === '/group-level' && method === 'PUT') {
+            // Tartibni yangilash: { levels: [{ id, orderNumber }] }
+            const levels = body.levels as Array<{ id: string; orderNumber: number }> | undefined
+            if (Array.isArray(levels)) {
+                const orderMap = new Map(levels.map((item) => [item.id, item.orderNumber]))
+                db.groupLevels = db.groupLevels
+                    .map((gl) => (orderMap.has(gl.id) ? { ...gl, orderNumber: orderMap.get(gl.id)! } : gl))
+                    .sort((a, b) => a.orderNumber - b.orderNumber)
+            }
+            return json(db.groupLevels)
+        }
+        if (path.startsWith('/group-level/') && method === 'PUT') {
+            const id = path.slice('/group-level/'.length)
+            db.groupLevels = db.groupLevels.map((gl) => {
+                if (gl.id !== id) return gl
+                return {
+                    ...gl,
+                    ...(body.name !== undefined ? { name: String(body.name) } : {}),
+                    ...(body.lessonCount !== undefined ? { lessonCount: Number(body.lessonCount) } : {}),
+                    ...(body.durationInMonths !== undefined ? { durationInMonths: Number(body.durationInMonths) } : {}),
+                    ...(body.monthlyFee !== undefined ? { monthlyFee: Number(body.monthlyFee) } : {}),
+                }
+            })
+            const updated = db.groupLevels.find((gl) => gl.id === id)
+            return updated ? json(updated) : json({ message: 'Group level not found' }, 404)
+        }
+        if (path.startsWith('/group-level/') && method === 'DELETE') {
+            const id = path.slice('/group-level/'.length)
+            db.groupLevels = db.groupLevels.filter((gl) => gl.id !== id)
+            return noContent()
+        }
+
+        // --- analytics ---
+        if (path.startsWith('/analytics/') && method === 'GET') {
+            const category = path.slice('/analytics/'.length)
+            switch (category) {
+                case 'student':
+                    return json({
+                        studentCount: db.students.length,
+                        studentsAddedInMonth: 3,
+                    })
+                case 'teacher':
+                    return json({
+                        teacherCount: db.teachers.length,
+                        teachersAddedInMonth: 1,
+                    })
+                case 'lead':
+                    return json({
+                        leadCount: db.leads.length,
+                        leadCountInAMonth: 5,
+                    })
+                case 'invoice': {
+                    const totalAmount = db.invoices.reduce((sum, inv) => sum + (inv.amount ?? 0), 0)
+                    return json({
+                        invoiceAmount: totalAmount,
+                        invoiceAmountInAMonth: 1050000,
+                    })
+                }
+                case 'enrollment':
+                    return json({
+                        enrollmentCount: Object.values(groupRoster).reduce((sum, ids) => sum + ids.length, 0),
+                        enrollmentCountInAMonth: 4,
+                    })
+                case 'branch':
+                    return json({
+                        branchCount: db.branches.length,
+                    })
+                default:
+                    return json({ message: `Unknown analytics category: ${category}` }, 404)
+            }
+        }
+
         // --- super-admin: tashkilotlar va filiallar ---
         if (path === '/organizations' && method === 'GET') {
             return page(db.organizations as unknown as Row[], url)
@@ -386,8 +564,15 @@ export function installMockApi() {
             return noContent()
         }
 
-        // --- generik CRUD: /student, /teacher, /group, /lesson ---
+        // Profil saqlash `PUT /user/{id}` orqali ketadi — demo'da shunchaki
+        // yangi qiymatni qaytaramiz.
         const [, resource, tail] = path.split('/')
+        if (resource === 'user' && method === 'PUT') {
+            Object.assign(demoUser, body)
+            return json(demoUser)
+        }
+
+        // --- generik CRUD: /student, /teacher, /group, /lesson ---
         const table = {
             student: 'students',
             teacher: 'teachers',
@@ -427,13 +612,6 @@ export function installMockApi() {
             return json(created)
         }
 
-        // Profil saqlash `PUT /user/{id}` orqali ketadi — demo'da shunchaki
-        // yangi qiymatni qaytaramiz.
-        if (resource === 'user' && method === 'PUT') {
-            Object.assign(demoUser, body)
-            return json(demoUser)
-        }
-
         if (method === 'PUT' && tail) {
             const rows = db[table] as unknown as Row[]
             const index = rows.findIndex((row) => row.id === tail)
@@ -450,6 +628,9 @@ export function installMockApi() {
 
         return json({ message: `No mock for ${method} ${path}` }, 405)
     }
+
+    if (typeof window !== 'undefined') window.fetch = mockFetch
+    if (typeof globalThis !== 'undefined') globalThis.fetch = mockFetch
 }
 
 /**
