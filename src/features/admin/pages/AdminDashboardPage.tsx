@@ -140,7 +140,14 @@ export function AdminDashboardPage() {
                     token={session.token}
                     theme={theme}
                     toggleTheme={toggleTheme}
-                    secondary={<AdminTabStrip entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />}
+                    secondary={
+                        <AdminTabStrip
+                            entities={visibleEntities}
+                            activeTab={activeTab}
+                            onTabChange={changeTab}
+                            links={sidebarLinks}
+                        />
+                    }
                 >
                     <StatsRow entities={visibleEntities} counts={counts} />
 

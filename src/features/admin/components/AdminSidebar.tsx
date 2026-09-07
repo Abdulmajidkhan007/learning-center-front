@@ -3,17 +3,18 @@ import type { TranslationKey } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
 import type { EntityConfig, EntityKey } from '../types'
 
-interface AdminNavProps {
-    entities: EntityConfig[]
-    activeTab: EntityKey
-    onTabChange: (tab: EntityKey) => void
-}
-
 /** Sidebarning pastki guruhidagi havola — tab emas, marshrutga o'tadi. */
 export interface AdminSidebarLink {
     key: string
     labelKey: TranslationKey
     onClick: () => void
+}
+
+interface AdminNavProps {
+    entities: EntityConfig[]
+    activeTab: EntityKey
+    onTabChange: (tab: EntityKey) => void
+    links?: AdminSidebarLink[]
 }
 
 interface AdminSidebarProps extends AdminNavProps {
@@ -83,7 +84,7 @@ export function AdminSidebar({ entities, activeTab, onTabChange, links }: AdminS
 }
 
 /** Mobil variant — sarlavha ostidagi tasma. */
-export function AdminTabStrip({ entities, activeTab, onTabChange }: AdminNavProps) {
+export function AdminTabStrip({ entities, activeTab, onTabChange, links }: AdminNavProps) {
     const { t } = useT()
 
     return (
@@ -103,6 +104,21 @@ export function AdminTabStrip({ entities, activeTab, onTabChange }: AdminNavProp
                     {t(entity.pluralKey)}
                 </button>
             ))}
+            {links && links.length > 0 && (
+                <>
+                    <div className="my-auto h-4 w-px shrink-0 bg-border-base" />
+                    {links.map((link) => (
+                        <button
+                            key={link.key}
+                            type="button"
+                            onClick={link.onClick}
+                            className="shrink-0 cursor-pointer rounded-full border border-border-base px-3.5 py-1.5 text-xs whitespace-nowrap text-fg-muted transition-colors hover:bg-surface-hover hover:text-fg"
+                        >
+                            {t(link.labelKey)}
+                        </button>
+                    ))}
+                </>
+            )}
         </div>
     )
 }
