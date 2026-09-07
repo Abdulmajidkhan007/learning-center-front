@@ -208,10 +208,14 @@ export function installMockApi() {
         }
 
         // Kirgan o'quvchining o'z yozuvi. Demo'da "kirgan o'quvchi" —
-        // `demoUser` telefoni bilan mos keladigan yozuv.
+        // `demoUser` telefoni bilan mos keladigan yozuv. Balans va to'lov
+        // holati guruhga bog'liq, shuning uchun `groupId` shart.
         if (path === '/student/me' && method === 'GET') {
             const me = db.students.find((student) => student.userDto?.phone === demoUser.phone)
-            return me ? json(me) : json({ message: 'Student not found' }, 404)
+            if (!me) return json({ message: 'Student not found' }, 404)
+            const groupId = url.searchParams.get('groupId') ?? ''
+            if (!groupId) return json({ message: 'groupId is required' }, 400)
+            return json({ ...me, balance: -300000, status: 'PARTIAL' })
         }
 
         // O'quvchi panelidagi guruh va davomat bloklari — demo'da kirgan

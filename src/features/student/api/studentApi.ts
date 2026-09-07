@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { GroupDto, MyAttendanceDto, StudentBalanceDto, StudentDto } from '@/shared/types'
+import type { GroupDto, MyAttendanceDto, StudentDto } from '@/shared/types'
 
 const GROUP_ENDPOINT = '/group'
 const ATTENDANCE_ENDPOINT = '/attendance'
@@ -14,8 +14,8 @@ const STUDENT_ENDPOINT = '/student'
  * 403 qaytarardi, ya'ni blok jimgina bo'sh qolardi. Backend `/student/me`
  * ni qo'shgach, o'sha vaqtinchalik yechim olib tashlandi.
  */
-export function fetchMyStudent(token: string) {
-    return apiFetch<StudentDto>(`${STUDENT_ENDPOINT}/me`, { token })
+export function fetchMyStudent(token: string, groupId: string) {
+    return apiFetch<StudentDto>(`${STUDENT_ENDPOINT}/me`, { token, params: { groupId } })
 }
 
 /**
@@ -41,14 +41,4 @@ export async function fetchMyAttendance(
             params: { previousMonths },
         })) ?? []
     )
-}
-
-/**
- * O'quvchining balansi.
- *
- * Endpoint hali backendda yo'q — bu funksiya hozircha hech qayerdan
- * chaqirilmaydi (`useMyBalance` ga qarang). Endpoint kelganda tayyor turadi.
- */
-export function fetchMyBalance(token: string) {
-    return apiFetch<StudentBalanceDto>(`${STUDENT_ENDPOINT}/my/balance`, { token })
 }

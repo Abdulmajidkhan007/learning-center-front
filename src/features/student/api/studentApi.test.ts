@@ -21,16 +21,16 @@ describe('fetchMyStudent', () => {
     it('o‘quvchining o‘z yozuvini `/student/me` dan oladi', async () => {
         const fetchMock = mockFetch('{"id":"st-1","parentPhone":"+998901112233"}')
 
-        const student = await fetchMyStudent('fake-token')
+        const student = await fetchMyStudent('fake-token', 'g1')
 
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/student/me')
+        expect(String(fetchMock.mock.calls[0][0])).toBe('/api/v1/student/me?groupId=g1')
         expect(student?.id).toBe('st-1')
     })
 
     it('telefon raqamini so‘rov parametriga qo‘shmaydi', async () => {
         const fetchMock = mockFetch('{"id":"st-1"}')
 
-        await fetchMyStudent('fake-token')
+        await fetchMyStudent('fake-token', 'g1')
 
         expect(String(fetchMock.mock.calls[0][0])).not.toContain('phone')
     })

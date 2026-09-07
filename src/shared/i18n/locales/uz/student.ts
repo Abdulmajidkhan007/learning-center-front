@@ -19,6 +19,9 @@ export const student = {
     'student.balance': 'Balansim',
     'student.balanceHint':
         'Manfiy son — qarzingiz borligini bildiradi. Nol — balans toza. Musbat son — sizda avans bor.',
+    'student.paymentStatus.UNPAID': 'To‘lanmagan',
+    'student.paymentStatus.PARTIAL': 'Qisman to‘langan',
+    'student.paymentStatus.PAID': 'To‘langan',
 } as const
 
 export type StudentKeys = keyof typeof student

@@ -4,8 +4,9 @@ import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useMe } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
-import { AppShell, EmptyState, ErrorBox, Eyebrow, Panel, PendingBackend } from '@/shared/ui'
+import { AppShell, EmptyState, ErrorBox, Eyebrow, Panel } from '@/shared/ui'
 import { AttendanceList, type MonthOption } from '../components/AttendanceList'
+import { BalanceCard } from '../components/BalanceCard'
 import { GroupCard } from '../components/GroupCard'
 import { GroupPicker } from '../components/GroupPicker'
 import { ProfileCard } from '../components/ProfileCard'
@@ -16,10 +17,9 @@ import { useMyStudentRecord } from '../hooks/useMyStudentRecord'
 /**
  * O'quvchi paneli.
  *
- * Balans bloki hali `PendingBackend` bilan bo'sh turibdi: `GET
- * /student/my/balance` backendda hali yo'q (`docs/backend-notes.md` ga
- * qarang). Tip va hook (`useMyBalance`) tayyor — endpoint kelganda faqat
- * ulash qoladi.
+ * Balans TANLANGAN GURUHGA tegishli: backend uni `Enrollment` dan
+ * hisoblaydi, ya'ni har bir guruh uchun alohida. Guruh almashtirilsa
+ * balans ham almashadi.
  */
 export function StudentDashboardPage() {
     const { t } = useT()
@@ -32,7 +32,6 @@ export function StudentDashboardPage() {
     const [month, setMonth] = useState<MonthOption>('1')
 
     const { data: me, isLoading, error } = useMe(session.token)
-    const { data: student } = useMyStudentRecord(session.token)
 
     const groupsQuery = useMyGroups(session.token)
     const groups = useMemo(() => groupsQuery.data ?? [], [groupsQuery.data])
@@ -44,6 +43,7 @@ export function StudentDashboardPage() {
         : (groups[0]?.id ?? '')
     const selectedGroup = groups.find((group) => group.id === selectedGroupId)
 
+    const { data: student, error: studentError } = useMyStudentRecord(session.token, selectedGroupId)
     const attendanceQuery = useMyAttendance(session.token, selectedGroupId, Number(month))
 
     return (
@@ -69,7 +69,7 @@ export function StudentDashboardPage() {
 
                 {!isLoading && me && <ProfileCard user={me} student={student ?? null} />}
 
-                {!isLoading && me && !student && (
+                {!isLoading && me && selectedGroupId !== '' && studentError != null && (
                     <div className="mb-5">
                         <EmptyState title={t('student.notFound')} description={t('student.notFoundHint')} />
                     </div>
@@ -115,19 +115,7 @@ export function StudentDashboardPage() {
                     )}
                 </Panel>
 
-                <Panel>
-                    <div className="mb-1 flex items-center gap-2">
-                        <Eyebrow>{t('student.balance')}</Eyebrow>
-                        <span
-                            aria-hidden="true"
-                            className="flex size-4 items-center justify-center rounded-full border border-border-base font-mono text-[0.6rem] text-fg-faint"
-                        >
-                            ?
-                        </span>
-                    </div>
-                    <p className="mt-1 mb-4 text-sm text-fg-muted">{t('student.balanceHint')}</p>
-                    <PendingBackend />
-                </Panel>
+                <BalanceCard student={student ?? null} hasGroup={Boolean(selectedGroup)} />
             </div>
         </AppShell>
     )

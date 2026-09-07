@@ -567,9 +567,10 @@ allaqachon shunday qilingan.
 **2026-09-07: qo'shildi** (`StudentController.getMe`). Frontend o'shanga
 o'tkazildi, `/student/phone` orqali qidirish olib tashlandi.
 
-Bitta narsa qoldi: javobdagi `StudentDto` da **balans yo'q**
-(`id`, `userDto`, `parentPhone`). O'quvchi panelidagi balans bloki hali
-ham bo'sh turibdi — qarang: quyidagi balans bo'limi.
+**2026-09-07: balans ham qo'shildi.** `StudentDto` endi `balance` va
+`status` (`UNPAID`/`PARTIAL`/`PAID`) qaytaradi, lekin buning uchun
+`?groupId=…` MAJBURIY — balans `Enrollment` dan olinadi, ya'ni har bir
+guruh uchun alohida. Frontend tanlangan guruhni uzatadi.
 
 ### `GET /api/v1/attendance/me` (yoki `/attendance/student/{studentId}`)
 
