@@ -272,8 +272,11 @@ filtr baribir `Origin` ni tekshiradi — shuning uchun to'g'ri qiymat shart.)
 ### 5. 🟠 `/student/phone` ham himoyalanishi kerak
 
 `GET /student/phone?phone=…` istalgan raqam bo'yicha o'quvchi kartasini
-qaytaradi. Frontend undan faqat kirgan foydalanuvchining O'Z raqami bilan
-foydalanadi (o'quvchi paneli), lekin backendda tekshiruv yo'q.
+qaytaradi va backendda tekshiruv yo'q.
+
+**2026-09-07:** frontend endi undan FOYDALANMAYDI — o'quvchi paneli
+`/student/me` ga o'tdi. Ya'ni bu endi bizni to'smaydi, lekin endpoint
+ochiqligicha qolyapti va tuzatilishi kerak.
 
 1-banddagi `@PreAuthorize` ishi qilinganda shu endpoint "o'zi yoki xodim"
 qoidasiga bo'ysunsin.
