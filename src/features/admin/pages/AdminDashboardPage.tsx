@@ -6,6 +6,7 @@ import { useT } from '@/shared/i18n'
 import { GROUP_STATUSES } from '@/shared/types'
 import { Button, ErrorBox, Eyebrow, Input, Pagination, Panel, Select } from '@/shared/ui'
 import { AdminSidebar, AdminTabStrip } from '../components/AdminSidebar'
+import type { AdminSidebarLink } from '../components/AdminSidebar'
 import { AssignStudentsModal } from '../components/AssignStudentsModal'
 import { EntityFormModal } from '../components/EntityFormModal'
 import { EntityTable } from '../components/EntityTable'
@@ -63,6 +64,16 @@ export function AdminDashboardPage() {
 
     const columns = columnConfigs ? columnConfigs.map((column) => column.key) : inferColumns(list.rows)
 
+    const sidebarLinks: AdminSidebarLink[] = [
+        { key: 'group-levels', labelKey: 'groupLevel.title', onClick: () => navigate('/group-levels') },
+        hasLeadPermission && { key: 'leads', labelKey: 'lead.title', onClick: () => navigate('/leads') },
+        hasInvoicePermission && {
+            key: 'payments',
+            labelKey: 'invoice.title',
+            onClick: () => navigate('/payments'),
+        },
+    ].filter((link): link is AdminSidebarLink => Boolean(link))
+
     /** Tab almashganda sahifalash va filtrlarni tozalaymiz — aks holda yangi
      *  bo'limda "3-sahifa, qidiruv: Ali" holati qolib ketadi. */
     function changeTab(tab: EntityKey) {
@@ -112,30 +123,18 @@ export function AdminDashboardPage() {
 
     return (
         <div className="flex min-h-screen bg-surface">
-            <AdminSidebar entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />
+            <AdminSidebar
+                entities={visibleEntities}
+                activeTab={activeTab}
+                onTabChange={changeTab}
+                links={sidebarLinks}
+            />
 
             {/* `min-w-0` shart: busiz keng jadval flex elementni cho'zib yuboradi */}
             <div className="min-w-0 flex-1">
                 <AppShell
                     subtitle={t('admin.role')}
                     onSignOut={signOut}
-                    actions={
-                        <>
-                            <Button variant="purple" size="sm" onClick={() => navigate('/group-levels')}>
-                                {t('groupLevel.title')}
-                            </Button>
-                            {hasLeadPermission && (
-                                <Button variant="purple" size="sm" onClick={() => navigate('/leads')}>
-                                    {t('lead.title')}
-                                </Button>
-                            )}
-                            {hasInvoicePermission && (
-                                <Button variant="purple" size="sm" onClick={() => navigate('/payments')}>
-                                    {t('invoice.title')}
-                                </Button>
-                            )}
-                        </>
-                    }
                     secondary={<AdminTabStrip entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />}
                 >
                     <StatsRow entities={visibleEntities} counts={counts} />
