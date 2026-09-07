@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import type { LeadCreateDto, LeadDto, LeadRejectDto, LeadStatus, LeadUpdateDto } from '@/shared/types'
 import { LEAD_STATUSES, REJECTION_REASONS } from '@/shared/types'
@@ -26,6 +27,7 @@ function asStatus(value?: LeadStatus): LeadStatus { return LEAD_STATUSES.include
 export function LeadsPage() {
     const { token } = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
     const { t } = useT()
     const [search, setSearch] = useState('')
@@ -103,7 +105,7 @@ export function LeadsPage() {
     }
 
     return (
-        <AppShell subtitle={t('lead.title')} onSignOut={signOut} actions={<><Button size="sm" onClick={() => navigate('/')}>{t('common.back')}</Button><Button variant="primary" size="sm" onClick={openCreate}>{t('lead.new')}</Button></>}>
+        <AppShell subtitle={t('lead.title')} onSignOut={signOut} token={token} theme={theme} toggleTheme={toggleTheme} actions={<><Button size="sm" onClick={() => navigate('/')}>{t('common.back')}</Button><Button variant="primary" size="sm" onClick={openCreate}>{t('lead.new')}</Button></>}>
             <div className="mx-auto max-w-[1600px] space-y-5">
                 <Panel className="border-0 bg-linear-to-br from-accent-soft/60 via-surface-card to-surface-card p-5 sm:p-7">
                     <div className="flex flex-wrap items-end justify-between gap-4"><div><Badge tone="accent">{t('lead.eyebrow')}</Badge><h1 className="mt-3 font-display text-3xl font-semibold text-fg">{t('lead.title')}</h1><p className="mt-1 text-sm text-fg-muted">{t('lead.description')}</p></div><div className="rounded-xl border border-border-base bg-surface-card px-4 py-3 text-right"><p className="text-xs text-fg-muted">{t('lead.total')}</p><p className="font-display text-2xl font-semibold text-fg">{total}</p></div></div>

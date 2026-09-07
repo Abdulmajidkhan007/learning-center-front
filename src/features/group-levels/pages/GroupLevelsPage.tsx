@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { useT } from '@/shared/i18n'
 import type { GroupLevelDto } from '@/shared/types'
 import { AppShell, BackIcon, Button, ErrorBox, IconButton, Panel } from '@/shared/ui'
@@ -22,6 +23,7 @@ export function GroupLevelsPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
 
     const [modal, setModal] = useState<{ mode: 'create' | 'edit'; row: GroupLevelDto | null } | null>(null)
@@ -92,6 +94,9 @@ export function GroupLevelsPage() {
         <AppShell
             subtitle={t('groupLevel.title')}
             onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
             actions={
                 <>
                     <IconButton label={t('common.back')} onClick={() => navigate('/')}>

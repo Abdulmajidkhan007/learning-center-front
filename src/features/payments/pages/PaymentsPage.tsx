@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { formatAmount } from '@/shared/lib'
@@ -36,6 +37,7 @@ export function PaymentsPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
 
     const [page, setPage] = useState(0)
@@ -89,6 +91,9 @@ export function PaymentsPage() {
         <AppShell
             subtitle={t('invoice.title')}
             onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
             actions={
                 <>
                     <IconButton label={t('common.back')} onClick={() => navigate('/')}>
