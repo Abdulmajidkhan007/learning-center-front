@@ -30,7 +30,7 @@ export function StudentDashboardPage() {
     const [month, setMonth] = useState<MonthOption>('1')
 
     const { data: me, isLoading, error } = useMe(session.token)
-    const { data: student } = useMyStudentRecord(session.token, me?.phone)
+    const { data: student } = useMyStudentRecord(session.token)
 
     const groupsQuery = useMyGroups(session.token)
     const groups = useMemo(() => groupsQuery.data ?? [], [groupsQuery.data])

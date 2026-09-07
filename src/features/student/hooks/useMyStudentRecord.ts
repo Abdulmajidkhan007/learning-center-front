@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api'
-import { fetchStudentByPhone } from '../api/studentApi'
+import { fetchMyStudent } from '../api/studentApi'
 
 /**
  * Kirgan o'quvchining o'z kartasi.
  *
- * `/auth/me` dan kelgan telefon raqami bo'yicha izlanadi, shuning uchun
- * telefon ma'lum bo'lmaguncha so'rov yuborilmaydi.
+ * `retry: false` — kirgan odam o'quvchi bo'lmasa backend xato qaytaradi,
+ * uni uch marta qayta so'rashning ma'nosi yo'q.
  */
-export function useMyStudentRecord(token: string, phone: string | undefined) {
+export function useMyStudentRecord(token: string) {
     return useQuery({
-        queryKey: queryKeys.myStudentRecord(phone ?? ''),
-        queryFn: () => fetchStudentByPhone(token, phone!),
-        enabled: Boolean(phone),
+        queryKey: queryKeys.myStudentRecord(),
+        queryFn: () => fetchMyStudent(token),
+        retry: false,
         staleTime: 5 * 60_000,
     })
 }

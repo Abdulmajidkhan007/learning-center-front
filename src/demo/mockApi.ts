@@ -207,6 +207,13 @@ export function installMockApi() {
             return json(db.students.filter((student) => student.userDto?.phone === phone))
         }
 
+        // Kirgan o'quvchining o'z yozuvi. Demo'da "kirgan o'quvchi" —
+        // `demoUser` telefoni bilan mos keladigan yozuv.
+        if (path === '/student/me' && method === 'GET') {
+            const me = db.students.find((student) => student.userDto?.phone === demoUser.phone)
+            return me ? json(me) : json({ message: 'Student not found' }, 404)
+        }
+
         // O'quvchi panelidagi guruh va davomat bloklari — demo'da kirgan
         // "o'quvchi" telefon raqami bo'yicha topiladi (haqiqiy backendda esa
         // token orqali).

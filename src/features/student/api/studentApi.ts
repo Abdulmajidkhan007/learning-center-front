@@ -6,17 +6,16 @@ const ATTENDANCE_ENDPOINT = '/attendance'
 const STUDENT_ENDPOINT = '/student'
 
 /**
- * O'quvchini telefon raqami bo'yicha topadi.
+ * Kirgan o'quvchining o'z yozuvi.
  *
- * Nega aynan shu endpoint: o'quvchining o'z `studentId` sini bilishning
- * boshqa yo'li yo'q (`/auth/me` foydalanuvchi id sini beradi, o'quvchi
- * id sini emas). Butun ro'yxatni yuklab, ichidan o'zini qidirish esa
- * boshqalarning ma'lumotini ham yuklab olish demak — shuning uchun
- * bunday qilinmadi.
+ * Ilgari bu ma'lumot `/student/phone` orqali — telefon raqami bo'yicha
+ * QIDIRIB olinardi, chunki o'quvchining `studentId` sini bilishning boshqa
+ * yo'li yo'q edi. U endpoint adminlar uchun mo'ljallangan va o'quvchiga
+ * 403 qaytarardi, ya'ni blok jimgina bo'sh qolardi. Backend `/student/me`
+ * ni qo'shgach, o'sha vaqtinchalik yechim olib tashlandi.
  */
-export async function fetchStudentByPhone(token: string, phone: string): Promise<StudentDto | null> {
-    const found = await apiFetch<StudentDto[]>('/student/phone', { token, params: { phone } })
-    return found?.[0] ?? null
+export function fetchMyStudent(token: string) {
+    return apiFetch<StudentDto>(`${STUDENT_ENDPOINT}/me`, { token })
 }
 
 /**

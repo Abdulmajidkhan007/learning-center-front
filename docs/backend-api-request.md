@@ -562,17 +562,14 @@ Ekranlar tayyor, uchalasi ham hozir bo'sh holat ko'rsatib turibdi.
 Uchalasida ham `@CurrentUser` ishlatilsa bo'ladi — `AuthController` da
 allaqachon shunday qilingan.
 
-### `GET /api/v1/student/me`
+### `GET /api/v1/student/me` — ✅ bajarildi
 
-```java
-@GetMapping("/me")
-public ResponseEntity<StudentDto> me(@CurrentUser User user) { … }
-```
+**2026-09-07: qo'shildi** (`StudentController.getMe`). Frontend o'shanga
+o'tkazildi, `/student/phone` orqali qidirish olib tashlandi.
 
-Hozir frontend `GET /student/phone?phone=…` dan foydalanyapti. Bu ikki
-tomondan yomon: birinchidan, o'z raqamini bilish shart bo'ladi;
-ikkinchidan, o'sha endpoint **himoyalanmagan** va istalgan raqam bo'yicha
-kartani qaytaradi.
+Bitta narsa qoldi: javobdagi `StudentDto` da **balans yo'q**
+(`id`, `userDto`, `parentPhone`). O'quvchi panelidagi balans bloki hali
+ham bo'sh turibdi — qarang: quyidagi balans bo'limi.
 
 ### `GET /api/v1/attendance/me` (yoki `/attendance/student/{studentId}`)
 
