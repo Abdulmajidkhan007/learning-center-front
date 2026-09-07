@@ -1,4 +1,5 @@
 import { useT } from '@/shared/i18n'
+import type { TranslationKey } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
 import type { EntityConfig, EntityKey } from '../types'
 
@@ -8,6 +9,17 @@ interface AdminNavProps {
     onTabChange: (tab: EntityKey) => void
 }
 
+/** Sidebarning pastki guruhidagi havola — tab emas, marshrutga o'tadi. */
+export interface AdminSidebarLink {
+    key: string
+    labelKey: TranslationKey
+    onClick: () => void
+}
+
+interface AdminSidebarProps extends AdminNavProps {
+    links: AdminSidebarLink[]
+}
+
 /**
  * Bo'limlar navigatsiyasi.
  *
@@ -15,7 +27,7 @@ interface AdminNavProps {
  * Ikkita alohida komponent — bitta komponentni CSS bilan ikki xil qilishdan
  * ko'ra shu tushunarliroq va har biri o'z holatida to'g'ri ishlaydi.
  */
-export function AdminSidebar({ entities, activeTab, onTabChange }: AdminNavProps) {
+export function AdminSidebar({ entities, activeTab, onTabChange, links }: AdminSidebarProps) {
     const { t } = useT()
 
     return (
@@ -43,6 +55,22 @@ export function AdminSidebar({ entities, activeTab, onTabChange }: AdminNavProps
                         {t(entity.pluralKey)}
                     </button>
                 ))}
+
+                {links.length > 0 && (
+                    <>
+                        <div className="mx-5 my-3 border-t border-white/10" />
+                        {links.map((link) => (
+                            <button
+                                key={link.key}
+                                type="button"
+                                onClick={link.onClick}
+                                className="cursor-pointer border-l-3 border-l-transparent px-5 py-3 text-left text-sm text-sidebar-fg/65 transition-colors hover:bg-sidebar-fg/8 hover:text-sidebar-fg"
+                            >
+                                {t(link.labelKey)}
+                            </button>
+                        ))}
+                    </>
+                )}
             </nav>
 
             <div className="border-t border-white/10 px-5 pt-4">
