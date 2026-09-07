@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useAttendanceRecords } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
@@ -24,6 +25,7 @@ export function AttendancePage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -100,6 +102,9 @@ export function AttendancePage() {
         <AppShell
             subtitle={t('attendance.title')}
             onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
             actions={
                 <>
                     <SegmentedControl<MonthOption>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import {
@@ -38,6 +39,7 @@ export function SuperAdminDashboardPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
 
     const [tab, setTab] = useState<Tab>('organizations')
     const [page, setPage] = useState(0)
@@ -121,6 +123,9 @@ export function SuperAdminDashboardPage() {
         <AppShell
             subtitle={t('superAdmin.role')}
             onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
             actions={
                 <>
                     <SegmentedControl<Tab>

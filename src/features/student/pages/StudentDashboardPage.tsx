@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useMe } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
@@ -24,6 +25,7 @@ export function StudentDashboardPage() {
     const { t } = useT()
     const { signOut } = useAuth()
     const session = useSession()
+    const { theme, toggleTheme } = useTheme()
 
     // Bo'sh satr = "hali tanlanmagan"; bunda ro'yxatdagi birinchi guruh olinadi.
     const [pickedGroupId, setPickedGroupId] = useState('')
@@ -45,7 +47,13 @@ export function StudentDashboardPage() {
     const attendanceQuery = useMyAttendance(session.token, selectedGroupId, Number(month))
 
     return (
-        <AppShell subtitle={t('student.role')} onSignOut={signOut}>
+        <AppShell
+            subtitle={t('student.role')}
+            onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
+        >
             <div className="mx-auto max-w-2xl">
                 {isLoading && (
                     <Panel className="mb-5 py-8 text-center font-mono text-sm text-fg-faint">

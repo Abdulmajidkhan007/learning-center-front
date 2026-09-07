@@ -26,7 +26,7 @@ export function Badge({
     )
 }
 
-/** Davomat jadvalidagi dumaloq bitta harfli nishon. */
+/** Davomat jadvalidagi kvadrat bitta harfli nishon. */
 export function DotBadge({
     tone = 'neutral',
     title,
@@ -41,7 +41,7 @@ export function DotBadge({
         <span
             title={title}
             className={cn(
-                'inline-flex size-7.5 items-center justify-center rounded-full border font-mono text-sm font-bold shadow-[0_10px_24px_-24px_var(--fg)]',
+                'inline-flex size-7.5 items-center justify-center rounded-md border font-mono text-sm font-bold shadow-[0_10px_24px_-24px_var(--fg)]',
                 badgeToneClasses[tone]
             )}
         >

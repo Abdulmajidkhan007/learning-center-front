@@ -3,6 +3,7 @@ import { StudentDashboardPage } from '@/features/student/pages/StudentDashboardP
 import { SuperAdminDashboardPage } from '@/features/super-admin/pages/SuperAdminDashboardPage'
 import { TeacherDashboardPage } from '@/features/teacher/pages/TeacherDashboardPage'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { useT } from '@/shared/i18n'
 import { AppShell, EmptyState } from '@/shared/ui'
 
@@ -16,6 +17,7 @@ export function RoleDashboard() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
 
     switch (session.role) {
         case 'ADMINISTRATOR':
@@ -28,7 +30,13 @@ export function RoleDashboard() {
             return <SuperAdminDashboardPage />
         default:
             return (
-                <AppShell subtitle={session.role} onSignOut={signOut}>
+                <AppShell
+                    subtitle={session.role}
+                    onSignOut={signOut}
+                    token={session.token}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                >
                     <div className="mx-auto max-w-xl">
                         <EmptyState title={t('pending.title')} description={t('pending.body')} />
                     </div>

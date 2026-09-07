@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useAttendanceRecords } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
@@ -21,6 +22,7 @@ export function TeacherDashboardPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
 
     const [dayFilter, setDayFilter] = useState<DayFilter>('all')
@@ -88,6 +90,9 @@ export function TeacherDashboardPage() {
         <AppShell
             subtitle={t('teacher.role')}
             onSignOut={signOut}
+            token={session.token}
+            theme={theme}
+            toggleTheme={toggleTheme}
             actions={
                 <>
                     <Button variant="purple" size="sm" onClick={openAttendance}>

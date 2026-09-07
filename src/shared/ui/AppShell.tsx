@@ -1,15 +1,13 @@
-import { useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { useT } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
 import { Brand } from './Brand'
-import { IconButton } from './IconButton'
-import { ThemeToggle } from './ThemeToggle'
-import { SettingsIcon, SignOutIcon } from './icons'
+import { ProfileMenu } from './ProfileMenu'
 
 interface AppShellProps {
     subtitle: string
     onSignOut: () => void
+    /** `useMe` uchun — profil menyusi shu bilan o'zining ismi va rasmini yuklaydi. */
+    token: string
     /** Tema va almashtirish funksiyasi. */
     theme?: string
     toggleTheme?: () => void
@@ -33,6 +31,7 @@ interface AppShellProps {
 export function AppShell({
     subtitle,
     onSignOut,
+    token,
     theme,
     toggleTheme,
     actions,
@@ -40,9 +39,6 @@ export function AppShell({
     mainClassName,
     children,
 }: AppShellProps) {
-    const { t } = useT()
-    const navigate = useNavigate()
-
     return (
         <div className="flex min-h-screen flex-col bg-surface">
             <header className="sticky top-0 z-30 border-b border-border-base bg-surface-card/82 shadow-[0_18px_55px_-45px_var(--fg)] backdrop-blur-xl">
@@ -50,13 +46,7 @@ export function AppShell({
                     <Brand subtitle={subtitle} className="min-w-0 [&>span:last-child]:truncate" />
 
                     <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                        <IconButton label={t('nav.settings')} onClick={() => navigate('/settings')}>
-                            <SettingsIcon />
-                        </IconButton>
-                        <IconButton label={t('common.signOut')} onClick={onSignOut}>
-                            <SignOutIcon />
-                        </IconButton>
+                        <ProfileMenu token={token} theme={theme} toggleTheme={toggleTheme} onSignOut={onSignOut} />
                     </div>
                 </div>
 

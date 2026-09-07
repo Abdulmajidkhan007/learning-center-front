@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
+import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { GROUP_STATUSES } from '@/shared/types'
@@ -33,6 +34,7 @@ export function AdminDashboardPage() {
     const { t } = useT()
     const session = useSession()
     const { signOut } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
 
     const { visibleEntities, hasLeadPermission, hasInvoicePermission } = useAdminPermissions()
@@ -135,6 +137,9 @@ export function AdminDashboardPage() {
                 <AppShell
                     subtitle={t('admin.role')}
                     onSignOut={signOut}
+                    token={session.token}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
                     secondary={<AdminTabStrip entities={visibleEntities} activeTab={activeTab} onTabChange={changeTab} />}
                 >
                     <StatsRow entities={visibleEntities} counts={counts} />

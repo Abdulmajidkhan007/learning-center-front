@@ -70,13 +70,15 @@ export function AttendanceTable({
                         </th>
                         {pastColumns.map((column) => {
                             const isEditing = column.lessonId === editingPastLessonId
+                            // Qoralama ustuni bilan bir xil tartib: sana asosiy (tepada),
+                            // dars raqami ikkinchi darajali (pastda).
                             const label = (
                                 <>
-                                    <span className="block text-sm font-semibold text-fg-muted">
-                                        {column.lessonTitle}
-                                    </span>
-                                    <span className="block font-mono text-[0.62rem] tabular-nums text-fg-faint">
+                                    <span className="block text-sm font-semibold tabular-nums text-fg-muted">
                                         {formatDate(column.date)}
+                                    </span>
+                                    <span className="block font-mono text-[0.62rem] text-fg-faint">
+                                        {column.lessonTitle}
                                     </span>
                                 </>
                             )
@@ -84,7 +86,7 @@ export function AttendanceTable({
                                 <th
                                     key={column.lessonId}
                                     className={cn(
-                                        'min-w-25 border-b px-3.5 py-2.5 text-center whitespace-nowrap',
+                                        'min-w-16 border-b px-2 py-1.5 text-center whitespace-nowrap',
                                         isEditing ? 'border-brand bg-brand/10' : 'border-border-base bg-surface'
                                     )}
                                 >
@@ -106,7 +108,7 @@ export function AttendanceTable({
                             )
                         })}
                         {draft && !editingPastLessonId && (
-                            <th className="min-w-28 border-b border-brand bg-brand/10 px-3.5 py-2.5 text-center whitespace-nowrap">
+                            <th className="min-w-18 border-b border-brand bg-brand/10 px-2 py-1.5 text-center whitespace-nowrap">
                                 <span className="block text-sm font-semibold tabular-nums text-fg-muted">
                                     {formatDate(draft.lesson.lessonDate)}
                                 </span>
@@ -144,7 +146,7 @@ export function AttendanceTable({
                                     return (
                                         <td
                                             key={column.lessonId}
-                                            className="border-b border-border-base px-3 py-2 text-center"
+                                            className="border-b border-border-base px-2 py-1.5 text-center"
                                         >
                                             <AttendanceCell
                                                 studentName={student.userDto?.fullName ?? student.id}
@@ -162,7 +164,7 @@ export function AttendanceTable({
                                 return (
                                     <td
                                         key={column.lessonId}
-                                        className="border-b border-border-base px-3 py-2 text-center"
+                                        className="border-b border-border-base px-2 py-1.5 text-center"
                                     >
                                         {/* Xaritada yo'q o'quvchi — katak bo'sh va rangsiz qoladi, bu
                                             "kelmadi" bilan chalkashmasligi kerak. */}
@@ -176,7 +178,7 @@ export function AttendanceTable({
                             })}
 
                             {draft && onStatusChange && !editingPastLessonId && (
-                                <td className="border-b border-border-base px-3 py-2 text-center">
+                                <td className="border-b border-border-base px-2 py-1.5 text-center">
                                     <AttendanceCell
                                         studentName={student.userDto?.fullName ?? student.id}
                                         status={draft.statuses[student.id] ?? 'PRESENT'}
