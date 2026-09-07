@@ -12,12 +12,11 @@ export const queryKeys = {
     entityCount: (entity: string) => ['entity', entity, 'count'] as const,
 
     me: () => ['auth', 'me'] as const,
-    myStudentRecord: () => ['student', 'me'] as const,
+    myStudentRecord: (groupId: string) => ['student', 'me', groupId] as const,
     myGroups: () => ['group', 'my'] as const,
     /** `previousMonths` ham kalitga kiradi — oy almashsa alohida so'rov/keshlanadi. */
     myAttendance: (groupId: string, previousMonths: number) =>
         ['attendance', 'my', groupId, previousMonths] as const,
-    myBalance: () => ['student', 'my-balance'] as const,
 
     teacherOptions: () => ['teacher', 'options'] as const,
     groupOptions: () => ['group', 'options'] as const,

@@ -93,21 +93,24 @@ export interface ChangePasswordPayload {
     confirmPassword: string
 }
 
+/**
+ * O'quvchining to'lov holati bitta guruh bo'yicha (`Enrollment.status`).
+ *
+ * `PARTIAL` — qisman to'langan; ya'ni "to'lamagan" ham, "to'lagan" ham emas.
+ */
+export type EnrollmentPaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID'
+
 export interface StudentDto {
     id: string
     userDto?: UserDto
     parentPhone?: string
-}
-
-/**
- * `GET /student/my/balance` javobi.
- *
- * Manfiy son — o'quvchining qarzi borligini bildiradi, nol — balans toza,
- * musbat son — avans. Endpoint hali backendda yo'q
- * (`docs/backend-api-request.md` ga qarang).
- */
-export interface StudentBalanceDto {
-    balance: number
+    /**
+     * Balans va to'lov holati faqat `GET /student/me?groupId=…` javobida
+     * keladi va BITTA GURUHGA tegishli — boshqa endpointlarda bo'sh bo'ladi.
+     * Manfiy son — qarz (`paidAmount - monthlyFee`).
+     */
+    balance?: number
+    status?: EnrollmentPaymentStatus
 }
 
 export interface TeacherDto {
