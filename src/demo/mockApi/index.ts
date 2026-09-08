@@ -1,14 +1,14 @@
 import { handleAnalytics } from './analytics'
 import { handleAttendance } from './attendance'
 import { handleAuth } from './auth'
+import { handleCrud } from './crud'
 import { handleEnrollments } from './enrollments'
-import { handleGeneric } from './generic'
 import { handleGroupLevels } from './groupLevels'
 import { handleInvoices } from './invoices'
 import { handleLeads } from './leads'
-import { handleOrganizations } from './organizations'
 import { isInstalled, resetMockApiInstalledFlag, setDemoRole, setInstalled } from './state'
 import { handleStudents } from './students'
+import { handleSuperAdmin } from './superAdmin'
 import { handleTeacher } from './teacher'
 
 export { setDemoRole, resetMockApiInstalledFlag }
@@ -61,14 +61,14 @@ export function installMockApi() {
         const analyticsRes = handleAnalytics(path, method)
         if (analyticsRes) return analyticsRes
 
-        const orgsRes = handleOrganizations(path, method, url, body)
-        if (orgsRes) return orgsRes
+        const superAdminRes = handleSuperAdmin(path, method, url, body)
+        if (superAdminRes) return superAdminRes
 
         const invoicesRes = handleInvoices(path, method, url, body)
         if (invoicesRes) return invoicesRes
 
-        const genericRes = handleGeneric(path, method, url, body)
-        if (genericRes) return genericRes
+        const crudRes = handleCrud(path, method, url, body)
+        if (crudRes) return crudRes
 
         return new Response(JSON.stringify({ message: `No mock for ${method} ${path}` }), {
             status: 405,
