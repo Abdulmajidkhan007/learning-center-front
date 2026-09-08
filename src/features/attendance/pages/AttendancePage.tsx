@@ -5,12 +5,13 @@ import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useAttendanceRecords } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
+import { downloadCsv, generateCsv, formatDate, type CsvColumn } from '@/shared/lib'
 import { AppShell, AttendanceTable, Button, EmptyState, ErrorBox, SegmentedControl, type PastLessonColumn } from '@/shared/ui'
 import { DraftBar } from '../components/DraftBar'
 import { useAttendanceDraft, type AttendanceDraftInitial } from '../hooks/useAttendanceDraft'
 import { useGroupStudents } from '../hooks/useGroupStudents'
 import { useSubmitAttendance } from '../hooks/useSubmitAttendance'
-import type { AttendanceStatus, LessonDto } from '@/shared/types'
+import type { AttendanceStatus, LessonDto, StudentDto } from '@/shared/types'
 
 /** Dashboard'dan `navigate('/attendance', { state })` orqali keladigan yuk. */
 interface AttendanceRouteState {
@@ -95,6 +96,74 @@ export function AttendancePage() {
         }
     }
 
+    function handleExportCsv() {
+        if (students.length === 0) return
+
+        const exportColumns: CsvColumn<StudentDto>[] = [
+            {
+                header: t('attendance.student'),
+                accessor: (student) => student.userDto?.fullName || '—',
+            },
+        ]
+
+        const currentDraft = draft.draft
+        const editingPastLessonId =
+            currentDraft && pastColumns.some((column) => column.lessonId === currentDraft.lesson.id)
+                ? currentDraft.lesson.id
+                : null
+
+        pastColumns.forEach((column) => {
+            const isEditingThisCol = column.lessonId === editingPastLessonId
+            const header = column.date
+                ? column.lessonTitle
+                    ? `${formatDate(column.date)} (${column.lessonTitle})`
+                    : formatDate(column.date)
+                : column.lessonTitle || ''
+
+            exportColumns.push({
+                header,
+                accessor: (student: StudentDto) => {
+                    if (isEditingThisCol && currentDraft) {
+                        const status = currentDraft.statuses[student.id] ?? 'PRESENT'
+                        const reason = currentDraft.reasons[student.id]
+                        const statusKey = `attendance.${status}` as 'attendance.PRESENT' | 'attendance.ABSENT' | 'attendance.EXCUSED'
+                        const statusText = t(statusKey)
+                        return reason ? `${statusText} (${reason})` : statusText
+                    }
+                    const entry = column.attendanceMap[student.id]
+                    if (!entry) return ''
+                    const statusKey = `attendance.${entry.status}` as 'attendance.PRESENT' | 'attendance.ABSENT' | 'attendance.EXCUSED'
+                    const statusText = t(statusKey)
+                    return entry.reason ? `${statusText} (${entry.reason})` : statusText
+                },
+            })
+        })
+
+        if (currentDraft && !editingPastLessonId) {
+            const draftHeader = currentDraft.lesson.lessonDate
+                ? `${formatDate(currentDraft.lesson.lessonDate)} (${t('attendance.lessonNumber', { number: currentDraft.lesson.title ?? '' })})`
+                : t('attendance.lessonNumber', { number: currentDraft.lesson.title ?? '' })
+
+            exportColumns.push({
+                header: draftHeader,
+                accessor: (student: StudentDto) => {
+                    const status = currentDraft.statuses[student.id] ?? 'PRESENT'
+                    const reason = currentDraft.reasons[student.id]
+                    const statusKey = `attendance.${status}` as 'attendance.PRESENT' | 'attendance.ABSENT' | 'attendance.EXCUSED'
+                    const statusText = t(statusKey)
+                    return reason ? `${statusText} (${reason})` : statusText
+                },
+            })
+        }
+
+        const groupName = activeLesson?.group?.name || groupId || 'export'
+        const todayStr = formatDate(new Date().toISOString())
+        const filename = `attendance-${groupName}-${todayStr}.csv`
+
+        const csvContent = generateCsv(students, exportColumns)
+        downloadCsv(csvContent, filename)
+    }
+
     const isLoading = studentsQuery.isLoading || recordsQuery.isLoading
     const failure = submit.error ?? studentsQuery.error ?? recordsQuery.error
 
@@ -117,6 +186,9 @@ export function AttendancePage() {
                             { value: '3', label: t('attendance.monthTwoAgo') },
                         ]}
                     />
+                    <Button size="sm" onClick={handleExportCsv} disabled={isLoading || students.length === 0}>
+                        {t('common.exportCsv')}
+                    </Button>
                     <Button size="sm" onClick={() => navigate('/')}>
                         ← {t('attendance.backToDashboard')}
                     </Button>
