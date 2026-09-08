@@ -20,6 +20,7 @@ export const common = {
     'common.somethingWrong': 'Nimadir xato ketdi. Qaytadan urinib ko’ring.',
     'common.back': 'Orqaga',
     'common.notConnected': 'Ulanmagan',
+    'common.exportCsv': 'Excel ga yuklash',
     'nav.home': 'Bosh sahifa',
     'nav.attendance': 'Davomat',
     'nav.settings': 'Sozlamalar',

@@ -4,7 +4,7 @@ import { useAuth, useSession } from '@/app/providers/useAuth'
 import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { formatAmount } from '@/shared/lib'
+import { downloadCsv, generateCsv, formatAmount, formatDate, type CsvColumn } from '@/shared/lib'
 import { INVOICE_STATUSES } from '@/shared/types'
 import {
     AppShell,
@@ -67,6 +67,43 @@ export function PaymentsPage() {
         remove.mutate(invoice.id)
     }
 
+    function handleExportCsv() {
+        if (list.invoices.length === 0) return
+
+        const exportColumns: CsvColumn<InvoiceDto>[] = [
+            {
+                header: t('invoice.number'),
+                accessor: (inv) => inv.invoiceNumber ?? '',
+            },
+            {
+                header: t('invoice.student'),
+                accessor: (inv) => inv.student?.userDto?.fullName ?? '',
+            },
+            {
+                header: t('invoice.amount'),
+                accessor: (inv) => (inv.amount != null ? formatAmount(inv.amount) : ''),
+            },
+            {
+                header: t('invoice.issuedAt'),
+                accessor: (inv) => formatDate(inv.issuedAt),
+            },
+            {
+                header: t('field.status'),
+                accessor: (inv) => (inv.status ? t(`invoice.status.${inv.status}`) : ''),
+            },
+            {
+                header: t('invoice.type'),
+                accessor: (inv) => inv.type ?? '',
+            },
+        ]
+
+        const todayStr = formatDate(new Date().toISOString())
+        const filename = `payments-${todayStr}.csv`
+
+        const csvContent = generateCsv(list.invoices, exportColumns)
+        downloadCsv(csvContent, filename)
+    }
+
     /**
      * Pul qaytarish.
      *
@@ -99,6 +136,9 @@ export function PaymentsPage() {
                     <IconButton label={t('common.back')} onClick={() => navigate('/')}>
                         <BackIcon />
                     </IconButton>
+                    <Button size="sm" onClick={handleExportCsv} disabled={list.isLoading || list.invoices.length === 0}>
+                        {t('common.exportCsv')}
+                    </Button>
                     <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
                         {t('invoice.new')}
                     </Button>
