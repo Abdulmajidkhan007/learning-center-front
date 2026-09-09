@@ -7,11 +7,13 @@ import { useT } from '@/shared/i18n'
 import { downloadCsv, generateCsv, formatAmount, formatDate, type CsvColumn } from '@/shared/lib'
 import { INVOICE_STATUSES } from '@/shared/types'
 import { AppShell, BackIcon, Button, ErrorBox, Eyebrow, IconButton, Pagination, Panel } from '@/shared/ui'
+import { GroupInvoicePanel } from '../components/GroupInvoicePanel'
 import { InvoiceFilters } from '../components/InvoiceFilters'
 import { InvoiceTable } from '../components/InvoiceTable'
 import { NewPaymentModal } from '../components/NewPaymentModal'
 import { TransactionTable } from '../components/TransactionTable'
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations'
+import { useGroupOptions } from '../hooks/useGroupOptions'
 import { useInvoices } from '../hooks/useInvoices'
 import { useStudentOptions } from '../hooks/useStudentOptions'
 import { useTransactionMutations, useTransactions } from '../hooks/useTransactions'
@@ -47,6 +49,7 @@ export function PaymentsPage() {
     const list = useInvoices(session.token, { page, search, status, from, to })
     const transactions = useTransactions(session.token, txPage, search)
     const studentOptions = useStudentOptions(session.token)
+    const groupOptions = useGroupOptions(session.token)
     const invoices = useInvoiceMutations(session.token)
     const payments = useTransactionMutations(session.token)
 
@@ -161,6 +164,14 @@ export function PaymentsPage() {
                     totalPages={list.totalPages}
                     totalElements={list.totalElements}
                     onPageChange={setPage}
+                />
+
+                <GroupInvoicePanel
+                    groupOptions={groupOptions}
+                    isPending={invoices.createForGroup.isPending}
+                    isSuccess={invoices.createForGroup.isSuccess}
+                    error={invoices.createForGroup.error}
+                    onCreate={(groupId) => invoices.createForGroup.mutate(groupId)}
                 />
             </Panel>
 
