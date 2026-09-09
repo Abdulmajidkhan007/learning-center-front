@@ -23,9 +23,8 @@ export function handleStudents(
     if (path === '/student/me' && method === 'GET') {
         const me = db.students.find((student) => student.userDto?.phone === demoUser.phone)
         if (!me) return json({ message: 'Student not found' }, 404)
-        const groupId = url.searchParams.get('groupId') ?? ''
-        if (!groupId) return json({ message: 'groupId is required' }, 400)
-        return json({ ...me, balance: -300000, status: 'PARTIAL' })
+        // Balans butun o'quvchiga tegishli — guruh so'ralmaydi.
+        return json({ ...me, balance: -300000 })
     }
 
     // O'quvchi panelidagi guruh va davomat bloklari — demo'da kirgan

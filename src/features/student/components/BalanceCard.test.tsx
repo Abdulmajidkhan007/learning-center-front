@@ -4,14 +4,13 @@ import { renderWithProviders } from '@/test/renderWithProviders'
 import { BalanceCard } from './BalanceCard'
 import type { StudentDto } from '@/shared/types'
 
-const student: StudentDto = { id: 'st-1', balance: -300000, status: 'PARTIAL' }
+const student: StudentDto = { id: 'st-1', balance: -300000 }
 
 describe('BalanceCard', () => {
-    it('balansni va to‘lov holatini ko‘rsatadi', () => {
+    it('balansni ko‘rsatadi', () => {
         renderWithProviders(<BalanceCard student={student} hasGroup />)
 
         expect(screen.getByText(/300/)).toBeInTheDocument()
-        expect(screen.getByText(/qisman/i)).toBeInTheDocument()
     })
 
     it('guruh yo‘q bo‘lsa balans o‘rniga bo‘sh holat chiqadi', () => {

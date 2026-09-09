@@ -10,6 +10,7 @@ import type {
     LessonDto,
     StudentDto,
     TeacherDto,
+    TransactionDto,
 } from '@/shared/types'
 
 /**
@@ -90,11 +91,19 @@ export const lessons: LessonDto[] = [
     { id: 'l3', title: '14', topic: 'Unit 14 — Conditionals', lessonDate: '2026-08-07T09:00:00', isComplete: false, group: groups[1], teacherDto: teachers[1] },
 ]
 
+// Hisobda o'quvchi endi `enrollmentDto.studentId` orqali — backend
+// `student` obyektini qaytarmaydi.
 export const invoices: InvoiceDto[] = [
-    { id: 'i1', invoiceNumber: 'INV-001', student: students[0], amount: 450000, issuedAt: '2026-07-01T09:00:00', status: 'PAID', type: 'PAYMENT' },
-    { id: 'i2', invoiceNumber: 'INV-002', student: students[1], amount: 450000, issuedAt: '2026-08-01T09:00:00', status: 'PENDING', type: 'PAYMENT' },
-    { id: 'i3', invoiceNumber: 'INV-003', student: students[2], amount: 600000, issuedAt: '2026-06-01T09:00:00', status: 'OVERDUE', type: 'PAYMENT' },
-    { id: 'i4', invoiceNumber: 'INV-004', student: students[3], amount: 450000, issuedAt: '2026-08-05T09:00:00', status: 'PENDING', type: 'PAYMENT' },
+    { id: 'i1', invoiceNumber: 'INV-001', amount: 450000, issuedAt: '2026-07-01T09:00:00', enrollmentDto: { id: 'e1', studentId: students[0].id, groupId: 'g1' } },
+    { id: 'i2', invoiceNumber: 'INV-002', amount: 450000, issuedAt: '2026-08-01T09:00:00', enrollmentDto: { id: 'e2', studentId: students[1].id, groupId: 'g1' } },
+    { id: 'i3', invoiceNumber: 'INV-003', amount: 600000, issuedAt: '2026-06-01T09:00:00', enrollmentDto: { id: 'e3', studentId: students[2].id, groupId: 'g2' } },
+    { id: 'i4', invoiceNumber: 'INV-004', amount: 450000, issuedAt: '2026-08-05T09:00:00', enrollmentDto: { id: 'e4', studentId: students[3].id, groupId: 'g2' } },
+]
+
+export const transactions: TransactionDto[] = [
+    { id: 't1', type: 'PAID', amount: 250000, invoice: invoices[1], user: students[1], createdAt: '2026-08-03T10:15:00' },
+    { id: 't2', type: 'PAID', amount: 200000, invoice: invoices[1], user: students[1], createdAt: '2026-08-11T14:40:00' },
+    { id: 't3', type: 'RETURNED', amount: 100000, invoice: invoices[2], user: students[2], createdAt: '2026-06-20T09:05:00' },
 ]
 
 export const organizations: OrganizationDto[] = [

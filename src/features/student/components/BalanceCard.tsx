@@ -1,14 +1,7 @@
 import { useT } from '@/shared/i18n'
 import { cn, formatAmount } from '@/shared/lib'
-import { Badge, EmptyState, Eyebrow, Panel, PendingBackend } from '@/shared/ui'
-import type { BadgeTone } from '@/shared/ui'
-import type { EnrollmentPaymentStatus, StudentDto } from '@/shared/types'
-
-const PAYMENT_STATUS_TONE: Record<EnrollmentPaymentStatus, BadgeTone> = {
-    UNPAID: 'danger',
-    PARTIAL: 'warning',
-    PAID: 'success',
-}
+import { EmptyState, Eyebrow, Panel, PendingBackend } from '@/shared/ui'
+import type { StudentDto } from '@/shared/types'
 
 interface BalanceCardProps {
     /** `null` — guruh tanlanmagan (o'quvchi hech qaysi guruhda emas). */
@@ -37,21 +30,14 @@ export function BalanceCard({ student, hasGroup }: BalanceCardProps) {
             {hasGroup && student?.balance === undefined && <PendingBackend />}
 
             {hasGroup && student?.balance !== undefined && (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span
-                        className={cn(
-                            'font-display text-3xl font-semibold tabular-nums',
-                            student.balance < 0 ? 'text-danger-fg' : 'text-fg'
-                        )}
-                    >
-                        {formatAmount(student.balance)}
-                    </span>
-                    {student.status && (
-                        <Badge tone={PAYMENT_STATUS_TONE[student.status]}>
-                            {t(`student.paymentStatus.${student.status}`)}
-                        </Badge>
+                <span
+                    className={cn(
+                        'block font-display text-3xl font-semibold tabular-nums',
+                        student.balance < 0 ? 'text-danger-fg' : 'text-fg'
                     )}
-                </div>
+                >
+                    {formatAmount(student.balance)}
+                </span>
             )}
         </Panel>
     )

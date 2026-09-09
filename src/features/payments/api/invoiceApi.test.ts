@@ -1,12 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-    createInvoice,
-    deleteInvoice,
-    fetchInvoices,
-    fetchStudentOptions,
-    returnInvoice,
-    updateInvoiceStatus,
-} from './invoiceApi'
+import { deleteInvoice, fetchInvoices, fetchStudentOptions } from './invoiceApi'
 
 /**
  * `httpClient.test.ts` dagi kabi — global `fetch` soxtalashtiriladi,
@@ -56,42 +49,12 @@ describe('fetchInvoices', () => {
     })
 })
 
-describe('createInvoice', () => {
-    it('POST /invoice ga body yuboradi', async () => {
-        const fetchMock = mockFetch({ text: '{"id":"1"}' })
-        await createInvoice(TOKEN, { studentId: 's1', amount: 100 })
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/invoice')
-        expect(fetchMock.mock.calls[0][1].method).toBe('POST')
-        expect(fetchMock.mock.calls[0][1].body).toBe('{"studentId":"s1","amount":100}')
-    })
-})
-
-describe('updateInvoiceStatus', () => {
-    it('PUT /invoice/{id} ga faqat status yuboradi', async () => {
-        const fetchMock = mockFetch({ text: '{"id":"1"}' })
-        await updateInvoiceStatus(TOKEN, '1', 'PAID')
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/invoice/1')
-        expect(fetchMock.mock.calls[0][1].method).toBe('PUT')
-        expect(fetchMock.mock.calls[0][1].body).toBe('{"status":"PAID"}')
-    })
-})
-
 describe('deleteInvoice', () => {
     it('DELETE /invoice/{id} yuboradi', async () => {
         const fetchMock = mockFetch({ text: '' })
         await deleteInvoice(TOKEN, '1')
         expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/invoice/1')
         expect(fetchMock.mock.calls[0][1].method).toBe('DELETE')
-    })
-})
-
-describe('returnInvoice', () => {
-    it('POST /invoice/return ga studentId ni query sifatida yuboradi, body yo‘q', async () => {
-        const fetchMock = mockFetch({ text: '{"id":"1"}' })
-        await returnInvoice(TOKEN, 's1')
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/invoice/return?studentId=s1')
-        expect(fetchMock.mock.calls[0][1].method).toBe('POST')
-        expect(fetchMock.mock.calls[0][1].body).toBeUndefined()
     })
 })
 

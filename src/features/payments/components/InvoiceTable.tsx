@@ -1,27 +1,24 @@
 import { useT } from '@/shared/i18n'
 import { formatAmount, formatDate } from '@/shared/lib'
-import { Button, DataTable, IconButton, TrashIcon } from '@/shared/ui'
-import type { DataTableColumn } from '@/shared/ui'
-import { InvoiceStatusBadge } from './InvoiceStatusBadge'
+import { DataTable, IconButton, TrashIcon } from '@/shared/ui'
+import type { DataTableColumn, SelectOption } from '@/shared/ui'
 import type { InvoiceDto } from '@/shared/types'
 
 interface InvoiceTableProps {
     invoices: InvoiceDto[]
     isLoading: boolean
-    /** Holat o'zgartirilayotgan hisob — tugmalar shu qatorda o'chiriladi. */
-    pendingId?: string
-    onMarkPaid: (invoice: InvoiceDto) => void
+    /**
+     * O'quvchilar ro'yxati — `InvoiceDto` da faqat `studentId` bor, ism yo'q.
+     * Ismni shu ro'yxatdan topamiz.
+     */
+    studentOptions: SelectOption[]
     onDelete: (invoice: InvoiceDto) => void
 }
 
-export function InvoiceTable({
-    invoices,
-    isLoading,
-    pendingId,
-    onMarkPaid,
-    onDelete,
-}: InvoiceTableProps) {
+export function InvoiceTable({ invoices, isLoading, studentOptions, onDelete }: InvoiceTableProps) {
     const { t } = useT()
+
+    const nameById = new Map(studentOptions.map((option) => [option.value, option.label]))
 
     const columns: DataTableColumn<InvoiceDto>[] = [
         {
@@ -33,7 +30,13 @@ export function InvoiceTable({
         {
             key: 'student',
             header: t('invoice.student'),
-            render: (invoice) => invoice.student?.userDto?.fullName ?? '—',
+            render: (invoice) => {
+                const studentId = invoice.enrollmentDto?.studentId
+                if (!studentId) return '—'
+                // Ro'yxat hali yuklanmagan bo'lsa id ko'rsatiladi — bo'sh
+                // katakdan ko'ra id foydaliroq, hech bo'lmasa qidirsa bo'ladi.
+                return nameById.get(studentId) ?? studentId
+            },
         },
         {
             key: 'amount',
@@ -45,21 +48,7 @@ export function InvoiceTable({
         {
             key: 'issuedAt',
             header: t('invoice.issuedAt'),
-            className: 'tabular-nums text-fg-muted',
             render: (invoice) => formatDate(invoice.issuedAt) || '—',
-        },
-        {
-            key: 'type',
-            header: t('invoice.type'),
-            className: 'font-mono text-xs text-fg-muted',
-            // Turi serverdan kelgan enum nomi bilan ko'rsatiladi: qiymatlari hali aytilmagan,
-            // taxminiy tarjima esa yolg'on bo'lardi.
-            render: (invoice) => invoice.type || '—',
-        },
-        {
-            key: 'status',
-            header: t('field.status'),
-            render: (invoice) => <InvoiceStatusBadge status={invoice.status} />,
         },
     ]
 
@@ -73,21 +62,9 @@ export function InvoiceTable({
             getRowKey={(invoice) => invoice.id}
             actionsHeader={t('admin.actions')}
             renderActions={(invoice) => (
-                <>
-                    {invoice.status !== 'PAID' && (
-                        <Button
-                            variant="success"
-                            size="sm"
-                            disabled={pendingId === invoice.id}
-                            onClick={() => onMarkPaid(invoice)}
-                        >
-                            {t('invoice.markPaid')}
-                        </Button>
-                    )}
-                    <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(invoice)}>
-                        <TrashIcon />
-                    </IconButton>
-                </>
+                <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(invoice)}>
+                    <TrashIcon />
+                </IconButton>
             )}
         />
     )

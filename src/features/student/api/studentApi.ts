@@ -14,8 +14,8 @@ const STUDENT_ENDPOINT = '/student'
  * 403 qaytarardi, ya'ni blok jimgina bo'sh qolardi. Backend `/student/me`
  * ni qo'shgach, o'sha vaqtinchalik yechim olib tashlandi.
  */
-export function fetchMyStudent(token: string, groupId: string) {
-    return apiFetch<StudentDto>(`${STUDENT_ENDPOINT}/me`, { token, params: { groupId } })
+export function fetchMyStudent(token: string) {
+    return apiFetch<StudentDto>(`${STUDENT_ENDPOINT}/me`, { token })
 }
 
 /**
