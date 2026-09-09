@@ -16,4 +16,10 @@ export const student: Record<StudentKeys, string> = {
     'student.balance': 'My balance',
     'student.balanceHint':
         'A negative number means you have a debt. Zero means your balance is clear. A positive number is a credit.',
+    'student.levelLabel': 'Your level',
+    'student.groupLabel': 'Your group',
+    'student.groupAttendanceSection': 'My group and attendance',
+    'student.infoSection': 'My info',
+    'student.settingsSection': 'Settings',
+    'student.settingsHint': 'Change your profile and password on the settings page.',
 }

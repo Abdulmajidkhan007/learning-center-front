@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
-import { useAttendanceRecords } from '@/shared/hooks'
+import { useAttendanceRecords, useGroupInfo } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { downloadCsv, generateCsv, formatDate, type CsvColumn } from '@/shared/lib'
 import { AppShell, AttendanceTable, Button, EmptyState, ErrorBox, SegmentedControl, type PastLessonColumn } from '@/shared/ui'
@@ -40,7 +40,9 @@ export function AttendancePage() {
 
     const studentsQuery = useGroupStudents(session.token, groupId, session.role)
     const recordsQuery = useAttendanceRecords(session.token, groupId, Number(month))
+    const groupInfoQuery = useGroupInfo(session.token, groupId)
     const students = studentsQuery.students
+    const plannedLessonCount = groupInfoQuery.data?.groupDto?.level?.lessonCount
 
     const pastColumns = useMemo<PastLessonColumn[]>(
         () =>
@@ -234,6 +236,7 @@ export function AttendancePage() {
                         draft={draft.draft}
                         onStatusChange={draft.setStatus}
                         onEditPastLesson={handleEditPastLesson}
+                        plannedLessonCount={plannedLessonCount}
                     />
                 </>
             )}

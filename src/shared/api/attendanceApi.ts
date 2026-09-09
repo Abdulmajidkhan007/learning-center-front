@@ -47,6 +47,11 @@ export async function fetchGroupStudents(token: string, groupId: string): Promis
     return data?.studentDto ?? []
 }
 
+/** Guruh haqida to'liq ma'lumot — guruh o'zi va o'quvchilar ro'yxati. */
+export function fetchGroupInfo(token: string, groupId: string) {
+    return apiFetch<FullGroupDto>(`${GROUP_ENDPOINT}/groupInfo`, { token, params: { groupId } })
+}
+
 export interface CreateAttendancePayload {
     lessonId: string
     students: AttendanceStudentDto[]
