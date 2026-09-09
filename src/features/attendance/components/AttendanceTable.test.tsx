@@ -55,4 +55,29 @@ describe('AttendanceTable', () => {
 
         expect(cells[1].querySelector('[title="Kasal"]')).toBeInTheDocument()
     })
+
+    it("rejalashtirilgan darslar o'tilganlardan ko'p bo'lsa, farqi qadar bo'sh ustun qo'shiladi", () => {
+        renderWithProviders(
+            <AttendanceTable students={students} pastColumns={pastColumns} plannedLessonCount={4} />
+        )
+
+        // 1 ta ism ustuni + 1 ta o'tilgan dars + 3 ta bo'sh ustun (reja 4 ta).
+        const headerRow = screen.getAllByRole('row')[0]
+        expect(within(headerRow).getAllByRole('columnheader')).toHaveLength(5)
+
+        const row = screen.getByRole('row', { name: /aziza karimova/i })
+        const cells = within(row).getAllByRole('cell')
+        // ism katagi + o'tilgan dars katagi + 3 ta bo'sh katak.
+        expect(cells).toHaveLength(5)
+        expect(cells[2]).toBeEmptyDOMElement()
+        expect(cells[3]).toBeEmptyDOMElement()
+        expect(cells[4]).toBeEmptyDOMElement()
+    })
+
+    it("rejalashtirilgan darslar soni berilmasa bo'sh ustun qo'shilmaydi", () => {
+        renderWithProviders(<AttendanceTable students={students} pastColumns={pastColumns} />)
+
+        const headerRow = screen.getAllByRole('row')[0]
+        expect(within(headerRow).getAllByRole('columnheader')).toHaveLength(2)
+    })
 })
