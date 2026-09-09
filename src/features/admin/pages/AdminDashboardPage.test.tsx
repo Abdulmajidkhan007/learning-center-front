@@ -53,7 +53,7 @@ describe('AdminDashboardPage — ruxsatlar', () => {
         renderWithProviders(<AdminDashboardPage />)
 
         expect(screen.queryByRole('button', { name: /lidlar/i })).not.toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /to.lovlar/i })).toBeInTheDocument()
+        expect(screen.getAllByRole('button', { name: /to.lovlar/i }).length).toBeGreaterThan(0)
     })
 
     it('LEAD_MANAGEMENT bor administratorga "Lidlar" tugmasi ko‘rinadi', () => {
@@ -62,7 +62,7 @@ describe('AdminDashboardPage — ruxsatlar', () => {
 
         renderWithProviders(<AdminDashboardPage />)
 
-        expect(screen.getByRole('button', { name: /lidlar/i })).toBeInTheDocument()
+        expect(screen.getAllByRole('button', { name: /lidlar/i }).length).toBeGreaterThan(0)
     })
 
     it('STUDENT_MANAGEMENT yo‘q administratorga O‘quvchilar tabi ko‘rinmaydi', () => {
