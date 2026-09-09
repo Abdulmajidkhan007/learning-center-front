@@ -43,6 +43,24 @@ describe('createTransaction', () => {
     })
 })
 
+describe('createTransaction ishorasi', () => {
+    // Backend summani turga qarab o'zgartirmaydi — qaytarim manfiy bo'lmasa
+    // o'quvchining qarzi kamayish o'rniga ko'payib ketadi.
+    it('qaytarimni manfiy qilib yuboradi', async () => {
+        const fetchMock = mockFetch('{"id":"t2"}')
+        await createTransaction(TOKEN, { type: 'RETURNED', amount: 100000, studentId: 'st-1' })
+
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"type":"RETURNED","amount":-100000,"studentId":"st-1"}')
+    })
+
+    it('to‘lovni musbat qoldiradi', async () => {
+        const fetchMock = mockFetch('{"id":"t3"}')
+        await createTransaction(TOKEN, { type: 'PAID', amount: 100000, studentId: 'st-1' })
+
+        expect(fetchMock.mock.calls[0][1].body).toBe('{"type":"PAID","amount":100000,"studentId":"st-1"}')
+    })
+})
+
 describe('deleteTransaction', () => {
     it('DELETE /transaction/{id} yuboradi', async () => {
         const fetchMock = mockFetch('')

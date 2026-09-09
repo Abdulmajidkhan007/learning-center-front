@@ -19,6 +19,24 @@ export function handleInvoices(
         // tekshiriladi — demo'da esa tekshiradigan narsa yo'q, hammasi qaytadi.
         return page(db.invoices as unknown as Row[], url)
     }
+    // Guruhga qo'lda hisob yaratish. Ikkinchi marta chaqirilsa haqiqiy
+    // backend 409 qaytaradi — demo'da ham shunday, tugmaning xato holati
+    // ko'rinsin.
+    if (path.startsWith('/invoice/') && method === 'POST') {
+        const groupId = path.split('/')[2]
+        const already = db.invoices.some((invoice) => invoice.enrollmentDto?.groupId === groupId)
+        if (already) return json({ errorCode: 'AlreadyExists', message: 'Invoice already created' }, 409)
+
+        const created = db.students.slice(0, 2).map((student, index) => ({
+            id: nextId('i'),
+            invoiceNumber: `INV-${String(db.invoices.length + index + 1).padStart(3, '0')}`,
+            amount: 450000,
+            issuedAt: new Date().toISOString().slice(0, 19),
+            enrollmentDto: { id: nextId('e'), studentId: student.id, groupId },
+        }))
+        db.invoices = [...db.invoices, ...created]
+        return noContent()
+    }
     if (path.startsWith('/invoice/') && method === 'DELETE') {
         const id = path.split('/')[2]
         db.invoices = db.invoices.filter((invoice) => invoice.id !== id)

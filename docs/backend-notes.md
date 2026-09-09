@@ -650,24 +650,27 @@ qaytaradi — tuzatilguncha ikkalasi ham qabul qilinadi) ·
 Backend `main` da hisob + tranzaksiya modeli ishga tushdi. Front unga
 o'tkazildi, lekin uchta narsa mijoz tomondan ishlamaydi:
 
-### 1. 🔴 `POST /invoice` ni chaqirib bo'lmaydi
+### 1. ✅ `POST /invoice` — tuzatildi
 
-`InvoiceCreateDto(Enrollment enrollment, BigDecimal amount)` — birinchi
-maydon JPA **entity**, id emas. Frontend butun `Enrollment` obyektini
-yubora olmaydi (bizda faqat `studentId` bor). `String enrollmentId`
-bo'lishi kerak.
+**2026-09-09:** `InvoiceCreateDto` endi `String enrollmentId` oladi.
+Bundan tashqari `POST /invoice/{groupId}` qo'shildi — guruhga shu oy
+uchun hisob yaratadi, front unga ulandi.
 
-Hozircha hisob qo'lda yaratilmaydi deb qabul qildik — 12-darsdan keyin
-avtomatik yaratiladi.
+### 2. 🟠 Tranzaksiya summasining ISHORASI mijozga qolgan
 
-### 2. 🔴 `RETURNED` tranzaksiya balansni NOTO'G'RI tomonga o'zgartiradi
+`TransactionService.create` → `setNewBalance(amount, studentId)`, so'rov esa
+`balance = balance + :amount`. Backend turga qaramaydi: `PAID` bo'ladimi,
+`RETURNED` bo'ladimi — qanday summa kelsa shundoq qo'shadi.
 
-`TransactionService.create` → `studentRepository.setNewBalance(amount, studentId)`,
-so'rov esa `balance = balance + :amount`. Ya'ni pul qaytarib berilganda
-ham balans **oshadi**. `TransactionCreateDto.amount` da
-`@DecimalMin("0.0")` bor, ya'ni manfiy summa ham yuborib bo'lmaydi.
+`@DecimalMin("0.0")` olib tashlangani uchun endi manfiy son yuborsa
+bo'ladi va front `RETURNED` da aynan shunday qilyapti (`transactionApi.ts`).
+Backendning o'zi ham ichkarida shunday qiladi — `createGroupInvoice` da
+`monthlyFee.negate()`.
 
-`RETURNED` uchun ayirish kerak.
+Ishlaydi, lekin mo'rt: boshqa mijoz (mobil ilova, Swagger orqali qo'lda
+so'rov) musbat son yuborsa, qaytarim qarzni kamaytirish o'rniga
+**oshiradi** va buni hech narsa to'xtatmaydi. Ishorani `TransactionService`
+ning o'zi turga qarab qo'ysa ishonchli bo'lardi.
 
 ### 3. 🟠 `InvoiceDto` da holat ham, o'quvchi ham yo'q
 
