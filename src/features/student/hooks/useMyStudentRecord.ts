@@ -3,20 +3,19 @@ import { queryKeys } from '@/shared/api'
 import { fetchMyStudent } from '../api/studentApi'
 
 /**
- * Kirgan o'quvchining o'z kartasi — tanlangan guruh bo'yicha.
+ * Kirgan o'quvchining o'z kartasi.
  *
- * `groupId` MAJBURIY: backend balansni `Enrollment` dan oladi, ya'ni
- * o'quvchi qaysi guruhda ekani aytilmasa javob berolmaydi. Guruh
- * tanlanmaguncha so'rov yuborilmaydi.
+ * Balans endi butun o'quvchiga tegishli (`Student.balance`), guruhga emas —
+ * shuning uchun `groupId` kerak emas va so'rov guruhlar yuklanishini
+ * kutmaydi.
  *
- * `retry: false` — o'quvchi o'sha guruhda bo'lmasa backend 404 qaytaradi,
+ * `retry: false` — kirgan odam o'quvchi bo'lmasa backend xato qaytaradi,
  * uni uch marta qayta so'rashning ma'nosi yo'q.
  */
-export function useMyStudentRecord(token: string, groupId: string) {
+export function useMyStudentRecord(token: string) {
     return useQuery({
-        queryKey: queryKeys.myStudentRecord(groupId),
-        queryFn: () => fetchMyStudent(token, groupId),
-        enabled: Boolean(groupId),
+        queryKey: queryKeys.myStudentRecord(),
+        queryFn: () => fetchMyStudent(token),
         retry: false,
         staleTime: 5 * 60_000,
     })

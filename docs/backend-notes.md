@@ -642,3 +642,46 @@ qaytaradi — tuzatilguncha ikkalasi ham qabul qilinadi) ·
 `GroupNameProjection` (id, name, dayType) · `AttendanceCreateDto{lessonId, students}` ·
 `StatusReasonDto{status, reason}` (`MonthlyAttendanceDto.attendanceStudentMap` qiymati) ·
 `AttendanceStudentDto.reason`
+
+---
+
+## 2026-09-09: to'lov modeli almashtirildi — topilgan muammolar
+
+Backend `main` da hisob + tranzaksiya modeli ishga tushdi. Front unga
+o'tkazildi, lekin uchta narsa mijoz tomondan ishlamaydi:
+
+### 1. 🔴 `POST /invoice` ni chaqirib bo'lmaydi
+
+`InvoiceCreateDto(Enrollment enrollment, BigDecimal amount)` — birinchi
+maydon JPA **entity**, id emas. Frontend butun `Enrollment` obyektini
+yubora olmaydi (bizda faqat `studentId` bor). `String enrollmentId`
+bo'lishi kerak.
+
+Hozircha hisob qo'lda yaratilmaydi deb qabul qildik — 12-darsdan keyin
+avtomatik yaratiladi.
+
+### 2. 🔴 `RETURNED` tranzaksiya balansni NOTO'G'RI tomonga o'zgartiradi
+
+`TransactionService.create` → `studentRepository.setNewBalance(amount, studentId)`,
+so'rov esa `balance = balance + :amount`. Ya'ni pul qaytarib berilganda
+ham balans **oshadi**. `TransactionCreateDto.amount` da
+`@DecimalMin("0.0")` bor, ya'ni manfiy summa ham yuborib bo'lmaydi.
+
+`RETURNED` uchun ayirish kerak.
+
+### 3. 🟠 `InvoiceDto` da holat ham, o'quvchi ham yo'q
+
+`GET /invoice?status=…` filtri ishlaydi, lekin javobda `status` qaytmaydi —
+ya'ni foydalanuvchi nima bo'yicha filtrlaganini jadvalda ko'rmaydi.
+O'quvchi ham faqat `enrollmentDto.studentId` bo'lib keladi; ismni
+ko'rsatish uchun front butun o'quvchilar ro'yxatini yuklab, id bo'yicha
+qidiryapti. `InvoiceDto` ga `status` va o'quvchi ismini qo'shsangiz shu
+ikkalasi ham yo'qoladi.
+
+### 4. 🟠 To'lov faqat ENG SO'NGGI hisobga bog'lanadi
+
+`TransactionMapper.toEntity` → `studentService.getLatestInvoice(studentId)`.
+Ya'ni eski hisobga to'lov yozib bo'lmaydi, va o'quvchida umuman hisob
+bo'lmasa `POST /transaction` 404 qaytaradi. Hozircha yetarli, lekin
+`TransactionCreateDto` ga ixtiyoriy `invoiceId` qo'shilsa moslashuvchan
+bo'lardi.

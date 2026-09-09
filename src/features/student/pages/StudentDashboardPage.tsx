@@ -17,9 +17,8 @@ import { useMyStudentRecord } from '../hooks/useMyStudentRecord'
 /**
  * O'quvchi paneli.
  *
- * Balans TANLANGAN GURUHGA tegishli: backend uni `Enrollment` dan
- * hisoblaydi, ya'ni har bir guruh uchun alohida. Guruh almashtirilsa
- * balans ham almashadi.
+ * Balans butun o'quvchiga tegishli, guruhga emas: to'lovlar `Student.balance`
+ * ga qo'shilib boradi. Manfiy son qarzni bildiradi.
  */
 export function StudentDashboardPage() {
     const { t } = useT()
@@ -43,7 +42,7 @@ export function StudentDashboardPage() {
         : (groups[0]?.id ?? '')
     const selectedGroup = groups.find((group) => group.id === selectedGroupId)
 
-    const { data: student, error: studentError } = useMyStudentRecord(session.token, selectedGroupId)
+    const { data: student, error: studentError } = useMyStudentRecord(session.token)
     const attendanceQuery = useMyAttendance(session.token, selectedGroupId, Number(month))
 
     return (
@@ -69,7 +68,7 @@ export function StudentDashboardPage() {
 
                 {!isLoading && me && <ProfileCard user={me} student={student ?? null} />}
 
-                {!isLoading && me && selectedGroupId !== '' && studentError != null && (
+                {!isLoading && me && studentError != null && (
                     <div className="mb-5">
                         <EmptyState title={t('student.notFound')} description={t('student.notFoundHint')} />
                     </div>

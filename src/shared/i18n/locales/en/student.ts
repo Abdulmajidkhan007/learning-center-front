@@ -16,7 +16,4 @@ export const student: Record<StudentKeys, string> = {
     'student.balance': 'My balance',
     'student.balanceHint':
         'A negative number means you have a debt. Zero means your balance is clear. A positive number is a credit.',
-    'student.paymentStatus.UNPAID': 'Unpaid',
-    'student.paymentStatus.PARTIAL': 'Partly paid',
-    'student.paymentStatus.PAID': 'Paid',
 }

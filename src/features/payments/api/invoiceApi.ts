@@ -18,52 +18,24 @@ export function fetchInvoices(token: string, params: InvoiceListParams) {
     return apiFetch<Page<InvoiceDto>>(ENDPOINT, { token, params })
 }
 
-export interface CreateInvoicePayload {
-    studentId: string
-    amount: number
-}
-
-export function createInvoice(token: string, body: CreateInvoicePayload) {
-    return apiFetch<InvoiceDto>(ENDPOINT, { method: 'POST', token, body })
-}
-
 /**
- * Hisob holatini o'zgartirish.
+ * Hisobni o'chirish.
  *
- * `InvoiceUpdateDto` da faqat `status` bor — summa tahrirlanmaydi. To'lov
- * Payme/Click orqali emas, kartaga qo'lda o'tkaziladi, shuning uchun pulni
- * ko'rgan administrator hisobni shu yerda `PAID` qilib qo'yadi. Kim
- * tasdiqlagani backendda `updatedBy` ga o'zi yozilib qoladi.
+ * Qolgan yozish amallari backenddan olib tashlandi: `PUT /invoice/{id}`
+ * (holatni o'zgartirish) va `POST /invoice/return` (pul qaytarish) endi
+ * yo'q. Hisob 12-darsdan keyin avtomatik yaratiladi, pul qaytarish esa
+ * `RETURNED` turidagi tranzaksiya bo'lib yoziladi.
  */
-export function updateInvoiceStatus(token: string, id: string, status: InvoiceStatus) {
-    return apiFetch<InvoiceDto>(`${ENDPOINT}/${id}`, { method: 'PUT', token, body: { status } })
-}
-
 export function deleteInvoice(token: string, id: string) {
     return apiFetch(`${ENDPOINT}/${id}`, { method: 'DELETE', token })
 }
 
 /**
- * Pul qaytarish.
+ * O'quvchilar ro'yxati — tanlagich uchun VA ismni id bo'yicha topish uchun.
  *
- * O'quvchi oylik to'lovni to'lab, oy o'rtasida ketsa (masalan sayohatga),
- * markaz qolgan pulni qaytaradi. **Summani backend o'zi hisoblaydi** —
- * o'tilgan darslar puli ushlab qolinadi, qolgani qaytariladi. Shuning uchun
- * bu yerda summa yuborilmaydi va oldindan ko'rsatilmaydi: mijozda hisoblasak,
- * server bilan farq chiqib, foydalanuvchiga noto'g'ri raqam aytardik.
- *
- * Hisob `studentId` bo'yicha, ya'ni bitta yozuvga emas, O'QUVCHIGA tegishli.
- */
-export function returnInvoice(token: string, studentId: string) {
-    return apiFetch<InvoiceDto>(`${ENDPOINT}/return`, {
-        method: 'POST',
-        token,
-        params: { studentId },
-    })
-}
-
-/**
- * Yangi hisob formasidagi o'quvchi tanlagichi.
+ * `InvoiceDto` da o'quvchining ismi yo'q, faqat `enrollmentDto.studentId`
+ * bor. Har bir qator uchun alohida so'rov yuborish o'rniga ro'yxat bir marta
+ * yuklanadi va jadval undan ism oladi.
  *
  * Bo'limlar bir-biridan import qilmagani uchun admin'dagi o'xshash
  * funksiyaga tayanmaymiz — bu yerda o'zimizniki turadi.

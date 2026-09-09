@@ -6,32 +6,28 @@ import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { downloadCsv, generateCsv, formatAmount, formatDate, type CsvColumn } from '@/shared/lib'
 import { INVOICE_STATUSES } from '@/shared/types'
-import {
-    AppShell,
-    BackIcon,
-    Button,
-    ErrorBox,
-    Eyebrow,
-    Field,
-    IconButton,
-    Input,
-    Pagination,
-    Panel,
-    Select,
-} from '@/shared/ui'
+import { AppShell, BackIcon, Button, ErrorBox, Eyebrow, IconButton, Pagination, Panel } from '@/shared/ui'
+import { InvoiceFilters } from '../components/InvoiceFilters'
 import { InvoiceTable } from '../components/InvoiceTable'
-import { NewInvoiceModal } from '../components/NewInvoiceModal'
+import { NewPaymentModal } from '../components/NewPaymentModal'
+import { TransactionTable } from '../components/TransactionTable'
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations'
 import { useInvoices } from '../hooks/useInvoices'
 import { useStudentOptions } from '../hooks/useStudentOptions'
-import type { InvoiceDto, InvoiceStatus } from '@/shared/types'
+import { useTransactionMutations, useTransactions } from '../hooks/useTransactions'
+import type { InvoiceDto, InvoiceStatus, TransactionDto } from '@/shared/types'
 
 /**
  * To'lovlar bo'limi.
  *
- * To'lov onlayn qabul qilinmaydi: o'quvchi kartaga o'tkazadi, pulni ko'rgan
- * administrator hisobni shu yerda "to'landi" qilib belgilaydi. Shuning uchun
- * ekranning markazida — status va uni o'zgartirish tugmasi.
+ * Model ikki qavatli: HISOB (`invoice`) 12-darsdan keyin avtomatik
+ * yaratiladi va summasi qotib turadi; unga esa bir nechta TO'LOV
+ * (`transaction`) bog'lanadi — o'quvchi bo'lib-bo'lib to'lashi mumkin.
+ * Shuning uchun ekranda ikkita ro'yxat bor.
+ *
+ * Hisob qo'lda yaratilmaydi: `POST /invoice` hozir `Enrollment` obyektini
+ * kutadi, ya'ni mijoz tomondan yuborib bo'lmaydi. Administratorga kerak
+ * bo'ladigan kundalik amal — to'lovni yozib qo'yish, u shu yerda.
  */
 export function PaymentsPage() {
     const { t } = useT()
@@ -45,84 +41,54 @@ export function PaymentsPage() {
     const [status, setStatus] = useState<InvoiceStatus | ''>('')
     const [from, setFrom] = useState('')
     const [to, setTo] = useState('')
+    const [txPage, setTxPage] = useState(0)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [refundStudentId, setRefundStudentId] = useState('')
 
     const list = useInvoices(session.token, { page, search, status, from, to })
+    const transactions = useTransactions(session.token, txPage, search)
+    const studentOptions = useStudentOptions(session.token)
+    const invoices = useInvoiceMutations(session.token)
+    const payments = useTransactionMutations(session.token)
 
-    /** Har qanday filtr o'zgarsa birinchi sahifaga qaytamiz. */
+    /** Har qanday filtr o'zgarsa ikkala ro'yxat ham birinchi sahifaga qaytadi. */
     function applyFilter(apply: () => void) {
         apply()
         setPage(0)
-    }
-    const studentOptions = useStudentOptions(session.token)
-    const { create, changeStatus, remove, refund } = useInvoiceMutations(session.token)
-
-    function handleMarkPaid(invoice: InvoiceDto) {
-        changeStatus.mutate({ id: invoice.id, status: 'PAID' })
+        setTxPage(0)
     }
 
-    function handleDelete(invoice: InvoiceDto) {
+    function handleDeleteInvoice(invoice: InvoiceDto) {
         if (!confirm(t('invoice.deleteConfirm', { number: invoice.invoiceNumber ?? '' }))) return
-        remove.mutate(invoice.id)
+        invoices.remove.mutate(invoice.id)
+    }
+
+    function handleDeleteTransaction(transaction: TransactionDto) {
+        if (!confirm(t('transaction.deleteConfirm', { amount: formatAmount(transaction.amount) }))) return
+        payments.remove.mutate(transaction.id)
     }
 
     function handleExportCsv() {
         if (list.invoices.length === 0) return
 
+        const nameById = new Map(studentOptions.map((option) => [option.value, option.label]))
         const exportColumns: CsvColumn<InvoiceDto>[] = [
-            {
-                header: t('invoice.number'),
-                accessor: (inv) => inv.invoiceNumber ?? '',
-            },
+            { header: t('invoice.number'), accessor: (inv) => inv.invoiceNumber ?? '' },
             {
                 header: t('invoice.student'),
-                accessor: (inv) => inv.student?.userDto?.fullName ?? '',
+                accessor: (inv) => {
+                    const studentId = inv.enrollmentDto?.studentId
+                    return studentId ? (nameById.get(studentId) ?? studentId) : ''
+                },
             },
-            {
-                header: t('invoice.amount'),
-                accessor: (inv) => (inv.amount != null ? formatAmount(inv.amount) : ''),
-            },
-            {
-                header: t('invoice.issuedAt'),
-                accessor: (inv) => formatDate(inv.issuedAt),
-            },
-            {
-                header: t('field.status'),
-                accessor: (inv) => (inv.status ? t(`invoice.status.${inv.status}`) : ''),
-            },
-            {
-                header: t('invoice.type'),
-                accessor: (inv) => inv.type ?? '',
-            },
+            { header: t('invoice.amount'), accessor: (inv) => (inv.amount != null ? formatAmount(inv.amount) : '') },
+            { header: t('invoice.issuedAt'), accessor: (inv) => formatDate(inv.issuedAt) },
         ]
 
-        const todayStr = formatDate(new Date().toISOString())
-        const filename = `payments-${todayStr}.csv`
-
-        const csvContent = generateCsv(list.invoices, exportColumns)
-        downloadCsv(csvContent, filename)
+        const filename = `payments-${formatDate(new Date().toISOString())}.csv`
+        downloadCsv(generateCsv(list.invoices, exportColumns), filename)
     }
 
-    /**
-     * Pul qaytarish.
-     *
-     * Jadval qatorida EMAS, alohida blokda: `POST /invoice/return` o'quvchi
-     * bo'yicha ishlaydi, hisob bo'yicha emas. Qatorga qo'ysak, bitta
-     * o'quvchining har hisobida bir xil tugma takrorlanardi va qaytarim
-     * yozuvining o'zida ham chiqib qolardi.
-     *
-     * Summani backend hisoblagani uchun oldindan ko'rsata olmaymiz —
-     * tasdiqlash matni shuni ochiq aytadi, natija esa javobdan olinadi.
-     */
-    function handleRefund() {
-        if (refundStudentId === '') return
-        const name = studentOptions.find((option) => option.value === refundStudentId)?.label ?? ''
-        if (!confirm(t('invoice.refundConfirm', { name }))) return
-        refund.mutate(refundStudentId, { onSuccess: () => setRefundStudentId('') })
-    }
-
-    const mutationError = changeStatus.error ?? remove.error ?? refund.error
+    const mutationError = invoices.remove.error ?? payments.remove.error
 
     return (
         <AppShell
@@ -140,108 +106,38 @@ export function PaymentsPage() {
                         {t('common.exportCsv')}
                     </Button>
                     <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
-                        {t('invoice.new')}
+                        {t('transaction.new')}
                     </Button>
                 </>
             }
         >
-            <Panel>
-                <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                    <div className="min-w-0">
-                        <Eyebrow>{t('invoice.eyebrow')}</Eyebrow>
-                        <h1 className="mt-1 font-display text-2xl font-semibold text-fg">
-                            {t('invoice.title')}
-                        </h1>
-                    </div>
-
-                    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-                        <Select
-                            aria-label={t('admin.filterStatus')}
-                            // `w-auto` EMAS: `inputClasses` ichida `w-full` bor va
-                            // ikkalasi bir xil breakpoint'da bo'lgani uchun qaysi
-                            // biri yutishi CSS tartibiga qolib ketadi. `sm:` esa
-                            // aniq keyin keladi.
-                            className="sm:w-44"
-                            options={[
-                                { value: '', label: t('invoice.allStatuses') },
-                                ...INVOICE_STATUSES.map((value) => ({
-                                    value,
-                                    label: t(`invoice.status.${value}`),
-                                })),
-                            ]}
-                            value={status}
-                            onChange={(event) =>
-                                applyFilter(() => setStatus(event.target.value as InvoiceStatus | ''))
-                            }
-                        />
-                        <Input
-                            className="min-w-40 flex-1 sm:w-56 sm:flex-none"
-                            placeholder={t('invoice.search')}
-                            value={search}
-                            onChange={(event) => applyFilter(() => setSearch(event.target.value))}
-                        />
-                    </div>
+            <Panel className="mb-5">
+                <header className="mb-5 min-w-0">
+                    <Eyebrow>{t('invoice.eyebrow')}</Eyebrow>
+                    <h1 className="mt-1 font-display text-2xl font-semibold text-fg">{t('invoice.title')}</h1>
                 </header>
 
-                <div className="mb-4 flex flex-wrap items-end gap-2">
-                    <Field label={t('invoice.from')}>
-                        <Input
-                            type="date"
-                            className="sm:w-44"
-                            value={from}
-                            onChange={(event) => applyFilter(() => setFrom(event.target.value))}
-                        />
-                    </Field>
-                    <Field label={t('invoice.to')}>
-                        <Input
-                            type="date"
-                            className="sm:w-44"
-                            value={to}
-                            onChange={(event) => applyFilter(() => setTo(event.target.value))}
-                        />
-                    </Field>
-                    {(from || to) && (
-                        <Button
-                            size="sm"
-                            onClick={() =>
-                                applyFilter(() => {
-                                    setFrom('')
-                                    setTo('')
-                                })
-                            }
-                        >
-                            {t('invoice.clearDates')}
-                        </Button>
-                    )}
-                </div>
-
-                <div className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-border-base p-3">
-                    <Field label={t('invoice.refundFor')}>
-                        <Select
-                            className="sm:w-56"
-                            placeholder={t('field.select')}
-                            options={studentOptions}
-                            value={refundStudentId}
-                            onChange={(event) => setRefundStudentId(event.target.value)}
-                        />
-                    </Field>
-                    <Button
-                        size="sm"
-                        disabled={refundStudentId === '' || refund.isPending}
-                        onClick={handleRefund}
-                    >
-                        {refund.isPending ? t('common.saving') : t('invoice.refund')}
-                    </Button>
-                    <p className="w-full text-[0.72rem] leading-snug text-fg-faint">
-                        {t('invoice.refundHint')}
-                    </p>
-                </div>
+                <InvoiceFilters
+                    search={search}
+                    status={status}
+                    from={from}
+                    to={to}
+                    statuses={INVOICE_STATUSES}
+                    onSearchChange={(value) => applyFilter(() => setSearch(value))}
+                    onStatusChange={(value) => applyFilter(() => setStatus(value))}
+                    onFromChange={(value) => applyFilter(() => setFrom(value))}
+                    onToChange={(value) => applyFilter(() => setTo(value))}
+                    onClearDates={() =>
+                        applyFilter(() => {
+                            setFrom('')
+                            setTo('')
+                        })
+                    }
+                />
 
                 {list.error && (
                     <div className="mb-4">
-                        <ErrorBox>
-                            {t('invoice.loadFailed', { message: errorMessage(list.error) })}
-                        </ErrorBox>
+                        <ErrorBox>{t('invoice.loadFailed', { message: errorMessage(list.error) })}</ErrorBox>
                     </div>
                 )}
 
@@ -251,22 +147,12 @@ export function PaymentsPage() {
                     </div>
                 )}
 
-                {refund.isSuccess && refund.data && (
-                    <p className="mb-4 text-sm text-success-fg">
-                        {t('invoice.refundDone', {
-                            amount: formatAmount(refund.data.amount),
-                            number: refund.data.invoiceNumber ?? '',
-                        })}
-                    </p>
-                )}
-
                 {!list.error && (
                     <InvoiceTable
                         invoices={list.invoices}
                         isLoading={list.isLoading}
-                        pendingId={changeStatus.isPending ? changeStatus.variables?.id : undefined}
-                        onMarkPaid={handleMarkPaid}
-                        onDelete={handleDelete}
+                        studentOptions={studentOptions}
+                        onDelete={handleDeleteInvoice}
                     />
                 )}
 
@@ -278,13 +164,41 @@ export function PaymentsPage() {
                 />
             </Panel>
 
+            <Panel>
+                <header className="mb-5 min-w-0">
+                    <Eyebrow>{t('transaction.eyebrow')}</Eyebrow>
+                    <h2 className="mt-1 font-display text-xl font-semibold text-fg">{t('transaction.title')}</h2>
+                </header>
+
+                {transactions.error && (
+                    <div className="mb-4">
+                        <ErrorBox>{errorMessage(transactions.error)}</ErrorBox>
+                    </div>
+                )}
+
+                {!transactions.error && (
+                    <TransactionTable
+                        transactions={transactions.transactions}
+                        isLoading={transactions.isLoading}
+                        onDelete={handleDeleteTransaction}
+                    />
+                )}
+
+                <Pagination
+                    page={txPage}
+                    totalPages={transactions.totalPages}
+                    totalElements={transactions.totalElements}
+                    onPageChange={setTxPage}
+                />
+            </Panel>
+
             {isModalOpen && (
-                <NewInvoiceModal
+                <NewPaymentModal
                     studentOptions={studentOptions}
-                    isSaving={create.isPending}
-                    error={create.error}
+                    isSaving={payments.create.isPending}
+                    error={payments.create.error}
                     onSubmit={(payload) =>
-                        create.mutate(payload, { onSuccess: () => setIsModalOpen(false) })
+                        payments.create.mutate(payload, { onSuccess: () => setIsModalOpen(false) })
                     }
                     onClose={() => setIsModalOpen(false)}
                 />
