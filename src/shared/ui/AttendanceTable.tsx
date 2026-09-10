@@ -37,6 +37,13 @@ interface AttendanceTableProps {
      * tahrirlashga o'tish. Berilmasa ustunlar bosilmaydigan bo'lib qoladi.
      */
     onEditPastLesson?: (column: PastLessonColumn) => void
+    /**
+     * Guruhda rejalashtirilgan darslar soni (`GroupLevelDto.lessonCount`).
+     * Mavjud ustunlardan ko'p bo'lsa, farqi qadar BUTUNLAY BO'SH ustun
+     * qo'shiladi — hali o'tilmagan darsning sarlavhasida ham, katagida ham
+     * hech narsa yozilmasin, deb backend jamoasi so'ragan.
+     */
+    plannedLessonCount?: number
 }
 
 /**
@@ -52,6 +59,7 @@ export function AttendanceTable({
     onStatusChange,
     onSelectStudent,
     onEditPastLesson,
+    plannedLessonCount,
 }: AttendanceTableProps) {
     const { t } = useT()
 
@@ -59,6 +67,15 @@ export function AttendanceTable({
     // tahrirlanmoqda, alohida oxirgi ustun qo'shilmaydi (ikkilanish bo'lmasin).
     const editingPastLessonId =
         draft && pastColumns.some((column) => column.lessonId === draft.lesson.id) ? draft.lesson.id : null
+
+    // Reja bilan solishtirib, hali o'tilmagan darslar uchun bo'sh ustun sonini
+    // topamiz — qoralama ustuni ham "band" hisoblanadi, u alohida dars emas.
+    const occupiedColumnsCount = pastColumns.length + (draft && !editingPastLessonId ? 1 : 0)
+    const emptyColumnsCount =
+        plannedLessonCount && plannedLessonCount > occupiedColumnsCount
+            ? plannedLessonCount - occupiedColumnsCount
+            : 0
+    const emptyColumnKeys = Array.from({ length: emptyColumnsCount }, (_, index) => `empty-${index}`)
 
     return (
         <div className="overflow-x-auto rounded-lg border border-border-base bg-surface-card">
@@ -117,6 +134,12 @@ export function AttendanceTable({
                                 </span>
                             </th>
                         )}
+                        {emptyColumnKeys.map((key) => (
+                            <th
+                                key={key}
+                                className="min-w-16 border-b border-border-base bg-surface px-2 py-1.5 text-center whitespace-nowrap"
+                            />
+                        ))}
                     </tr>
                 </thead>
                 <tbody>
@@ -189,6 +212,10 @@ export function AttendanceTable({
                                     />
                                 </td>
                             )}
+
+                            {emptyColumnKeys.map((key) => (
+                                <td key={key} className="border-b border-border-base px-2 py-1.5 text-center" />
+                            ))}
                         </tr>
                     ))}
                 </tbody>

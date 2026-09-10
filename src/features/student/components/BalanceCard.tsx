@@ -1,29 +1,21 @@
 import { useT } from '@/shared/i18n'
 import { cn, formatAmount } from '@/shared/lib'
-import { Badge, EmptyState, Eyebrow, Panel, PendingBackend } from '@/shared/ui'
-import type { BadgeTone } from '@/shared/ui'
-import type { EnrollmentPaymentStatus, StudentDto } from '@/shared/types'
-
-const PAYMENT_STATUS_TONE: Record<EnrollmentPaymentStatus, BadgeTone> = {
-    UNPAID: 'danger',
-    PARTIAL: 'warning',
-    PAID: 'success',
-}
+import { Eyebrow, Panel, PendingBackend } from '@/shared/ui'
+import type { StudentDto } from '@/shared/types'
 
 interface BalanceCardProps {
-    /** `null` — guruh tanlanmagan (o'quvchi hech qaysi guruhda emas). */
+    /** `null` — o'quvchi kartasi hali kelmagan. */
     student: StudentDto | null
-    hasGroup: boolean
 }
 
 /**
- * Tanlangan guruh bo'yicha balans.
+ * O'quvchi balansi.
  *
- * Balans `paidAmount - monthlyFee` — ya'ni MANFIY son qarzni bildiradi.
- * Shuning uchun manfiy qiymat qizil rangda: o'quvchi buni birinchi
- * qarashda ko'rishi kerak.
+ * Balans butun o'quvchiga tegishli (`Student.balance`), guruhga emas —
+ * guruhi yo'q o'quvchi ham o'z balansini ko'rishi kerak. Manfiy son qarzni
+ * bildiradi, shuning uchun qizil rangda: birinchi qarashda ko'rinsin.
  */
-export function BalanceCard({ student, hasGroup }: BalanceCardProps) {
+export function BalanceCard({ student }: BalanceCardProps) {
     const { t } = useT()
 
     return (
@@ -31,27 +23,18 @@ export function BalanceCard({ student, hasGroup }: BalanceCardProps) {
             <Eyebrow>{t('student.balance')}</Eyebrow>
             <p className="mt-1 mb-4 text-sm text-fg-muted">{t('student.balanceHint')}</p>
 
-            {!hasGroup && <EmptyState title={t('student.noGroups')} />}
+            {/* Balans hali kelmagan — o'quvchi kartasi yuklanmoqda yoki backend javobi to'liq emas. */}
+            {student?.balance === undefined && <PendingBackend />}
 
-            {/* Guruh bor, lekin balans kelmagan — backend javobi to'liq emas. */}
-            {hasGroup && student?.balance === undefined && <PendingBackend />}
-
-            {hasGroup && student?.balance !== undefined && (
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span
-                        className={cn(
-                            'font-display text-3xl font-semibold tabular-nums',
-                            student.balance < 0 ? 'text-danger-fg' : 'text-fg'
-                        )}
-                    >
-                        {formatAmount(student.balance)}
-                    </span>
-                    {student.status && (
-                        <Badge tone={PAYMENT_STATUS_TONE[student.status]}>
-                            {t(`student.paymentStatus.${student.status}`)}
-                        </Badge>
+            {student?.balance !== undefined && (
+                <span
+                    className={cn(
+                        'block font-display text-3xl font-semibold tabular-nums',
+                        student.balance < 0 ? 'text-danger-fg' : 'text-fg'
                     )}
-                </div>
+                >
+                    {formatAmount(student.balance)}
+                </span>
             )}
         </Panel>
     )

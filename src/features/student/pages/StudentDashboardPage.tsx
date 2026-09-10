@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { useTheme } from '@/app/providers/useTheme'
 import { errorMessage } from '@/shared/api'
 import { useMe } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
-import { AppShell, EmptyState, ErrorBox, Eyebrow, Panel } from '@/shared/ui'
-import { AttendanceList, type MonthOption } from '../components/AttendanceList'
+import { AppShell, Button, EmptyState, ErrorBox, Panel } from '@/shared/ui'
+import type { MonthOption } from '../components/AttendanceList'
 import { BalanceCard } from '../components/BalanceCard'
-import { GroupCard } from '../components/GroupCard'
-import { GroupPicker } from '../components/GroupPicker'
-import { ProfileCard } from '../components/ProfileCard'
+import { CollapsibleSection } from '../components/CollapsibleSection'
+import { GroupAttendanceSection } from '../components/GroupAttendanceSection'
+import { ProfileHeader } from '../components/ProfileHeader'
+import { StudentInfoSection } from '../components/StudentInfoSection'
 import { useMyAttendance } from '../hooks/useMyAttendance'
 import { useMyGroups } from '../hooks/useMyGroups'
 import { useMyStudentRecord } from '../hooks/useMyStudentRecord'
@@ -17,15 +19,15 @@ import { useMyStudentRecord } from '../hooks/useMyStudentRecord'
 /**
  * O'quvchi paneli.
  *
- * Balans TANLANGAN GURUHGA tegishli: backend uni `Enrollment` dan
- * hisoblaydi, ya'ni har bir guruh uchun alohida. Guruh almashtirilsa
- * balans ham almashadi.
+ * Balans butun o'quvchiga tegishli, guruhga emas: to'lovlar `Student.balance`
+ * ga qo'shilib boradi. Manfiy son qarzni bildiradi.
  */
 export function StudentDashboardPage() {
     const { t } = useT()
     const { signOut } = useAuth()
     const session = useSession()
     const { theme, toggleTheme } = useTheme()
+    const navigate = useNavigate()
 
     // Bo'sh satr = "hali tanlanmagan"; bunda ro'yxatdagi birinchi guruh olinadi.
     const [pickedGroupId, setPickedGroupId] = useState('')
@@ -43,7 +45,7 @@ export function StudentDashboardPage() {
         : (groups[0]?.id ?? '')
     const selectedGroup = groups.find((group) => group.id === selectedGroupId)
 
-    const { data: student, error: studentError } = useMyStudentRecord(session.token, selectedGroupId)
+    const { data: student, error: studentError } = useMyStudentRecord(session.token)
     const attendanceQuery = useMyAttendance(session.token, selectedGroupId, Number(month))
 
     return (
@@ -67,55 +69,49 @@ export function StudentDashboardPage() {
                     </div>
                 )}
 
-                {!isLoading && me && <ProfileCard user={me} student={student ?? null} />}
+                {!isLoading && me && <ProfileHeader user={me} group={selectedGroup} />}
 
-                {!isLoading && me && selectedGroupId !== '' && studentError != null && (
+                {!isLoading && me && studentError != null && (
                     <div className="mb-5">
                         <EmptyState title={t('student.notFound')} description={t('student.notFoundHint')} />
                     </div>
                 )}
 
-                <Panel className="mb-5">
-                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <Eyebrow>{t('student.group')}</Eyebrow>
-                            <p className="mt-1 text-sm text-fg-muted">{t('student.groupHint')}</p>
-                        </div>
-                        <GroupPicker groups={groups} selectedId={selectedGroupId} onSelect={setPickedGroupId} />
-                    </div>
+                <div className="mb-5">
+                    <BalanceCard student={student ?? null} />
+                </div>
 
-                    {groupsQuery.isLoading && (
-                        <p className="py-4 text-center font-mono text-sm text-fg-faint">{t('common.loading')}</p>
-                    )}
+                <CollapsibleSection title={t('student.groupAttendanceSection')} defaultOpen>
+                    <GroupAttendanceSection
+                        groups={groups}
+                        selectedGroupId={selectedGroupId}
+                        selectedGroup={selectedGroup}
+                        onSelectGroup={setPickedGroupId}
+                        groupsLoading={groupsQuery.isLoading}
+                        groupsError={groupsQuery.error}
+                        attendanceEntries={attendanceQuery.entries}
+                        attendanceLoading={attendanceQuery.isLoading}
+                        month={month}
+                        onMonthChange={setMonth}
+                    />
+                </CollapsibleSection>
 
-                    {groupsQuery.error != null && <ErrorBox>{errorMessage(groupsQuery.error)}</ErrorBox>}
+                <CollapsibleSection title={t('student.infoSection')}>
+                    <StudentInfoSection parentPhone={student?.parentPhone} birthDate={me?.birthDate} />
+                </CollapsibleSection>
 
-                    {!groupsQuery.isLoading && groupsQuery.error == null && selectedGroup && (
-                        <GroupCard group={selectedGroup} />
-                    )}
+                <CollapsibleSection title={t('student.settingsSection')}>
+                    <p className="mb-3 text-sm text-fg-muted">{t('student.settingsHint')}</p>
+                    <Button variant="secondary" onClick={() => navigate('/settings')}>
+                        {t('nav.settings')}
+                    </Button>
+                </CollapsibleSection>
 
-                    {!groupsQuery.isLoading && groupsQuery.error == null && !selectedGroup && (
-                        <EmptyState title={t('student.noGroups')} description={t('student.noGroupsHint')} />
-                    )}
-                </Panel>
-
-                <Panel className="mb-5">
-                    <Eyebrow>{t('student.attendance')}</Eyebrow>
-                    <p className="mt-1 mb-4 text-sm text-fg-muted">{t('student.attendanceHint')}</p>
-
-                    {selectedGroup ? (
-                        <AttendanceList
-                            entries={attendanceQuery.entries}
-                            isLoading={attendanceQuery.isLoading}
-                            month={month}
-                            onMonthChange={setMonth}
-                        />
-                    ) : (
-                        <EmptyState title={t('student.noGroups')} />
-                    )}
-                </Panel>
-
-                <BalanceCard student={student ?? null} hasGroup={Boolean(selectedGroup)} />
+                <div className="mt-2 flex justify-center">
+                    <Button variant="danger" onClick={signOut}>
+                        {t('common.signOut')}
+                    </Button>
+                </div>
             </div>
         </AppShell>
     )

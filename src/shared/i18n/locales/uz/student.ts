@@ -19,9 +19,12 @@ export const student = {
     'student.balance': 'Balansim',
     'student.balanceHint':
         'Manfiy son — qarzingiz borligini bildiradi. Nol — balans toza. Musbat son — sizda avans bor.',
-    'student.paymentStatus.UNPAID': 'To‘lanmagan',
-    'student.paymentStatus.PARTIAL': 'Qisman to‘langan',
-    'student.paymentStatus.PAID': 'To‘langan',
+    'student.levelLabel': 'Darajangiz',
+    'student.groupLabel': 'Guruhingiz',
+    'student.groupAttendanceSection': 'Guruhim va davomat',
+    'student.infoSection': 'Ma’lumotlarim',
+    'student.settingsSection': 'Sozlamalar',
+    'student.settingsHint': 'Profil va parolni sozlamalar sahifasida o‘zgartirasiz.',
 } as const
 
 export type StudentKeys = keyof typeof student

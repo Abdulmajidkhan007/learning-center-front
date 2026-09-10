@@ -642,3 +642,49 @@ qaytaradi — tuzatilguncha ikkalasi ham qabul qilinadi) ·
 `GroupNameProjection` (id, name, dayType) · `AttendanceCreateDto{lessonId, students}` ·
 `StatusReasonDto{status, reason}` (`MonthlyAttendanceDto.attendanceStudentMap` qiymati) ·
 `AttendanceStudentDto.reason`
+
+---
+
+## 2026-09-09: to'lov modeli almashtirildi — topilgan muammolar
+
+Backend `main` da hisob + tranzaksiya modeli ishga tushdi. Front unga
+o'tkazildi, lekin uchta narsa mijoz tomondan ishlamaydi:
+
+### 1. ✅ `POST /invoice` — tuzatildi
+
+**2026-09-09:** `InvoiceCreateDto` endi `String enrollmentId` oladi.
+Bundan tashqari `POST /invoice/{groupId}` qo'shildi — guruhga shu oy
+uchun hisob yaratadi, front unga ulandi.
+
+### 2. 🟠 Tranzaksiya summasining ISHORASI mijozga qolgan
+
+`TransactionService.create` → `setNewBalance(amount, studentId)`, so'rov esa
+`balance = balance + :amount`. Backend turga qaramaydi: `PAID` bo'ladimi,
+`RETURNED` bo'ladimi — qanday summa kelsa shundoq qo'shadi.
+
+`@DecimalMin("0.0")` olib tashlangani uchun endi manfiy son yuborsa
+bo'ladi va front `RETURNED` da aynan shunday qilyapti (`transactionApi.ts`).
+Backendning o'zi ham ichkarida shunday qiladi — `createGroupInvoice` da
+`monthlyFee.negate()`.
+
+Ishlaydi, lekin mo'rt: boshqa mijoz (mobil ilova, Swagger orqali qo'lda
+so'rov) musbat son yuborsa, qaytarim qarzni kamaytirish o'rniga
+**oshiradi** va buni hech narsa to'xtatmaydi. Ishorani `TransactionService`
+ning o'zi turga qarab qo'ysa ishonchli bo'lardi.
+
+### 3. 🟠 `InvoiceDto` da holat ham, o'quvchi ham yo'q
+
+`GET /invoice?status=…` filtri ishlaydi, lekin javobda `status` qaytmaydi —
+ya'ni foydalanuvchi nima bo'yicha filtrlaganini jadvalda ko'rmaydi.
+O'quvchi ham faqat `enrollmentDto.studentId` bo'lib keladi; ismni
+ko'rsatish uchun front butun o'quvchilar ro'yxatini yuklab, id bo'yicha
+qidiryapti. `InvoiceDto` ga `status` va o'quvchi ismini qo'shsangiz shu
+ikkalasi ham yo'qoladi.
+
+### 4. 🟠 To'lov faqat ENG SO'NGGI hisobga bog'lanadi
+
+`TransactionMapper.toEntity` → `studentService.getLatestInvoice(studentId)`.
+Ya'ni eski hisobga to'lov yozib bo'lmaydi, va o'quvchida umuman hisob
+bo'lmasa `POST /transaction` 404 qaytaradi. Hozircha yetarli, lekin
+`TransactionCreateDto` ga ixtiyoriy `invoiceId` qo'shilsa moslashuvchan
+bo'lardi.

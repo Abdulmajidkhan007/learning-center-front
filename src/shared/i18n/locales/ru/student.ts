@@ -16,7 +16,10 @@ export const student: Record<StudentKeys, string> = {
     'student.balance': 'Мой баланс',
     'student.balanceHint':
         'Отрицательное число означает задолженность. Ноль — баланс чист. Положительное число — аванс.',
-    'student.paymentStatus.UNPAID': 'Не оплачено',
-    'student.paymentStatus.PARTIAL': 'Оплачено частично',
-    'student.paymentStatus.PAID': 'Оплачено',
+    'student.levelLabel': 'Ваш уровень',
+    'student.groupLabel': 'Ваша группа',
+    'student.groupAttendanceSection': 'Моя группа и посещаемость',
+    'student.infoSection': 'Мои данные',
+    'student.settingsSection': 'Настройки',
+    'student.settingsHint': 'Профиль и пароль меняются на странице настроек.',
 }

@@ -1,46 +1,33 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-    createInvoice,
-    deleteInvoice,
-    returnInvoice,
-    updateInvoiceStatus,
-    type CreateInvoicePayload,
-} from '../api/invoiceApi'
-import type { InvoiceStatus } from '@/shared/types'
+import { createGroupInvoice, deleteInvoice } from '../api/invoiceApi'
 
 /**
- * Hisob yaratish / holatini o'zgartirish / o'chirish.
+ * Hisob o'chirish va guruhga qo'lda hisob yaratish.
  *
- * Uchalasi ham `['invoice']` prefiksini bekor qiladi — qaysi sahifa yoki
- * filtr ochiqligi ahamiyatsiz, hammasi yangilanadi.
+ * Ilgari bu yerda yaratish, holat almashtirish va pul qaytarish ham bor edi.
+ * Backend to'lov modelini almashtirgach ular yo'qoldi: hisob avtomatik
+ * yaratiladi, holat to'lovlardan kelib chiqadi, pul qaytarish esa
+ * tranzaksiya bo'lib yoziladi (`useTransactionMutations` ga qarang).
  */
 export function useInvoiceMutations(token: string) {
     const queryClient = useQueryClient()
 
-    function invalidate() {
-        return queryClient.invalidateQueries({ queryKey: ['invoice'] })
+    async function invalidate() {
+        await queryClient.invalidateQueries({ queryKey: ['invoice'] })
+        // Hisob yaratilganda har bir o'quvchiga MONTHLY_FEE tranzaksiyasi
+        // yoziladi va balansi o'zgaradi — ro'yxat eskirdi.
+        await queryClient.invalidateQueries({ queryKey: ['transaction'] })
     }
-
-    const create = useMutation({
-        mutationFn: (payload: CreateInvoicePayload) => createInvoice(token, payload),
-        onSuccess: invalidate,
-    })
-
-    const changeStatus = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: InvoiceStatus }) =>
-            updateInvoiceStatus(token, id, status),
-        onSuccess: invalidate,
-    })
 
     const remove = useMutation({
         mutationFn: (id: string) => deleteInvoice(token, id),
         onSuccess: invalidate,
     })
 
-    const refund = useMutation({
-        mutationFn: (studentId: string) => returnInvoice(token, studentId),
+    const createForGroup = useMutation({
+        mutationFn: (groupId: string) => createGroupInvoice(token, groupId),
         onSuccess: invalidate,
     })
 
-    return { create, changeStatus, remove, refund }
+    return { remove, createForGroup }
 }

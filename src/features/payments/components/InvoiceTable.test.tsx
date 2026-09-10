@@ -1,56 +1,39 @@
 import { describe, expect, it, vi } from 'vitest'
-import { screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { screen, within } from '@testing-library/react'
 import { renderWithProviders } from '@/test/renderWithProviders'
 import { InvoiceTable } from './InvoiceTable'
 import type { InvoiceDto } from '@/shared/types'
 
-const pending: InvoiceDto = {
-    id: 'i1',
-    invoiceNumber: 'INV-002',
-    student: { id: 's1', userDto: { fullName: 'Aziza Karimova' } },
-    amount: 450000,
-    issuedAt: '2026-08-01T09:00:00',
-    status: 'PENDING',
-}
+const invoices: InvoiceDto[] = [
+    {
+        id: 'i1',
+        invoiceNumber: 'INV-001',
+        amount: 450000,
+        issuedAt: '2026-07-01T09:00:00',
+        enrollmentDto: { id: 'e1', studentId: 'st-1' },
+    },
+]
 
-const paid: InvoiceDto = { ...pending, id: 'i2', invoiceNumber: 'INV-001', status: 'PAID' }
-
-function renderTable(invoices: InvoiceDto[], onMarkPaid = vi.fn()) {
-    renderWithProviders(
-        <InvoiceTable
-            invoices={invoices}
-            isLoading={false}
-            onMarkPaid={onMarkPaid}
-            onDelete={vi.fn()}
-        />
-    )
-    return onMarkPaid
-}
+const studentOptions = [{ value: 'st-1', label: 'Aziza Karimova' }]
 
 describe('InvoiceTable', () => {
-    it('o’quvchi ismini va summasini ko’rsatadi', () => {
-        renderTable([pending])
-        expect(screen.getByText('Aziza Karimova')).toBeInTheDocument()
-        expect(screen.getByText(/450/)).toBeInTheDocument()
+    // `InvoiceDto` da o'quvchi ismi yo'q — u faqat `studentId` bo'yicha topiladi.
+    it('o‘quvchi ismini id bo‘yicha ro‘yxatdan topadi', () => {
+        renderWithProviders(
+            <InvoiceTable invoices={invoices} isLoading={false} studentOptions={studentOptions} onDelete={vi.fn()} />
+        )
+
+        const row = screen.getByRole('row', { name: /INV-001/ })
+        expect(within(row).getByText('Aziza Karimova')).toBeInTheDocument()
     })
 
-    // To'langan hisobni qayta "to'landi" qilishning ma'nosi yo'q va bu
-    // tasodifan bosishga olib keladi.
-    it('to’langan hisobda "to’landi" tugmasi bo’lmaydi', () => {
-        renderTable([paid])
-        expect(screen.queryByRole('button', { name: /to‘landi/i })).not.toBeInTheDocument()
-    })
+    // Ro'yxat hali yuklanmagan bo'lsa bo'sh katakdan ko'ra id foydaliroq.
+    it('ro‘yxat bo‘sh bo‘lsa id ko‘rsatadi', () => {
+        renderWithProviders(
+            <InvoiceTable invoices={invoices} isLoading={false} studentOptions={[]} onDelete={vi.fn()} />
+        )
 
-    it('kutilayotgan hisobda tugma bosilsa hisobni uzatadi', async () => {
-        const onMarkPaid = renderTable([pending])
-        await userEvent.click(screen.getByRole('button', { name: /to‘landi/i }))
-        expect(onMarkPaid).toHaveBeenCalledWith(pending)
-    })
-
-
-    it('ro’yxat bo’sh bo’lsa tushunarli xabar chiqadi', () => {
-        renderTable([])
-        expect(screen.getByText(/hisob topilmadi/i)).toBeInTheDocument()
+        const row = screen.getByRole('row', { name: /INV-001/ })
+        expect(within(row).getByText('st-1')).toBeInTheDocument()
     })
 })

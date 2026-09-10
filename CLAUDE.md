@@ -65,7 +65,8 @@ git checkout -b <ism>/<ish> FETCH_HEAD
 ### Konflikt chiqadigan uch joy
 
 1. `src/shared/i18n/locales/` — kalitni **o'z bo'liming fayliga** qo'y.
-2. `src/shared/types/index.ts` — mavjud bloklarga tegma, yangisini qo'sh.
+2. `src/shared/types/` — tipni **mavzusiga mos faylga** qo'sh
+   (`invoice.ts`, `student.ts`, …); `index.ts` faqat re-export qiladi.
 3. `src/shared/ui/` — hammaga ta'sir qiladi, tegishdan oldin kelish.
 
 Qolgan hamma narsa `features/<bo'lim>/` ichida — u yerda to'qnashuv bo'lmaydi.
@@ -189,12 +190,16 @@ src/
     ui/                       AppShell, Button, Modal, Panel, Input, Select,
                               Pagination, Badge, DataTable, icons,
                               *Classes.ts (klass jadvallari) …
-    lib/                      format, jwt, cn
+    lib/                      format, jwt, cn, csv
+    hooks/                    bir nechta bo'lim ishlatadigan so'rovlar
+                              (useMe, useGroupInfo, useAttendanceRecords)
     i18n/                     translate, useT, locales/{uz,ru,en}/<bo'lim>.ts
-    types/index.ts            backend DTO tiplari (bitta fayl)
+    types/                    backend DTO tiplari mavzu bo'yicha;
+                              index.ts hammasini re-export qiladi
   styles/index.css            Tailwind + rang tokenlari + dark rejim
   test/                       setup.ts, renderWithProviders.tsx
-  demo/                       backendsiz demo (production'ga tushmaydi)
+  demo/                       backendsiz demo (production'ga tushmaydi);
+                              mockApi/ ichida endpointlar bo'lim-bo'lim
 ```
 
 Ildizda: `Dockerfile` + `Caddyfile` (production, `/api` proxysi),
@@ -203,22 +208,24 @@ Ildizda: `Dockerfile` + `Caddyfile` (production, `/api` proxysi),
 
 ### Marshrutlar
 
-`/` → rolga qarab dashboard · `/attendance` · `/payments` · `/leads` ·
-`/settings` (`src/app/routes/AppRoutes.tsx`).
+`/` → rolga qarab dashboard · `/attendance` · `/payments` · `/group-levels` ·
+`/leads` · `/settings` (`src/app/routes/AppRoutes.tsx`).
 
 Rol tekshiruvi `RequireRole` orqali (`src/app/routes/RequireRole.tsx`).
-**Diqqat:** bu himoya EMAS, faqat qulaylik — backendda `@PreAuthorize`
-yo'q, ya'ni tokeni bor har kim API'ga to'g'ridan-to'g'ri kira oladi.
+**Diqqat: bu himoya EMAS, faqat qulaylik.** Backendda `@PreAuthorize`
+endi bor, lekin faqat bir qismida — `Invoice`, `Lead`, `Student`, `Teacher`,
+`User` va super-admin analitikasida. `Group`, `Attendance`, `Lesson`,
+`Branch`, `Organization`, `Image` va `Transaction` kontrollerlarida yo'q,
+ya'ni tokeni bor har kim ularga to'g'ridan-to'g'ri kira oladi.
 
 ## Ma'lum chetlanishlar
 
-Bular allaqachon topilgan, qayta "kashf qilish" shart emas:
+Hozircha yo'q. Ilgari uchtasi bor edi (`ThemeToggle` da `shared` dan `app`
+ga import, ikkita sahifada bo'limlararo import, ikkita fayl 250 qatordan
+oshgani) — uchalasi ham tuzatildi.
 
-- `src/shared/ui/ThemeToggle.tsx:1` — `shared` dan `app` ga import
-  (1-qoidaning buzilishi).
-- `src/features/teacher/pages/TeacherDashboardPage.tsx:7` va
-  `src/features/student/pages/StudentDashboardPage.tsx:5` — bo'limlararo
-  import.
+Yangisini topsangiz shu yerga yozib qo'ying: aks holda keyingi odam yoki
+sessiya uni qayta "kashf qiladi".
 
 ## Hujjatlar
 
