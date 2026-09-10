@@ -4,6 +4,7 @@ import { handleAuth } from './auth'
 import { handleCrud } from './crud'
 import { handleEnrollments } from './enrollments'
 import { handleGroupLevels } from './groupLevels'
+import { handleImages } from './images'
 import { handleInvoices } from './invoices'
 import { handleLeads } from './leads'
 import { isInstalled, resetMockApiInstalledFlag, setDemoRole, setInstalled } from './state'
@@ -32,13 +33,27 @@ export function installMockApi() {
         const url = new URL(raw, origin)
         const path = url.pathname.replace('/api/v1', '')
         const method = (init?.method ?? 'GET').toUpperCase()
-        const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {}
+        let body: Record<string, unknown> = {}
+        if (init?.body) {
+            if (init.body instanceof FormData) {
+                body = {}
+            } else {
+                try {
+                    body = JSON.parse(String(init.body)) as Record<string, unknown>
+                } catch {
+                    body = {}
+                }
+            }
+        }
 
         // Haqiqiy tarmoqqa o'xshasin — spinner'lar ko'rinib qolsin.
         await new Promise((resolve) => setTimeout(resolve, 180))
 
         const authRes = handleAuth(path)
         if (authRes) return authRes
+
+        const imagesRes = handleImages(path, method, url, body)
+        if (imagesRes) return imagesRes
 
         const enrollmentsRes = handleEnrollments(path, method, url, body)
         if (enrollmentsRes) return enrollmentsRes
