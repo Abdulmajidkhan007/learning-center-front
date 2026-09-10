@@ -134,4 +134,36 @@ describe('mockApi', () => {
             expect(typeof data).toBe('object')
         }
     })
+
+    it('handles /image endpoints correctly', async () => {
+        // GET /image
+        const getPage = await apiFetch<Record<string, unknown>>('/image', { token: 'demo' })
+        expect(getPage).not.toBeNull()
+        const content = getPage?.content as Array<Record<string, unknown>>
+        expect(content.length).toBeGreaterThan(0)
+
+        // POST /image/upload
+        const formData = new FormData()
+        formData.append('file', new File(['dummy content'], 'test.png', { type: 'image/png' }))
+        const uploaded = await apiFetch<Record<string, unknown>>('/image/upload', {
+            method: 'POST',
+            token: 'demo',
+            body: formData,
+        })
+        expect(uploaded).not.toBeNull()
+        expect(uploaded?.imageUrl).toBeDefined()
+
+        const newImg = uploaded?.imageUrl as Record<string, unknown>
+        const imageId = newImg.id as string
+
+        // PUT /image/main/:id
+        await expect(apiFetch(`/image/main/${imageId}`, { method: 'PUT', token: 'demo' })).resolves.toBeNull()
+
+        // Verify /auth/me updated
+        const me = await apiFetch<Record<string, unknown>>('/auth/me', { token: 'demo' })
+        expect(me?.imageUrl).toBe(newImg.imageUrl)
+
+        // DELETE /image/:id
+        await expect(apiFetch(`/image/${imageId}`, { method: 'DELETE', token: 'demo' })).resolves.toBeNull()
+    })
 })
