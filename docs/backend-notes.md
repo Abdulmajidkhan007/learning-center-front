@@ -696,3 +696,41 @@ Ya'ni eski hisobga to'lov yozib bo'lmaydi, va o'quvchida umuman hisob
 bo'lmasa `POST /transaction` 404 qaytaradi. Hozircha yetarli, lekin
 `TransactionCreateDto` ga ixtiyoriy `invoiceId` qo'shilsa moslashuvchan
 bo'lardi.
+
+---
+
+## 2026-09-11 — `login apis fixes` (9795c65)
+
+### 5. 🔴 `LoginRequest.organizationId` talab qilinadi, lekin ISHLATILMAYDI
+
+`LoginRequest` ga `@NotBlank private String organizationId` qo'shildi.
+`AuthService` esa uni umuman o'qimaydi — foydalanuvchi ilgarigiday faqat
+telefon bo'yicha topiladi:
+
+```java
+User user = userRepository.findByPhoneAndDeletedFalse(phone)
+```
+
+Ya'ni hozir bu maydon **hech nimani hal qilmaydi**, faqat yuborilmasa
+login `400` qaytaradi. Frontend moslashtirildi (kirish oynasiga tashkilot
+tanlagichi qo'shildi), lekin ikkita savol ochiq:
+
+1. Bir xil telefon raqami ikki tashkilotda bo'lsa nima bo'ladi? Hozir
+   `findByPhoneAndDeletedFalse` birinchi topilganini oladi — ya'ni odam
+   boshqa tashkilotga kirib qolishi mumkin. Qidiruv
+   `findByPhoneAndOrganizationIdAndDeletedFalse` bo'lishi kerak.
+2. Agar 1-band bajarilmasa, maydonni `@NotBlank` dan olib tashlash
+   kerak — hech nima hal qilmaydigan majburiy maydon faqat xatolik
+   manbai.
+
+Bu o'zi taklif qilgan "avval kirish, keyin tashkilot tanlash" modeliga
+ham zid: ro'yxat kirishdan OLDIN ochiq turibdi (`WHITE_LIST` da
+`/api/v1/organization/name` bor), ya'ni tashqaridan har kim barcha
+tashkilotlar nomini ko'ra oladi.
+
+### 6. 🟡 `/api/v1/organizations` → `/api/v1/organization`
+
+Yo'l ko'plikdan birlikka o'zgardi. Frontend moslashtirildi
+(`superAdminApi.ts`). Eslatma: bunday o'zgarish oldindan aytilmasa
+super-admin paneli jimgina `404` bo'ladi — tekshirib ko'rmaguncha
+bilinmaydi.

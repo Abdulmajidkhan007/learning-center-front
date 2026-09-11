@@ -44,6 +44,11 @@ export interface LoginCredentials {
     phone: string
     password: string
     rememberMe: boolean
+    /**
+     * Backendda `@NotBlank` — bo'sh yuborilsa login 400 qaytaradi.
+     * Shuning uchun kirish tugmasi tashkilot tanlanmaguncha o'chiq turadi.
+     */
+    organizationId: string
 }
 
-export type Role = 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'
+export type Role = 'DEVELOPER' | 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'

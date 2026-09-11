@@ -3,6 +3,7 @@ import type { SuperAdminKeys } from '../uz/superAdmin'
 /** Super-admin: tashkilotlar va filiallar. (ruscha) */
 export const superAdmin: Record<SuperAdminKeys, string> = {
     'superAdmin.role': 'Супер-админ',
+    'superAdmin.developerRole': 'Разработчик',
     'superAdmin.eyebrow': 'Система',
     'superAdmin.section': 'Раздел',
     'superAdmin.search': 'поиск по названию…',

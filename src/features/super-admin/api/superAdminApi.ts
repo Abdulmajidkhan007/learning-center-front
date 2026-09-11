@@ -1,7 +1,8 @@
 import { apiFetch } from '@/shared/api'
 import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page } from '@/shared/types'
 
-const ORGANIZATIONS = '/organizations'
+// Backend yo'lni ko'plikdan birlikka o'zgartirdi (2026-09-11, `login apis fixes`).
+const ORGANIZATIONS = '/organization'
 const BRANCHES = '/branch'
 const ANALYTICS = '/analytics'
 

@@ -41,6 +41,8 @@ export const queryKeys = {
     transactions: (params: Record<string, unknown>) => ['transaction', 'list', params] as const,
 
     organizations: (params: Record<string, unknown>) => ['organization', 'list', params] as const,
+    /** Kirish oynasidagi tanlagich — token talab qilmaydi, shuning uchun alohida kalit. */
+    organizationOptions: ['organization', 'options'] as const,
     branches: (params: Record<string, unknown>) => ['branch', 'list', params] as const,
     branch: (id: string) => ['branch', 'one', id] as const,
 

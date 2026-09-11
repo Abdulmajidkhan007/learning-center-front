@@ -11,16 +11,35 @@ function tokenWithRole(role: string): string {
     return `${encode({ alg: 'HS256' })}.${encode({ role })}.sig`
 }
 
+/**
+ * Kirish oynasi ikki xil so'rov yuboradi: tashkilotlar ro'yxati va login'ning
+ * o'zi. Ikkalasiga bir xil javob berib bo'lmaydi — ro'yxat massiv, login esa
+ * obyekt, shuning uchun mock manzilga qarab ajratadi.
+ */
 function mockLoginResponse(body: object, ok = true, status = 200) {
+    const respond = (payload: unknown, responseOk: boolean, responseStatus: number) => ({
+        ok: responseOk,
+        status: responseStatus,
+        text: () => Promise.resolve(JSON.stringify(payload)),
+        json: () => Promise.resolve(payload),
+    })
+
     vi.stubGlobal(
         'fetch',
-        vi.fn().mockResolvedValue({
-            ok,
-            status,
-            text: () => Promise.resolve(JSON.stringify(body)),
-            json: () => Promise.resolve(body),
-        })
+        vi.fn().mockImplementation((url: string) =>
+            Promise.resolve(
+                String(url).includes('/organization/name')
+                    ? respond([{ id: 'org-1', name: 'Demo markaz' }], true, 200)
+                    : respond(body, ok, status)
+            )
+        )
     )
+}
+
+/** Login so'rovining tanasi — birinchi chaqiruv tashkilotlar ro'yxati bo'lishi mumkin. */
+function loginRequestBody() {
+    const call = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('/auth/login'))
+    return JSON.parse(String(call?.[1]?.body))
 }
 
 afterEach(() => {
@@ -55,9 +74,23 @@ describe('LoginForm', () => {
         await user.click(screen.getByLabelText(/meni eslab qol/i))
         await user.click(screen.getByRole('button', { name: /kirish/i }))
 
-        await waitFor(() => expect(fetch).toHaveBeenCalled())
-        const [, init] = vi.mocked(fetch).mock.calls[0]
-        expect(JSON.parse(String(init?.body))).toMatchObject({ rememberMe: true })
+        await waitFor(() => expect(loginRequestBody()).toMatchObject({ rememberMe: true }))
+    })
+
+    // Backendda `organizationId` @NotBlank — yuborilmasa login 400 bo'ladi.
+    // Bitta tashkilot bo'lganda foydalanuvchi hech nima tanlamaydi, shuning
+    // uchun forma uni o'zi qo'yishi kerak.
+    it('bitta tashkilot bo’lsa uni o’zi tanlab yuboradi', async () => {
+        const user = userEvent.setup()
+        mockLoginResponse({ token: tokenWithRole('ADMINISTRATOR') })
+
+        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        await waitFor(() => expect(loginRequestBody()).toMatchObject({ organizationId: 'org-1' }))
     })
 
     it('noto’g’ri ma’lumotda xato xabarini ko’rsatadi', async () => {

@@ -1,9 +1,19 @@
 import { apiFetch } from '@/shared/api'
 import { decodeJwt } from '@/shared/lib'
-import type { AuthResponse, LoginCredentials, Session } from '@/shared/types'
+import type { AuthResponse, IdNameDto, LoginCredentials, Session } from '@/shared/types'
 
 export function login(credentials: LoginCredentials) {
     return apiFetch<AuthResponse>('/auth/login', { method: 'POST', body: credentials })
+}
+
+/**
+ * Kirish oynasidagi tashkilotlar ro'yxati.
+ *
+ * Token bilan EMAS: bu yo'l backendning ochiq ro'yxatida (`WHITE_LIST`),
+ * chunki foydalanuvchi hali kirmagan — tashkilotni tanlamasdan kira olmaydi.
+ */
+export async function fetchOrganizationOptions() {
+    return (await apiFetch<IdNameDto[]>('/organization/name')) ?? []
 }
 
 /**

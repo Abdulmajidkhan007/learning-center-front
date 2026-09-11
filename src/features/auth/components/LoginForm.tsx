@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { Button, ErrorBox, Field, Input } from '@/shared/ui'
+import { Button, ErrorBox, Field, Input, Select } from '@/shared/ui'
 import { useLogin } from '../hooks/useLogin'
+import { useOrganizationOptions } from '../hooks/useOrganizationOptions'
 import type { Session } from '@/shared/types'
 
 export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => void }) {
@@ -10,12 +11,20 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
+    const [organizationId, setOrganizationId] = useState('')
 
     const { mutate, isPending, error } = useLogin(onLoggedIn)
+    const organizations = useOrganizationOptions()
+
+    // Bitta tashkilot bo'lsa tanlashning ma'nosi yo'q — o'zi tanlanadi.
+    // Ko'p markazli emas, bitta markazli mijozda bu ortiqcha bosish bo'lardi.
+    const onlyOrganization =
+        organizations.options.length === 1 ? organizations.options[0].value : ''
+    const selectedOrganizationId = organizationId || onlyOrganization
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        mutate({ phone, password, rememberMe })
+        mutate({ phone, password, rememberMe, organizationId: selectedOrganizationId })
     }
 
     return (
@@ -30,6 +39,18 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                     autoComplete="tel"
                 />
             </Field>
+
+            {organizations.options.length > 1 && (
+                <Field label={t('auth.organization')}>
+                    <Select
+                        required
+                        value={selectedOrganizationId}
+                        onChange={(event) => setOrganizationId(event.target.value)}
+                        options={organizations.options}
+                        placeholder={t('auth.organizationPlaceholder')}
+                    />
+                </Field>
+            )}
 
             <Field label={t('auth.password')}>
                 <Input
@@ -59,9 +80,16 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 {t('auth.keepSignedIn')}
             </label>
 
+            {organizations.error != null && <ErrorBox>{t('auth.organizationsFailed')}</ErrorBox>}
+
             {error && <ErrorBox>{errorMessage(error, t('auth.invalidCredentials'))}</ErrorBox>}
 
-            <Button type="submit" variant="primary" disabled={isPending} className="mt-2 py-3">
+            <Button
+                type="submit"
+                variant="primary"
+                disabled={isPending || selectedOrganizationId === ''}
+                className="mt-2 py-3"
+            >
                 {isPending ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
         </form>

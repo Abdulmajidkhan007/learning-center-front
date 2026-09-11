@@ -36,13 +36,13 @@ describe('fetchOrganizations', () => {
     it('to‘g‘ri yo‘l va query parametrlarini yuboradi', async () => {
         const fetchMock = mockFetch({ text: '{"content":[],"totalElements":0}' })
         await fetchOrganizations(TOKEN, { page: 0, size: 10 })
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations?page=0&size=10')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organization?page=0&size=10')
     })
 
     it('bo‘sh search parametrini query’dan tushirib qoldiradi', async () => {
         const fetchMock = mockFetch({ text: '{}' })
         await fetchOrganizations(TOKEN, { page: 0, size: 10, search: '' })
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations?page=0&size=10')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organization?page=0&size=10')
     })
 })
 
@@ -50,7 +50,7 @@ describe('createOrganization', () => {
     it('POST /organizations ga body yuboradi', async () => {
         const fetchMock = mockFetch({ text: '{"id":"1"}' })
         await createOrganization(TOKEN, { name: 'Markaz' })
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organization')
         expect(fetchMock.mock.calls[0][1].method).toBe('POST')
         expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Markaz"}')
     })
@@ -60,7 +60,7 @@ describe('updateOrganization', () => {
     it('PUT /organizations/{id} ga body yuboradi', async () => {
         const fetchMock = mockFetch({ text: '{"id":"1"}' })
         await updateOrganization(TOKEN, '1', { name: 'Markaz 2' })
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organizations/1')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/organization/1')
         expect(fetchMock.mock.calls[0][1].method).toBe('PUT')
         expect(fetchMock.mock.calls[0][1].body).toBe('{"name":"Markaz 2"}')
     })
