@@ -87,7 +87,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
             <Button
                 type="submit"
                 variant="primary"
-                disabled={isPending || selectedOrganizationId === ''}
+                disabled={isPending || (selectedOrganizationId === '' && !organizations.isUnavailable)}
                 className="mt-2 py-3"
             >
                 {isPending ? t('auth.signingIn') : t('auth.signIn')}

@@ -26,6 +26,16 @@ export function useOrganizationOptions() {
             label: organization.name,
         })),
         isLoading: query.isLoading,
+        /**
+         * Ro'yxat kelmagani kirishni TO'SIB QO'YMASLIGI kerak.
+         *
+         * Backendda hozir aylanma bog'liqlik bor: login `organizationId`
+         * talab qiladi, uni bilish uchun yagona yo'l esa token so'raydi.
+         * Shunday paytda tugmani o'chirib qo'ysak, foydalanuvchi umuman
+         * kira olmaydi va sababini ham ko'rmaydi. Shuning uchun urinishga
+         * ruxsat beramiz — xatoni backend aytsin.
+         */
+        isUnavailable: query.isError,
         error: query.error,
     }
 }

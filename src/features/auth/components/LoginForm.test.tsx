@@ -48,6 +48,31 @@ afterEach(() => {
 })
 
 describe('LoginForm', () => {
+    /*
+     * Tashkilotlar ro'yxati kelmasa ham kirishga urinib ko'rish mumkin
+     * bo'lishi kerak: aks holda backenddagi bitta nosozlik butun tizimga
+     * kirishni yopib qo'yadi va foydalanuvchi sababini ko'rmaydi.
+     */
+    it('tashkilotlar ro’yxati kelmasa ham kirish tugmasi ochiq qoladi', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockImplementation((url: string) =>
+                Promise.resolve({
+                    ok: !String(url).includes('/organization/name'),
+                    status: String(url).includes('/organization/name') ? 401 : 200,
+                    text: () => Promise.resolve(JSON.stringify({ token: tokenWithRole('TEACHER') })),
+                    json: () => Promise.resolve({ token: tokenWithRole('TEACHER') }),
+                })
+            )
+        )
+
+        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
+
+        await waitFor(() =>
+            expect(screen.getByRole('button', { name: /kirish/i })).toBeEnabled()
+        )
+    })
+
     it('telefon va parolni yuboradi, sessiyani qaytaradi', async () => {
         const user = userEvent.setup()
         mockLoginResponse({ token: tokenWithRole('ADMINISTRATOR') })

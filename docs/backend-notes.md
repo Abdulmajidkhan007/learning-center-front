@@ -701,7 +701,45 @@ bo'lardi.
 
 ## 2026-09-11 — `login apis fixes` (9795c65)
 
-### 5. 🔴 `LoginRequest.organizationId` talab qilinadi, lekin ISHLATILMAYDI
+### 5. 🔴 LOGINDA AYLANMA BOG'LIQLIK — hech kim kira olmaydi
+
+Uchta narsa bir-birini bog'lab qo'ygan:
+
+1. `LoginRequest.organizationId` — `@NotBlank`, yuborilmasa `400`.
+2. Uni bilishning yagona yo'li — `GET /api/v1/organization/name`.
+3. Lekin `OrganizationService.getByName()` birinchi qatoridayoq
+   `userValidator.authenticateAndGetOrganizationId()` chaqiradi, u esa
+   `SecurityContext` bo'sh bo'lsa `UNAUTHORIZED` tashlaydi.
+
+`SecurityConfig` bu yo'lni `WHITE_LIST` ga qo'shgani yordam bermaydi:
+Spring so'rovni ichkariga kiritadi, keyin servisning o'zi rad etadi.
+
+Ya'ni: **kirish uchun `organizationId` kerak, `organizationId` ni bilish
+uchun esa avval kirish kerak.** Kirmagan odam bu halqadan chiqa olmaydi.
+
+Yechim ikkitadan biri:
+- `getByName()` dan `authenticateAndGetOrganizationId()` ni olib tashlash
+  (u baribir ishlatilmayapti — pastda 6-bandga qarang), yoki
+- `organizationId` ni `@NotBlank` dan chiqarish.
+
+Front tomonda vaqtinchalik himoya qo'yildi: ro'yxat kelmasa "Kirish"
+tugmasi ochiq qoladi va xatoni backend aytadi — aks holda bitta nosozlik
+butun tizimga kirishni yopib qo'yardi.
+
+### 6. 🟠 `getByName()` chaqiruvchining tashkilotini tekshiradi, lekin filtrlamaydi
+
+```java
+String organizationId = userValidator.authenticateAndGetOrganizationId();
+validator.validateAndGetId(organizationId);
+List<Organization> organizations = repository.findAll();   // HAMMASI
+```
+
+Chaqiruvchining tashkiloti olinadi, tekshiriladi — va keyin e'tiborga
+olinmaydi: `findAll()` tizimdagi BARCHA tashkilotlarni qaytaradi. Kirish
+oynasi uchun aynan shu kerak (lekin tokensiz), kirgan foydalanuvchi uchun
+esa bu boshqa mijozlarning ro'yxatini ko'rsatib qo'yish.
+
+### 7. 🔴 `LoginRequest.organizationId` talab qilinadi, lekin ISHLATILMAYDI
 
 `LoginRequest` ga `@NotBlank private String organizationId` qo'shildi.
 `AuthService` esa uni umuman o'qimaydi — foydalanuvchi ilgarigiday faqat
@@ -715,10 +753,13 @@ Ya'ni hozir bu maydon **hech nimani hal qilmaydi**, faqat yuborilmasa
 login `400` qaytaradi. Frontend moslashtirildi (kirish oynasiga tashkilot
 tanlagichi qo'shildi), lekin ikkita savol ochiq:
 
-1. Bir xil telefon raqami ikki tashkilotda bo'lsa nima bo'ladi? Hozir
-   `findByPhoneAndDeletedFalse` birinchi topilganini oladi — ya'ni odam
-   boshqa tashkilotga kirib qolishi mumkin. Qidiruv
-   `findByPhoneAndOrganizationIdAndDeletedFalse` bo'lishi kerak.
+1. Bir xil telefon raqami ikki tashkilotda bo'lsa nima bo'ladi?
+   Hozircha **bo'la olmaydi**: `User.phone` da `@Column(unique = true)`
+   turibdi, ya'ni raqam butun tizim bo'ylab yagona. Demak telefonning
+   o'zi foydalanuvchini aniqlab beradi va `organizationId` ortiqcha.
+   Agar "bir odam ikki markazda" modeli kerak bo'lsa, avval shu
+   `unique = true` yechilishi kerak — bu ma'lumotlar bazasi qarori,
+   login formasining qarori emas.
 2. Agar 1-band bajarilmasa, maydonni `@NotBlank` dan olib tashlash
    kerak — hech nima hal qilmaydigan majburiy maydon faqat xatolik
    manbai.
@@ -728,7 +769,7 @@ ham zid: ro'yxat kirishdan OLDIN ochiq turibdi (`WHITE_LIST` da
 `/api/v1/organization/name` bor), ya'ni tashqaridan har kim barcha
 tashkilotlar nomini ko'ra oladi.
 
-### 6. 🟡 `/api/v1/organizations` → `/api/v1/organization`
+### 8. 🟡 `/api/v1/organizations` → `/api/v1/organization`
 
 Yo'l ko'plikdan birlikka o'zgardi. Frontend moslashtirildi
 (`superAdminApi.ts`). Eslatma: bunday o'zgarish oldindan aytilmasa
