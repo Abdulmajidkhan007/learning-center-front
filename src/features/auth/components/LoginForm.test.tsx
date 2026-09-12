@@ -102,6 +102,24 @@ describe('LoginForm', () => {
         await waitFor(() => expect(loginRequestBody()).toMatchObject({ rememberMe: true }))
     })
 
+    /*
+     * Telefon-parol to'g'ri, lekin odam tanlangan markazga a'zo emas:
+     * backend `403` qaytaradi. "Parol noto'g'ri" deb yozsak, odam parolini
+     * qayta-qayta terib ovora bo'ladi — holbuki buni administrator hal qiladi.
+     */
+    it('a’zo bo’lmagan markaz tanlansa administratorga yo’naltiradi', async () => {
+        const user = userEvent.setup()
+        mockLoginResponse({ message: 'Forbidden' }, false, 403)
+
+        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(/administrator/i)
+    })
+
     // Backendda `organizationId` @NotBlank — yuborilmasa login 400 bo'ladi.
     // Bitta tashkilot bo'lganda foydalanuvchi hech nima tanlamaydi, shuning
     // uchun forma uni o'zi qo'yishi kerak.

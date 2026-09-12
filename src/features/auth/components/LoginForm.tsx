@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { errorMessage } from '@/shared/api'
+import { ApiError, errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input, Select } from '@/shared/ui'
 import { useLogin } from '../hooks/useLogin'
@@ -63,13 +63,6 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 />
             </Field>
 
-            {/* Boshlang'ich parol — tug'ilgan sana. Busiz birinchi marta
-                kirayotgan odam nima yozishini bilmaydi va "parol xato" deb
-                o'ylab qoladi. */}
-            <p className="-mt-1 text-[0.72rem] leading-snug text-fg-faint">
-                {t('auth.firstTimeHint')}
-            </p>
-
             <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                     type="checkbox"
@@ -82,7 +75,17 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
 
             {organizations.error != null && <ErrorBox>{t('auth.organizationsFailed')}</ErrorBox>}
 
-            {error && <ErrorBox>{errorMessage(error, t('auth.invalidCredentials'))}</ErrorBox>}
+            {/* Backend a'zolikni tekshiradi: telefon-parol to'g'ri, lekin odam
+                tanlangan markazga tegishli bo'lmasa `403` keladi. Bunda
+                "parol noto'g'ri" deyish chalg'itadi — odam parolini qayta-qayta
+                terib ovora bo'ladi, holbuki uni administrator hal qiladi. */}
+            {error && (
+                <ErrorBox>
+                    {error instanceof ApiError && error.status === 403
+                        ? t('auth.notAMember')
+                        : errorMessage(error, t('auth.invalidCredentials'))}
+                </ErrorBox>
+            )}
 
             <Button
                 type="submit"

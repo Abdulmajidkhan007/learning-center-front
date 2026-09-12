@@ -13,9 +13,9 @@ export const auth: Record<AuthKeys, string> = {
     'auth.keepSignedIn': 'Keep me signed in',
     'auth.signIn': 'Sign in',
     'auth.signingIn': 'Signing in…',
+    'auth.notAMember': 'You do not have access to this centre. Please contact your administrator.',
     'auth.invalidCredentials': 'Invalid phone number or password',
     'auth.roleMissing': "Logged in, but couldn't read your role from the token.",
-    'auth.firstTimeHint': 'Signing in for the first time? Your password is your date of birth, written as 14.02.2007.',
     'auth.stamp': 'Est. semester one',
     'auth.quote':
         '“A record of every course, every cohort, every quiet bit of progress — kept the way a good registrar keeps a ledger.”',
