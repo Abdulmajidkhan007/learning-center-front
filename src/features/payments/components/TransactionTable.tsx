@@ -3,6 +3,7 @@ import { formatAmount, formatDate } from '@/shared/lib'
 import { Badge, DataTable, IconButton, TrashIcon } from '@/shared/ui'
 import type { BadgeTone, DataTableColumn } from '@/shared/ui'
 import type { TransactionDto, TransactionTypeRead } from '@/shared/types'
+import { PrintIcon } from './PrintIcon'
 
 const TYPE_TONE: Record<TransactionTypeRead, BadgeTone> = {
     PAID: 'success',
@@ -14,11 +15,15 @@ interface TransactionTableProps {
     transactions: TransactionDto[]
     isLoading: boolean
     onDelete: (transaction: TransactionDto) => void
+    onPrint?: (transaction: TransactionDto) => void
 }
 
 /** To'lov harakatlari: kim, qachon, qancha to'ladi yoki qaytarib oldi. */
-export function TransactionTable({ transactions, isLoading, onDelete }: TransactionTableProps) {
+export function TransactionTable({ transactions, isLoading, onDelete, onPrint }: TransactionTableProps) {
     const { t } = useT()
+
+    const rawPrintLabel = t('common.print' as any)
+    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
 
     const columns: DataTableColumn<TransactionDto>[] = [
         {
@@ -66,9 +71,16 @@ export function TransactionTable({ transactions, isLoading, onDelete }: Transact
             getRowKey={(transaction) => transaction.id}
             actionsHeader={t('admin.actions')}
             renderActions={(transaction) => (
-                <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(transaction)}>
-                    <TrashIcon />
-                </IconButton>
+                <div className="flex items-center gap-1">
+                    {onPrint && (
+                        <IconButton label={printLabel} onClick={() => onPrint(transaction)}>
+                            <PrintIcon />
+                        </IconButton>
+                    )}
+                    <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(transaction)}>
+                        <TrashIcon />
+                    </IconButton>
+                </div>
             )}
         />
     )

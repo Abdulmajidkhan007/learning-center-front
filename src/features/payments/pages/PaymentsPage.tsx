@@ -11,6 +11,7 @@ import { GroupInvoicePanel } from '../components/GroupInvoicePanel'
 import { InvoiceFilters } from '../components/InvoiceFilters'
 import { InvoiceTable } from '../components/InvoiceTable'
 import { NewPaymentModal } from '../components/NewPaymentModal'
+import { PaymentReceiptModal } from '../components/PaymentReceiptModal'
 import { TransactionTable } from '../components/TransactionTable'
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations'
 import { useGroupOptions } from '../hooks/useGroupOptions'
@@ -45,6 +46,8 @@ export function PaymentsPage() {
     const [to, setTo] = useState('')
     const [txPage, setTxPage] = useState(0)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [receiptTransaction, setReceiptTransaction] = useState<TransactionDto | null>(null)
+    const [receiptInvoice, setReceiptInvoice] = useState<InvoiceDto | null>(null)
 
     const list = useInvoices(session.token, { page, search, status, from, to })
     const transactions = useTransactions(session.token, txPage, search)
@@ -148,7 +151,12 @@ export function PaymentsPage() {
                 )}
 
                 {!list.error && (
-                    <InvoiceTable invoices={list.invoices} isLoading={list.isLoading} onDelete={handleDeleteInvoice} />
+                    <InvoiceTable
+                        invoices={list.invoices}
+                        isLoading={list.isLoading}
+                        onDelete={handleDeleteInvoice}
+                        onPrint={(invoice) => setReceiptInvoice(invoice)}
+                    />
                 )}
 
                 <Pagination
@@ -184,6 +192,7 @@ export function PaymentsPage() {
                         transactions={transactions.transactions}
                         isLoading={transactions.isLoading}
                         onDelete={handleDeleteTransaction}
+                        onPrint={(transaction) => setReceiptTransaction(transaction)}
                     />
                 )}
 
@@ -204,6 +213,17 @@ export function PaymentsPage() {
                         payments.create.mutate(payload, { onSuccess: () => setIsModalOpen(false) })
                     }
                     onClose={() => setIsModalOpen(false)}
+                />
+            )}
+
+            {(receiptTransaction != null || receiptInvoice != null) && (
+                <PaymentReceiptModal
+                    transaction={receiptTransaction}
+                    invoice={receiptInvoice}
+                    onClose={() => {
+                        setReceiptTransaction(null)
+                        setReceiptInvoice(null)
+                    }}
                 />
             )}
         </AppShell>
