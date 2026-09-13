@@ -21,8 +21,6 @@ interface InvoiceTableProps {
 export function InvoiceTable({ invoices, isLoading, onDelete, onPrint }: InvoiceTableProps) {
     const { t } = useT()
 
-    const rawPrintLabel = t('common.print' as any)
-    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
 
     const columns: DataTableColumn<InvoiceDto>[] = [
         {
@@ -76,7 +74,7 @@ export function InvoiceTable({ invoices, isLoading, onDelete, onPrint }: Invoice
             renderActions={(invoice) => (
                 <div className="flex items-center gap-1">
                     {onPrint && (
-                        <IconButton label={printLabel} onClick={() => onPrint(invoice)}>
+                        <IconButton label={t('common.print')} onClick={() => onPrint(invoice)}>
                             <PrintIcon />
                         </IconButton>
                     )}

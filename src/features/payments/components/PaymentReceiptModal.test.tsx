@@ -28,12 +28,23 @@ const mockTransaction: TransactionDto = {
     },
 }
 
+const groupOptions = [{ value: 'GRP-99', label: 'Ingliz tili — A2' }]
+
 describe('PaymentReceiptModal', () => {
     it('o‘quvchi ismi, guruh, summa, sana, to‘lov turi va balansni ko‘rsatadi', () => {
-        renderWithProviders(<PaymentReceiptModal transaction={mockTransaction} onClose={vi.fn()} />)
+        renderWithProviders(
+            <PaymentReceiptModal
+                transaction={mockTransaction}
+                groupOptions={groupOptions}
+                onClose={vi.fn()}
+            />
+        )
 
         expect(screen.getByText('Jasur Alimov')).toBeInTheDocument()
-        expect(screen.getByText('GRP-99')).toBeInTheDocument()
+        // Chekda guruhning NOMI turishi kerak, `groupId` emas — mijoz
+        // qo'lidagi qog'ozda UUID hech nima anglatmaydi.
+        expect(screen.getByText('Ingliz tili — A2')).toBeInTheDocument()
+        expect(screen.queryByText('GRP-99')).not.toBeInTheDocument()
         expect(screen.getByText('550 000')).toBeInTheDocument()
         expect(screen.getByText('2026-03-01')).toBeInTheDocument()
         expect(screen.getByText('150 000')).toBeInTheDocument()
@@ -60,5 +71,14 @@ describe('PaymentReceiptModal', () => {
         await userEvent.click(closeButton)
 
         expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    // Guruh nomini topib bo'lmasa qator umuman chiqmasin: bo'sh joy
+    // tushunarsiz identifikatordan yaxshiroq.
+    it('guruh nomi topilmasa guruh qatorini ko‘rsatmaydi', () => {
+        renderWithProviders(<PaymentReceiptModal transaction={mockTransaction} onClose={vi.fn()} />)
+
+        expect(screen.queryByText('GRP-99')).not.toBeInTheDocument()
+        expect(screen.getByText('Jasur Alimov')).toBeInTheDocument()
     })
 })

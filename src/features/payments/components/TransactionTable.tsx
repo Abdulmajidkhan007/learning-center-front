@@ -22,8 +22,6 @@ interface TransactionTableProps {
 export function TransactionTable({ transactions, isLoading, onDelete, onPrint }: TransactionTableProps) {
     const { t } = useT()
 
-    const rawPrintLabel = t('common.print' as any)
-    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
 
     const columns: DataTableColumn<TransactionDto>[] = [
         {
@@ -73,7 +71,7 @@ export function TransactionTable({ transactions, isLoading, onDelete, onPrint }:
             renderActions={(transaction) => (
                 <div className="flex items-center gap-1">
                     {onPrint && (
-                        <IconButton label={printLabel} onClick={() => onPrint(transaction)}>
+                        <IconButton label={t('common.print')} onClick={() => onPrint(transaction)}>
                             <PrintIcon />
                         </IconButton>
                     )}

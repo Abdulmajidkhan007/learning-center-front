@@ -8,6 +8,7 @@ export const common = {
     'common.save': 'Saqlash',
     'common.saving': 'Saqlanmoqda…',
     'common.cancel': 'Bekor qilish',
+    'common.print': 'Chop etish',
     'common.close': 'Yopish',
     'common.edit': 'Tahrirlash',
     'common.delete': "O'chirish",

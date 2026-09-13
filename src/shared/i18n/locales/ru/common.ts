@@ -5,6 +5,7 @@ export const common: Record<CommonKeys, string> = {
     'common.save': 'Сохранить',
     'common.saving': 'Сохранение…',
     'common.cancel': 'Отмена',
+    'common.print': 'Печать',
     'common.close': 'Закрыть',
     'common.edit': 'Изменить',
     'common.delete': 'Удалить',
