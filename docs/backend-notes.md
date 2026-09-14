@@ -775,3 +775,60 @@ Yo'l ko'plikdan birlikka o'zgardi. Frontend moslashtirildi
 (`superAdminApi.ts`). Eslatma: bunday o'zgarish oldindan aytilmasa
 super-admin paneli jimgina `404` bo'ladi — tekshirib ko'rmaguncha
 bilinmaydi.
+
+
+---
+
+## 2026-09-14 — ikki bosqichli login (42dfd27)
+
+`LoginRequest` dan `organizationId` olib tashlandi, `LoginResponse` ga
+`requiresOrganizationSelection` va `organizations: List<IdNameDto>`
+qo'shildi, `POST /auth/select-organization` paydo bo'ldi va
+`WHITE_LIST` ga kiritildi. Front shu oqimga o'tkazildi.
+
+### 9. 🔴 O'quvchilar ro'yxati hamon `User.organizationId` ni o'qiydi
+
+`Student` ga `organizationId` qo'shildi, lekin uchta so'rov hamon
+foydalanuvchi ustunini o'qiyapti:
+
+```sql
+where u.organizationId = :orgId          -- searchStudentsByOrganization
+where u.organizationId = :organizationId -- getAnalyticStudent
+where s.user.organizationId = :orgId     -- countStudentsByOrganizationId
+```
+
+`User` qatori faqat BIR marta — birinchi markazda — yaratiladi va o'sha
+markaz bilan muhrlanadi. Demak ikkinchi markazga yozilgan o'quvchi:
+
+- o'sha markazning ro'yxatida **umuman ko'rinmaydi**,
+- birinchi markazning ro'yxatida esa **ketgandan keyin ham turaveradi**,
+- hisobot va statistikada ham shunday.
+
+Uchalasi `s.organizationId` ga o'tishi kerak.
+
+### 10. 🔴 O'chirilgan a'zolik hamon kirish huquqini beradi
+
+`findAllByUserId` va `findStudentByOrganizationIdAndUserId` da
+`deleted = false` sharti yo'q. Ya'ni A markazidan chiqarilgan o'quvchi
+tanlash ro'yxatida A ni ko'raveradi va tanlasa token ham oladi.
+
+### 11. 🟠 Bitta a'zolikdagi tekshiruv foydalanuvchi ustuniga qaraydi
+
+```java
+Student student = studentList.get(0);
+if (!student.getOrganizationId().equals(user.getOrganizationId()))
+    throw new RestException(ErrorType.WRONG_ORGANIZATION, ...);
+```
+
+10-band tuzatilgach bu qulf bo'lib qoladi: A dan chiqib B da o'qiyotgan
+o'quvchida bitta a'zolik (B) qoladi, `user.organizationId` esa A —
+natijada u boshqa hech qachon kira olmaydi. Bitta a'zolik bo'lsa
+shundoq `student.getOrganizationId()` olinsa kifoya; `User` dagi ustun
+"hisob qayerda ochilgan" degani, huquq bermaydi.
+
+### 12. 🟡 Mayda narsalar
+
+- `searchStudentsByOrganization` da `and u.deleted = false` ikki marta.
+- `select-organization` da `organizationId` — `@RequestParam`, ya'ni
+  manzil satrida. Server va proxy jurnallariga tushadi; telefon va
+  parol bilan bitta tanada yuborilgani tozaroq bo'lardi.

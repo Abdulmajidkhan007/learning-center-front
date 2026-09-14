@@ -11,15 +11,23 @@ function tokenWithRole(role: string): string {
     return `${encode({ alg: 'HS256' })}.${encode({ role })}.sig`
 }
 
-/**
- * Kirish oynasi ikki xil so'rov yuboradi: tashkilotlar ro'yxati va login'ning
- * o'zi. Ikkalasiga bir xil javob berib bo'lmaydi — ro'yxat massiv, login esa
- * obyekt, shuning uchun mock manzilga qarab ajratadi.
- */
 function mockLoginResponse(body: object, ok = true, status = 200) {
-    const respond = (payload: unknown, responseOk: boolean, responseStatus: number) => ({
-        ok: responseOk,
-        status: responseStatus,
+    vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+            ok,
+            status,
+            text: () => Promise.resolve(JSON.stringify(body)),
+            json: () => Promise.resolve(body),
+        })
+    )
+}
+
+/** Ikki bosqich: login tashkilot so'raydi, `select-organization` token beradi. */
+function mockTwoStepLogin(organizations: { id: string; name: string }[], token: string) {
+    const respond = (payload: unknown) => ({
+        ok: true,
+        status: 200,
         text: () => Promise.resolve(JSON.stringify(payload)),
         json: () => Promise.resolve(payload),
     })
@@ -28,9 +36,9 @@ function mockLoginResponse(body: object, ok = true, status = 200) {
         'fetch',
         vi.fn().mockImplementation((url: string) =>
             Promise.resolve(
-                String(url).includes('/organization/name')
-                    ? respond([{ id: 'org-1', name: 'Demo markaz' }], true, 200)
-                    : respond(body, ok, status)
+                String(url).includes('/auth/select-organization')
+                    ? respond({ token })
+                    : respond({ requiresOrganizationSelection: true, organizations })
             )
         )
     )
@@ -48,31 +56,6 @@ afterEach(() => {
 })
 
 describe('LoginForm', () => {
-    /*
-     * Tashkilotlar ro'yxati kelmasa ham kirishga urinib ko'rish mumkin
-     * bo'lishi kerak: aks holda backenddagi bitta nosozlik butun tizimga
-     * kirishni yopib qo'yadi va foydalanuvchi sababini ko'rmaydi.
-     */
-    it('tashkilotlar ro’yxati kelmasa ham kirish tugmasi ochiq qoladi', async () => {
-        vi.stubGlobal(
-            'fetch',
-            vi.fn().mockImplementation((url: string) =>
-                Promise.resolve({
-                    ok: !String(url).includes('/organization/name'),
-                    status: String(url).includes('/organization/name') ? 401 : 200,
-                    text: () => Promise.resolve(JSON.stringify({ token: tokenWithRole('TEACHER') })),
-                    json: () => Promise.resolve({ token: tokenWithRole('TEACHER') }),
-                })
-            )
-        )
-
-        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
-
-        await waitFor(() =>
-            expect(screen.getByRole('button', { name: /kirish/i })).toBeEnabled()
-        )
-    })
-
     it('telefon va parolni yuboradi, sessiyani qaytaradi', async () => {
         const user = userEvent.setup()
         mockLoginResponse({ token: tokenWithRole('ADMINISTRATOR') })
@@ -120,20 +103,35 @@ describe('LoginForm', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent(/administrator/i)
     })
 
-    // Backendda `organizationId` @NotBlank — yuborilmasa login 400 bo'ladi.
-    // Bitta tashkilot bo'lganda foydalanuvchi hech nima tanlamaydi, shuning
-    // uchun forma uni o'zi qo'yishi kerak.
-    it('bitta tashkilot bo’lsa uni o’zi tanlab yuboradi', async () => {
+    /*
+     * Bir nechta markazda o'qiydigan o'quvchi: birinchi javobda token emas,
+     * markazlar ro'yxati keladi va faqat tanlangandan keyin kiriladi.
+     */
+    it('bir nechta markaz bo’lsa avval tanlashni so’raydi', async () => {
         const user = userEvent.setup()
-        mockLoginResponse({ token: tokenWithRole('ADMINISTRATOR') })
+        mockTwoStepLogin(
+            [
+                { id: 'org-1', name: 'Alia markazi' },
+                { id: 'org-2', name: 'Bilim markazi' },
+            ],
+            tokenWithRole('STUDENT')
+        )
+        const onLoggedIn = vi.fn()
 
-        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
+        renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
 
         await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
         await user.type(screen.getByLabelText(/parol/i), 'secret')
         await user.click(screen.getByRole('button', { name: /kirish/i }))
 
-        await waitFor(() => expect(loginRequestBody()).toMatchObject({ organizationId: 'org-1' }))
+        const select = await screen.findByLabelText(/tashkilot/i)
+        expect(onLoggedIn).not.toHaveBeenCalled()
+
+        await user.selectOptions(select, 'org-2')
+        await user.click(screen.getByRole('button', { name: /davom etish/i }))
+
+        await waitFor(() => expect(onLoggedIn).toHaveBeenCalledTimes(1))
+        expect(onLoggedIn.mock.calls[0][0]).toMatchObject({ role: 'STUDENT' })
     })
 
     it('noto’g’ri ma’lumotda xato xabarini ko’rsatadi', async () => {

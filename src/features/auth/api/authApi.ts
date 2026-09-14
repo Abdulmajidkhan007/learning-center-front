@@ -1,19 +1,24 @@
 import { apiFetch } from '@/shared/api'
 import { decodeJwt } from '@/shared/lib'
-import type { AuthResponse, IdNameDto, LoginCredentials, Session } from '@/shared/types'
+import type { AuthResponse, LoginCredentials, Session } from '@/shared/types'
 
 export function login(credentials: LoginCredentials) {
     return apiFetch<AuthResponse>('/auth/login', { method: 'POST', body: credentials })
 }
 
 /**
- * Kirish oynasidagi tashkilotlar ro'yxati.
+ * Kirishning ikkinchi bosqichi: tashkilot tanlangach yakuniy token olinadi.
  *
- * Token bilan EMAS: bu yo'l backendning ochiq ro'yxatida (`WHITE_LIST`),
- * chunki foydalanuvchi hali kirmagan — tashkilotni tanlamasdan kira olmaydi.
+ * Telefon va parol qaytadan yuboriladi — birinchi bosqichda token
+ * berilmagan, ya'ni o'zimizni tanitadigan boshqa narsa yo'q. Backend ham
+ * ikkalasini qaytadan tekshiradi (`AuthService.selectOrganization`).
  */
-export async function fetchOrganizationOptions() {
-    return (await apiFetch<IdNameDto[]>('/organization/name')) ?? []
+export function selectOrganization(organizationId: string, credentials: LoginCredentials) {
+    return apiFetch<AuthResponse>('/auth/select-organization', {
+        method: 'POST',
+        params: { organizationId },
+        body: credentials,
+    })
 }
 
 /**
@@ -26,7 +31,10 @@ export function refreshSession() {
 
 /**
  * Token javobidan sessiya yasaydi.
- * Rolni o'qib bo'lmasa `null` — chaqiruvchi buni xato deb ko'rsatadi.
+ *
+ * Token bo'lmasligi xato EMAS: bir nechta markazda o'qiydigan o'quvchiga
+ * birinchi javob tokensiz keladi va avval tashkilot tanlanishi kerak.
+ * Rolni o'qib bo'lmasa ham `null` — chaqiruvchi ikkalasini ajratadi.
  */
 export function toSession(response: AuthResponse | null): Session | null {
     if (!response?.token) return null

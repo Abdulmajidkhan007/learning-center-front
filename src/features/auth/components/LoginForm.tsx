@@ -3,7 +3,6 @@ import { ApiError, errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input, Select } from '@/shared/ui'
 import { useLogin } from '../hooks/useLogin'
-import { useOrganizationOptions } from '../hooks/useOrganizationOptions'
 import type { Session } from '@/shared/types'
 
 export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => void }) {
@@ -13,18 +12,61 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
     const [rememberMe, setRememberMe] = useState(false)
     const [organizationId, setOrganizationId] = useState('')
 
-    const { mutate, isPending, error } = useLogin(onLoggedIn)
-    const organizations = useOrganizationOptions()
-
-    // Bitta tashkilot bo'lsa tanlashning ma'nosi yo'q — o'zi tanlanadi.
-    // Ko'p markazli emas, bitta markazli mijozda bu ortiqcha bosish bo'lardi.
-    const onlyOrganization =
-        organizations.options.length === 1 ? organizations.options[0].value : ''
-    const selectedOrganizationId = organizationId || onlyOrganization
+    const { submitCredentials, submitOrganization, organizations, isPending, error } =
+        useLogin(onLoggedIn)
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        mutate({ phone, password, rememberMe, organizationId: selectedOrganizationId })
+        if (organizations) {
+            submitOrganization(organizationId)
+            return
+        }
+        submitCredentials({ phone, password, rememberMe })
+    }
+
+    // Xato turi bo'yicha xabar: `403` — telefon-parol to'g'ri, lekin odam
+    // tanlangan markazga tegishli emas. Bunda "parol noto'g'ri" deyish
+    // chalg'itadi: odam parolini qayta-qayta terib ovora bo'ladi, holbuki
+    // buni faqat administrator hal qiladi.
+    function messageFor(cause: unknown) {
+        if (cause instanceof Error && cause.message === 'ROLE_MISSING') return t('auth.roleMissing')
+        if (cause instanceof ApiError && cause.status === 403) return t('auth.notAMember')
+        return errorMessage(cause, t('auth.invalidCredentials'))
+    }
+
+    // Ikkinchi bosqichda telefon va parol maydonlari ko'rsatilmaydi: ular
+    // allaqachon to'g'ri deb tasdiqlangan, qayta so'rash faqat chalg'itadi.
+    if (organizations) {
+        return (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <p className="text-sm leading-snug text-fg-muted">{t('auth.chooseOrganization')}</p>
+
+                <Field label={t('auth.organization')}>
+                    <Select
+                        required
+                        autoFocus
+                        value={organizationId}
+                        onChange={(event) => setOrganizationId(event.target.value)}
+                        options={organizations.map((organization) => ({
+                            value: organization.id,
+                            label: organization.name,
+                        }))}
+                        placeholder={t('auth.organizationPlaceholder')}
+                    />
+                </Field>
+
+                {error && <ErrorBox>{messageFor(error)}</ErrorBox>}
+
+                <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isPending || organizationId === ''}
+                    className="mt-2 py-3"
+                >
+                    {isPending ? t('auth.signingIn') : t('auth.continue')}
+                </Button>
+            </form>
+        )
     }
 
     return (
@@ -39,18 +81,6 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                     autoComplete="tel"
                 />
             </Field>
-
-            {organizations.options.length > 1 && (
-                <Field label={t('auth.organization')}>
-                    <Select
-                        required
-                        value={selectedOrganizationId}
-                        onChange={(event) => setOrganizationId(event.target.value)}
-                        options={organizations.options}
-                        placeholder={t('auth.organizationPlaceholder')}
-                    />
-                </Field>
-            )}
 
             <Field label={t('auth.password')}>
                 <Input
@@ -73,26 +103,9 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 {t('auth.keepSignedIn')}
             </label>
 
-            {organizations.error != null && <ErrorBox>{t('auth.organizationsFailed')}</ErrorBox>}
+            {error && <ErrorBox>{messageFor(error)}</ErrorBox>}
 
-            {/* Backend a'zolikni tekshiradi: telefon-parol to'g'ri, lekin odam
-                tanlangan markazga tegishli bo'lmasa `403` keladi. Bunda
-                "parol noto'g'ri" deyish chalg'itadi — odam parolini qayta-qayta
-                terib ovora bo'ladi, holbuki uni administrator hal qiladi. */}
-            {error && (
-                <ErrorBox>
-                    {error instanceof ApiError && error.status === 403
-                        ? t('auth.notAMember')
-                        : errorMessage(error, t('auth.invalidCredentials'))}
-                </ErrorBox>
-            )}
-
-            <Button
-                type="submit"
-                variant="primary"
-                disabled={isPending || (selectedOrganizationId === '' && !organizations.isUnavailable)}
-                className="mt-2 py-3"
-            >
+            <Button type="submit" variant="primary" disabled={isPending} className="mt-2 py-3">
                 {isPending ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
         </form>

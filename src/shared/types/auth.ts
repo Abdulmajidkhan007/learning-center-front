@@ -1,3 +1,5 @@
+import type { IdNameDto } from './common'
+
 /**
  * Administrator ruxsatlari — faqat `ADMINISTRATOR` rolida ma'noga ega.
  * `SUPER_ADMIN` da bu ro'yxat umuman kelmaydi (unga cheklov yo'q).
@@ -36,19 +38,21 @@ export interface Session {
  * `refresh_token` cookie'siga yozadi (`AuthService.setRefreshCookie`).
  */
 export interface AuthResponse {
-    token: string
+    /**
+     * Bir nechta markazda o'qiydigan o'quvchida birinchi javob TOKENSIZ
+     * keladi — avval tashkilot tanlanishi kerak.
+     */
+    token?: string | null
     expiry?: string
+    /** `true` bo'lsa `organizations` dan bittasi tanlanib, ikkinchi bosqich chaqiriladi. */
+    requiresOrganizationSelection?: boolean
+    organizations?: IdNameDto[] | null
 }
 
 export interface LoginCredentials {
     phone: string
     password: string
     rememberMe: boolean
-    /**
-     * Backendda `@NotBlank` — bo'sh yuborilsa login 400 qaytaradi.
-     * Shuning uchun kirish tugmasi tashkilot tanlanmaguncha o'chiq turadi.
-     */
-    organizationId: string
 }
 
 export type Role = 'DEVELOPER' | 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'

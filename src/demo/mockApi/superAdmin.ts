@@ -7,10 +7,6 @@ export function handleSuperAdmin(
     url: URL,
     body: Record<string, unknown>
 ): Response | null {
-    // Kirish oynasidagi tashkilot tanlagichi — bu yo'l token talab qilmaydi.
-    if (path === '/organization/name' && method === 'GET') {
-        return json(db.organizations.map((org) => ({ id: org.id, name: org.name })))
-    }
     if (path === '/organization' && method === 'GET') {
         return page(db.organizations as unknown as Row[], url)
     }
