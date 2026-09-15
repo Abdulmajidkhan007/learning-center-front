@@ -17,6 +17,12 @@ export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number]
 export interface JwtClaims {
     role?: string
     permissions?: AdminPermission[]
+    /**
+     * Kirilgan markaz. Bitta odam bir nechta markazga a'zo bo'lishi mumkin,
+     * shuning uchun bu "qaysi markazga kirdi" degani — `userId` kabi qat'iy
+     * emas, har kirishda o'zgarishi mumkin.
+     */
+    organizationId?: string
     [claim: string]: unknown
 }
 
