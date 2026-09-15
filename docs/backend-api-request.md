@@ -864,3 +864,89 @@ private String paymentNote;          // "Karta: … , izohda ism-familiya"
 ```
 
 Har markazniki har xil bo'lgani uchun uni kodga yozib bo'lmaydi.
+
+
+---
+
+# 2026-09-16 — hozirgi holat va kerakli API'lar
+
+Bu bo'lim eskilarini almashtiradi: yuqoridagilar tarix uchun qoldirilgan.
+
+## Frontda nima tayyor
+
+Ekranlarning deyarli hammasi qurilgan va ulangan:
+
+| Ekran | Holat |
+| --- | --- |
+| Kirish (ikki bosqichli, ko'p markazli) | ✅ |
+| Administrator: o'quvchi, o'qituvchi, guruh, dars | ✅ |
+| Davomat (+ CSV, + chop etish) | ✅ |
+| To'lovlar (hisob, tranzaksiya, + chek) | ✅ |
+| Lidlar | ✅ |
+| Daraja (group-level) | ✅ |
+| Sozlamalar, rasm galereyasi | ✅ |
+| Super-admin: tashkilot, filial, analitika | ✅ |
+| O'quvchi paneli | ✅ |
+| O'qituvchi paneli | ✅ |
+
+To'sib turgan narsa UI emas — quyidagi to'rtta endpoint.
+
+## 1. 🔴 Yaratilgan o'quvchi va o'qituvchi TIZIMGA KIRA OLMAYDI
+
+Eng shoshilinch. `POST /student` va `POST /teacher` `UserOrganization`
+yaratmaydi:
+
+```java
+public StudentDto create(StudentCreateDto createDto) {
+    validator.validate(createDto);
+    Student entity = mapper.toEntity(createDto);
+    return mapper.toDto(repository.save(entity));   // a'zolik YO'Q
+}
+```
+
+A'zolikni faqat `UserService.createUser` yaratadi. Login esa a'zolik
+bo'lmasa `ORGANIZATION_NOT_FOUND` tashlaydi — ya'ni administrator
+qo'shgan har bir o'quvchi kira olmaydi.
+
+Ustiga-ustak `UserCreateDto` da parol maydoni yo'q va `StudentService`
+`generatePassword` ni chaqirmaydi, ya'ni `User.password` **`null`**
+bo'lib qoladi.
+
+Kerak: `POST /student` va `POST /teacher` ham `createUser` yo'lidan
+o'tsin — parol generatsiya qilinsin, a'zolik yaratilsin, va javobda
+`UserCreatedResponseDto` dagidek **generatsiya qilingan parol
+qaytarilsin**. Frontda uni administratorga ko'rsatamiz.
+
+## 2. O'qituvchi paneli — KPI kartalar
+
+Ko'rinish tayyor (`KpiRow.tsx`), qiymat o'rnida "—" turibdi. Guruh
+bo'yicha yettita son kerak:
+
+`active`, `new`, `lost`, `potentialFail`, `absent`, `redList`, `blackList`
+
+Taklif: `GET /group/{groupId}/stats` → shu yettita maydonli obyekt.
+
+## 3. Uy vazifasi
+
+`LessonStrip` dagi to'rtinchi katak kutyapti. Dars bo'yicha: berilgan
+va bajargan o'quvchilar soni. `LessonDto` ga ikkita son qo'shilsa ham
+yetarli.
+
+## 4. Parolni tiklash
+
+Hozir front tomonda "Parolni unutdim" ekrani YO'Q, chunki endpoint yo'q.
+Ikkita alohida narsa kerak:
+
+- **Administrator tiklashi:** `POST /user/{id}/reset-password` → yangi
+  parolni javobda qaytarsin (1-banddagi bilan bir xil usul).
+- **O'zi tiklashi:** hozircha shart emas — o'quvchi administratorga
+  murojaat qiladi. Bot tayyor bo'lganda qaytamiz.
+
+## 5. Mayda, lekin har ekranda sezilади
+
+`GET /auth/me` javobiga kirilgan markazning `id` va `name` i qo'shilsa.
+
+Hozir markaz nomini bilish uchun tokendagi `organizationId` ni o'qib,
+`GET /organization/{id}` ga alohida so'rov yuborish kerak. U chekda,
+davomat jurnalida va sarlavhada kerak bo'ladi — ya'ni har safar
+ortiqcha so'rov. `/auth/me` da kelsa bitta so'rov qisqaradi.
