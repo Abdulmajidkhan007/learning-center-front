@@ -950,3 +950,48 @@ Hozir markaz nomini bilish uchun tokendagi `organizationId` ni o'qib,
 `GET /organization/{id}` ga alohida so'rov yuborish kerak. U chekda,
 davomat jurnalida va sarlavhada kerak bo'ladi — ya'ni har safar
 ortiqcha so'rov. `/auth/me` da kelsa bitta so'rov qisqaradi.
+
+
+---
+
+## Obuna (subscription) — front boshlandi
+
+Dasturchi paneli yozildi: tariflar (qo'shish, tahrirlash, o'chirish) va
+obunalar (ro'yxat, qidiruv, faollashtirish, bekor qilish).
+`DEVELOPER` roli endi bo'sh ekran emas, shu panelga tushadi.
+
+Ikkita narsa kerak.
+
+### S-1. 🟠 Yo'l `v1` siz qolgan
+
+```java
+@RequestMapping("/api/plans")           // PlanController
+@RequestMapping("/api/subscriptions")   // SubscriptionController
+@RequestMapping("/api/v1/developer")    // DeveloperController — to'g'ri
+```
+
+Qolgan yigirmata kontroller `/api/v1/…` da. `apiFetch` hamma so'rovga
+`/api/v1` ni qo'shadi, ya'ni ikkitagina yo'l uchun istisno yozish kerak
+bo'ladi — va o'sha istisno keyin unutiladi.
+
+Front `/api/v1/plans` va `/api/v1/subscriptions` deb yozildi. `v1`
+qo'shsangiz o'zi ishlab ketadi.
+
+### S-2. 🔴 Tarif va obunani HAR KIM o'zgartira oladi
+
+Ikkala kontrollerda ham `@PreAuthorize` yo'q va ular `WHITE_LIST` da
+emas — ya'ni tokeni bor har kim kira oladi. Amalda:
+
+- markazning o'z administratori `POST /subscriptions` bilan o'ziga
+  bepul `PRO` obuna yozib qo'ya oladi,
+- `DELETE /plans/{id}` bilan narxlarni o'chirib tashlashi mumkin.
+
+Bu — pul bilan bog'liq yagona joy. Ikkalasiga ham `DEVELOPER` sharti
+qo'yilishi kerak.
+
+### Savol
+
+Obuna tugaganda nima bo'ladi? Hozir `EXPIRED` holati bor, lekin uni
+kim va qachon qo'yadi — rejali ish (scheduler) bormi, yoki tekshiruv
+har so'rovda bo'ladimi? Frontda buni ko'rsatishimiz kerak: markaz
+`GRACE` ga tushganda administrator ogohlantirish ko'rishi kerakmi?

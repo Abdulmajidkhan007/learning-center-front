@@ -11,6 +11,8 @@ import type {
     StudentDto,
     TeacherDto,
     TransactionDto,
+    PlanDto,
+    SubscriptionDto,
 } from '@/shared/types'
 
 /**
@@ -205,3 +207,68 @@ export function fullGroup(groupId: string): FullGroupDto {
     const ids = groupRoster[group.id] ?? []
     return { groupDto: group, studentDto: students.filter((student) => ids.includes(student.id)) }
 }
+
+/** Dasturchi paneli uchun: tariflar. */
+export const plans: PlanDto[] = [
+    {
+        id: 'pl-1',
+        code: 'START',
+        name: 'Start',
+        description: 'Kichik markazlar uchun',
+        price: 250000,
+        currency: 'UZS',
+        durationMonths: 1,
+        active: true,
+        sortOrder: 1,
+        limits: { MAX_STUDENTS: 100, MAX_TEACHERS: 5, MAX_GROUPS: 10, MAX_BRANCHES: 1, MAX_USERS: 3 },
+    },
+    {
+        id: 'pl-2',
+        code: 'STANDARD',
+        name: 'Standard',
+        price: 450000,
+        currency: 'UZS',
+        durationMonths: 1,
+        active: true,
+        sortOrder: 2,
+        limits: { MAX_STUDENTS: 500, MAX_TEACHERS: 20, MAX_GROUPS: 50, MAX_BRANCHES: 3, MAX_USERS: 10 },
+    },
+    {
+        id: 'pl-3',
+        code: 'PRO',
+        name: 'Pro',
+        description: 'Cheklovsiz',
+        price: 1200000,
+        currency: 'UZS',
+        durationMonths: 12,
+        active: true,
+        sortOrder: 3,
+        limits: { MAX_STUDENTS: 5000, MAX_TEACHERS: 200, MAX_GROUPS: 500, MAX_BRANCHES: 20, MAX_USERS: 100 },
+    },
+]
+
+/** Dasturchi paneli uchun: obunalar. */
+export const subscriptions: SubscriptionDto[] = [
+    {
+        id: 'sb-1',
+        organization: { id: organizations[0].id, name: organizations[0].name ?? '' },
+        plan: { id: 'pl-2', name: 'Standard' },
+        status: 'ACTIVE',
+        startsAt: '2026-09-01T00:00:00Z',
+        expiresAt: '2026-10-01T00:00:00Z',
+        paidAmount: 450000,
+        currency: 'UZS',
+        note: 'Humo o‘tkazma, JB-7K2M',
+    },
+    {
+        id: 'sb-2',
+        organization: { id: 'org-demo-2', name: 'Bilim maskani' },
+        plan: { id: 'pl-1', name: 'Start' },
+        status: 'GRACE',
+        startsAt: '2026-08-01T00:00:00Z',
+        expiresAt: '2026-09-01T00:00:00Z',
+        paidAmount: 250000,
+        currency: 'UZS',
+        note: 'O‘tkazma tasdiqlanmoqda',
+    },
+]

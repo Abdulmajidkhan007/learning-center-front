@@ -1,0 +1,52 @@
+/**
+ * Dasturchi paneli: tariflar va obunalar.
+ *
+ * To'lov QO'LDA qabul qilinadi, obunani dasturchi faollashtiradi —
+ * shuning uchun bu yerda "to'lash" emas, "tasdiqlash" tili ishlatiladi.
+ */
+export const developer = {
+    'developer.title': 'Панель разработчика',
+    'developer.eyebrow': 'Система',
+    'developer.plansTab': 'Тарифы',
+    'developer.subscriptionsTab': 'Подписки',
+    'plan.code': 'Код',
+    'plan.name': 'Название',
+    'plan.description': 'Описание',
+    'plan.price': 'Цена',
+    'plan.currency': 'Валюта',
+    'plan.duration': 'Срок',
+    'plan.months': '{count} мес.',
+    'plan.limits': 'Ограничения',
+    'plan.active': 'Статус',
+    'plan.inactive': 'Неактивен',
+    'plan.empty': 'Тарифы ещё не добавлены.',
+    'plan.new': 'Новый тариф',
+    'plan.newTitle': 'Добавить тариф',
+    'plan.edit': 'Изменить тариф',
+    'plan.sortOrder': 'Порядок',
+    'plan.codeHint': 'Например: START, STANDARD, PRO. Потом не меняется.',
+    'feature.MAX_STUDENTS': 'Учеников',
+    'feature.MAX_TEACHERS': 'Учителей',
+    'feature.MAX_GROUPS': 'Групп',
+    'feature.MAX_BRANCHES': 'Филиалов',
+    'feature.MAX_USERS': 'Пользователей',
+    'subscription.organization': 'Организация',
+    'subscription.plan': 'Тариф',
+    'subscription.status': 'Статус',
+    'subscription.startsAt': 'Начало',
+    'subscription.expiresAt': 'Окончание',
+    'subscription.paidAmount': 'Оплачено',
+    'subscription.note': 'Примечание',
+    'subscription.noteHint': 'О переводе: банк, дата, номер ссылки.',
+    'subscription.empty': 'Подписок пока нет.',
+    'subscription.new': 'Активировать подписку',
+    'subscription.newTitle': 'Новая подписка',
+    'subscription.renewHint': 'Если у организации есть действующая подписка, новый срок продолжится с её окончания.',
+    'subscription.search': 'Поиск по названию организации',
+    'subscription.status.ACTIVE': 'Активна',
+    'subscription.status.GRACE': 'Льготный период',
+    'subscription.status.EXPIRED': 'Истекла',
+    'subscription.status.CANCELED': 'Отменена',
+} as const
+
+export type DeveloperKeys = keyof typeof developer

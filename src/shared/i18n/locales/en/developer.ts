@@ -1,0 +1,52 @@
+/**
+ * Dasturchi paneli: tariflar va obunalar.
+ *
+ * To'lov QO'LDA qabul qilinadi, obunani dasturchi faollashtiradi —
+ * shuning uchun bu yerda "to'lash" emas, "tasdiqlash" tili ishlatiladi.
+ */
+export const developer = {
+    'developer.title': 'Developer panel',
+    'developer.eyebrow': 'System',
+    'developer.plansTab': 'Plans',
+    'developer.subscriptionsTab': 'Subscriptions',
+    'plan.code': 'Code',
+    'plan.name': 'Name',
+    'plan.description': 'Description',
+    'plan.price': 'Price',
+    'plan.currency': 'Currency',
+    'plan.duration': 'Duration',
+    'plan.months': '{count} months',
+    'plan.limits': 'Limits',
+    'plan.active': 'Status',
+    'plan.inactive': 'Inactive',
+    'plan.empty': 'No plans yet.',
+    'plan.new': 'New plan',
+    'plan.newTitle': 'Add a plan',
+    'plan.edit': 'Edit plan',
+    'plan.sortOrder': 'Sort order',
+    'plan.codeHint': 'For example START, STANDARD, PRO. Cannot be changed later.',
+    'feature.MAX_STUDENTS': 'Students',
+    'feature.MAX_TEACHERS': 'Teachers',
+    'feature.MAX_GROUPS': 'Groups',
+    'feature.MAX_BRANCHES': 'Branches',
+    'feature.MAX_USERS': 'Users',
+    'subscription.organization': 'Organisation',
+    'subscription.plan': 'Plan',
+    'subscription.status': 'Status',
+    'subscription.startsAt': 'Starts',
+    'subscription.expiresAt': 'Expires',
+    'subscription.paidAmount': 'Paid',
+    'subscription.note': 'Note',
+    'subscription.noteHint': 'About the transfer: bank, date, reference number.',
+    'subscription.empty': 'No subscriptions yet.',
+    'subscription.new': 'Activate a subscription',
+    'subscription.newTitle': 'New subscription',
+    'subscription.renewHint': 'If the organisation already has a live subscription, the new term continues from its expiry.',
+    'subscription.search': 'Search by organisation name',
+    'subscription.status.ACTIVE': 'Active',
+    'subscription.status.GRACE': 'Grace period',
+    'subscription.status.EXPIRED': 'Expired',
+    'subscription.status.CANCELED': 'Canceled',
+} as const
+
+export type DeveloperKeys = keyof typeof developer

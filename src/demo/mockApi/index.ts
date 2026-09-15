@@ -9,6 +9,7 @@ import { handleInvoices } from './invoices'
 import { handleLeads } from './leads'
 import { isInstalled, resetMockApiInstalledFlag, setDemoRole, setInstalled } from './state'
 import { handleStudents } from './students'
+import { handleSubscriptions } from './subscriptions'
 import { handleSuperAdmin } from './superAdmin'
 import { handleTeacher } from './teacher'
 
@@ -75,6 +76,9 @@ export function installMockApi() {
 
         const analyticsRes = handleAnalytics(path, method)
         if (analyticsRes) return analyticsRes
+
+        const subscriptionsRes = handleSubscriptions(path, method, url, body)
+        if (subscriptionsRes) return subscriptionsRes
 
         const superAdminRes = handleSuperAdmin(path, method, url, body)
         if (superAdminRes) return superAdminRes

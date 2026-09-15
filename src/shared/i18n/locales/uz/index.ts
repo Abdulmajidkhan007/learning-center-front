@@ -8,6 +8,7 @@ import { superAdmin } from './superAdmin'
 import { settings } from './settings'
 import { student } from './student'
 import { leads } from './leads'
+import { developer } from './developer'
 
 /**
  * O'zbekcha lug'at — kalitlarning HAQIQAT MANBAI.
@@ -28,6 +29,7 @@ export const uz = {
     ...settings,
     ...student,
     ...leads,
+    ...developer,
 }
 
 export type TranslationKey = keyof typeof uz

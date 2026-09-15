@@ -1,4 +1,5 @@
 import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
+import { DeveloperDashboardPage } from '@/features/developer/pages/DeveloperDashboardPage'
 import { StudentDashboardPage } from '@/features/student/pages/StudentDashboardPage'
 import { SuperAdminDashboardPage } from '@/features/super-admin/pages/SuperAdminDashboardPage'
 import { TeacherDashboardPage } from '@/features/teacher/pages/TeacherDashboardPage'
@@ -28,6 +29,8 @@ export function RoleDashboard() {
             return <StudentDashboardPage />
         case 'SUPER_ADMIN':
             return <SuperAdminDashboardPage />
+        case 'DEVELOPER':
+            return <DeveloperDashboardPage />
         default:
             return (
                 <AppShell

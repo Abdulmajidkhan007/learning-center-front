@@ -9,7 +9,9 @@ import {
     leads,
     lessons,
     organizations,
+    plans,
     students,
+    subscriptions,
     teachers,
 } from '../mockData'
 import { ADMIN_PERMISSIONS } from '@/shared/types'
@@ -26,6 +28,8 @@ import type {
     StudentDto,
     TeacherDto,
     UserDto,
+    PlanDto,
+    SubscriptionDto,
 } from '@/shared/types'
 
 export type Row = Record<string, unknown> & { id: string }
@@ -54,6 +58,8 @@ export const db = {
     branches: [...branches] as BranchDto[],
     groupLevels: [...groupLevels] as GroupLevelDto[],
     leads: [...leads] as LeadDto[],
+    plans: [...plans] as PlanDto[],
+    subscriptions: [...subscriptions] as SubscriptionDto[],
 }
 
 export { fullGroup }
