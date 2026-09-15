@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { GroupDto, Page, TeacherDto } from '@/shared/types'
+import type { GroupOverviewDto, Page, TeacherDto } from '@/shared/types'
 import type { AdminRow } from '../types'
 
 export interface EntityListParams {
@@ -56,7 +56,7 @@ export async function fetchTeacherOptions(token: string) {
  * beradi.
  */
 export async function fetchGroupOptions(token: string) {
-    const data = await apiFetch<Page<GroupDto>>('/group', { token, params: { page: 0, size: 200 } })
+    const data = await apiFetch<Page<GroupOverviewDto>>('/group', { token, params: { page: 0, size: 200 } })
     return (data?.content ?? []).map((group) => ({
         value: group.id,
         label: group.name || group.id,

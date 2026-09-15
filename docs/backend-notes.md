@@ -832,3 +832,70 @@ shundoq `student.getOrganizationId()` olinsa kifoya; `User` dagi ustun
 - `select-organization` da `organizationId` — `@RequestParam`, ya'ni
   manzil satrida. Server va proxy jurnallariga tushadi; telefon va
   parol bilan bitta tanada yuborilgani tozaroq bo'lardi.
+
+
+---
+
+## 2026-09-15 — a'zolik modeli (`UserOrganization`) va guruh ro'yxati
+
+Katta va to'g'ri o'zgarish: `User` endi faqat shaxsni saqlaydi (ism,
+telefon, parol, rasm, tug'ilgan sana), `role`, `branch` va `permissions`
+esa yangi `UserOrganization` jadvaliga ko'chdi. `refreshToken` ham
+a'zolikni qayta tekshiradi. Bu ilgari taklif qilingan model.
+
+### 13. 🔴 Loginda `return` tushib qolgan — HAMMA shu yo'lga tushadi
+
+```java
+if (allByUserId.size() == 1) {
+    UserOrganization userOrganization = allByUserId.get(0);
+    getLoginResponse(response, userOrganization);   // ← return YO'Q
+}
+return LoginResponse.builder()
+        .requiresOrganizationSelection(true)
+        ...
+```
+
+`getLoginResponse` `LoginResponse` qaytaradi, lekin natijasi
+tashlab yuborilyapti va kod pastga tushib ketadi. Natijada **bitta
+a'zoligi bor har bir foydalanuvchi** — ya'ni deyarli hamma:
+administrator, o'qituvchi, ko'pchilik o'quvchi — token o'rniga bitta
+elementli "markazni tanlang" ro'yxatini oladi.
+
+Access token yasalgan, refresh cookie ham qo'yilgan, faqat javobga
+tushmagan. Bitta `return` yetishmayapti.
+
+Front tomonda vaqtinchalik qoplama qo'yildi: ro'yxatda bitta element
+bo'lsa forma so'ramasdan ikkinchi bosqichni o'zi chaqiradi. Bu backend
+tuzatilgandan keyin ham to'g'ri xatti-harakat bo'lib qoladi, lekin
+hozir ortiqcha bitta so'rov ketyapti.
+
+### 14. 🔴 O'quvchilar ro'yxati HAMON `User.organizationId` ni o'qiydi
+
+9-band tuzatilmagan. `User` da endi `organizationId` ustuni faqat
+`BaseEntity` dan kelyapti va a'zolik `UserOrganization` ga ko'chgani
+uchun bu so'rovlar butunlay noto'g'ri manbaga qarab qoldi:
+
+```sql
+where u.organizationId = :orgId          -- searchStudentsByOrganization
+where u.organizationId = :organizationId -- getAnalyticStudent
+where s.user.organizationId = :orgId     -- countStudentsByOrganizationId
+```
+
+`s.organizationId` ga o'tishi kerak.
+
+### 15. 🟠 `findStudentByOrganizationIdAndUserId` da `deleted` filtri yo'q
+
+`findAllStudentOrganizationsByUserId` ga `s.deleted = false` qo'shildi
+(rahmat), lekin ikkinchi bosqichdagi tekshiruv hamon filtrsiz. Ro'yxatda
+ko'rinmasa ham, o'chirilgan a'zolikning id'sini qo'lda yuborib token
+olish mumkin.
+
+### 16. ✅ `GET /group` endi `GroupOverviewDto` qaytaradi
+
+Ro'yxat javobi yangilandi: `teacher` ichma-ich `TeacherDto` emas,
+`{ id, name }`; daraja obyekt emas, `levelName` satri; qo'shimcha
+`startDate` va `activeStudentsCount` keldi.
+
+Front moslashtirildi — `GroupOverviewDto` tipi qo'shildi, admin
+jadvalidagi o'qituvchi ustuni tuzatildi (u yangi shaklda bo'sh chiqib
+qolgan edi) va yangi maydonlar ustun sifatida qo'shildi.

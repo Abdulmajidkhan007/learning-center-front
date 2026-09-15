@@ -1,5 +1,13 @@
 import type { TranslationKey } from '@/shared/i18n'
-import type { AdminPermission, GroupDto, GroupStatus, TeacherDto, TimeTableDto, UserDto } from '@/shared/types'
+import type {
+    AdminPermission,
+    GroupDto,
+    GroupLevelNameDto,
+    GroupStatus,
+    TeacherDto,
+    TimeTableDto,
+    UserDto,
+} from '@/shared/types'
 
 export type EntityKey = 'students' | 'teachers' | 'groups' | 'lessons'
 
@@ -27,9 +35,18 @@ export interface AdminRow {
     parentPhone?: string
     name?: string
     room?: string
-    teacher?: TeacherDto
+    /**
+     * Guruhlar ro'yxatida o'qituvchi ichma-ich `TeacherDto` emas,
+     * `{ id, name }` bo'lib keladi (`GroupOverviewDto`). Darslar tabida esa
+     * hamon `teacherDto` — shuning uchun ikkalasi alohida.
+     */
+    teacher?: TeacherDto | GroupLevelNameDto
     timeTable?: TimeTableDto
     status?: GroupStatus
+    /** `GroupOverviewDto` maydonlari — guruhlar tabi uchun. */
+    startDate?: string
+    levelName?: string
+    activeStudentsCount?: number
     /** `LessonDto` maydonlari — darslar tabi uchun. */
     topic?: string
     title?: string

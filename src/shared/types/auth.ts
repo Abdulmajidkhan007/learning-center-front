@@ -1,5 +1,3 @@
-import type { IdNameDto } from './common'
-
 /**
  * Administrator ruxsatlari — faqat `ADMINISTRATOR` rolida ma'noga ega.
  * `SUPER_ADMIN` da bu ro'yxat umuman kelmaydi (unga cheklov yo'q).
@@ -46,7 +44,19 @@ export interface AuthResponse {
     expiry?: string
     /** `true` bo'lsa `organizations` dan bittasi tanlanib, ikkinchi bosqich chaqiriladi. */
     requiresOrganizationSelection?: boolean
-    organizations?: IdNameDto[] | null
+    organizations?: OrganizationViewDto[] | null
+}
+
+/**
+ * Kirish paytida tanlanadigan a'zolik.
+ *
+ * `role` shu markazdagi rol: bitta odam bir joyda o'qituvchi, boshqasida
+ * o'quvchi bo'lishi mumkin, shuning uchun u markaz bilan birga keladi.
+ */
+export interface OrganizationViewDto {
+    id: string
+    name: string
+    role?: Role
 }
 
 export interface LoginCredentials {

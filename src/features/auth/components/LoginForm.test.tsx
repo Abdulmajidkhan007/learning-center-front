@@ -104,6 +104,27 @@ describe('LoginForm', () => {
     })
 
     /*
+     * Backend hozir bitta a'zolikda ham ro'yxat qaytaryapti (undagi `return`
+     * tushib qolgan). Bitta variantli ro'yxatdan tanlashni so'rash ma'nosiz,
+     * shuning uchun forma o'zi o'tkazib yuboradi — backend tuzatilgandan
+     * keyin ham bu to'g'ri xatti-harakat bo'lib qoladi.
+     */
+    it('bitta a’zolik bo’lsa tanlashni so’ramasdan kiradi', async () => {
+        const user = userEvent.setup()
+        mockTwoStepLogin([{ id: 'org-1', name: 'Alia markazi' }], tokenWithRole('ADMINISTRATOR'))
+        const onLoggedIn = vi.fn()
+
+        renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        await waitFor(() => expect(onLoggedIn).toHaveBeenCalledTimes(1))
+        expect(screen.queryByLabelText(/tashkilot/i)).not.toBeInTheDocument()
+    })
+
+    /*
      * Bir nechta markazda o'qiydigan o'quvchi: birinchi javobda token emas,
      * markazlar ro'yxati keladi va faqat tanlangandan keyin kiriladi.
      */

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { login, selectOrganization, toSession } from '../api/authApi'
-import type { IdNameDto, LoginCredentials, Session } from '@/shared/types'
+import type { LoginCredentials, OrganizationViewDto, Session } from '@/shared/types'
 
 /**
  * Kirish — bir yoki ikki bosqichda.
@@ -21,7 +21,7 @@ import type { IdNameDto, LoginCredentials, Session } from '@/shared/types'
 export function useLogin(onSuccess: (session: Session) => void) {
     const [pending, setPending] = useState<{
         credentials: LoginCredentials
-        organizations: IdNameDto[]
+        organizations: OrganizationViewDto[]
     } | null>(null)
 
     const mutation = useMutation({
@@ -30,7 +30,20 @@ export function useLogin(onSuccess: (session: Session) => void) {
             const response = await login(credentials)
 
             if (response?.requiresOrganizationSelection) {
-                return { credentials, organizations: response.organizations ?? [] }
+                const organizations = response.organizations ?? []
+
+                // Bitta a'zolik bo'lsa tanlaydigan narsa yo'q — so'ramasdan
+                // o'tkazamiz. Aks holda foydalanuvchi bitta variantli
+                // ro'yxatdan o'sha bittasini tanlab o'tirardi.
+                if (organizations.length === 1) {
+                    const session = toSession(
+                        await selectOrganization(organizations[0].id, credentials)
+                    )
+                    if (!session) throw new Error('ROLE_MISSING')
+                    return session
+                }
+
+                return { credentials, organizations }
             }
 
             const session = toSession(response)

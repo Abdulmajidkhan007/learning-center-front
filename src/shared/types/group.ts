@@ -59,6 +59,31 @@ export interface GroupDto {
 }
 
 /**
+ * `GET /group` (sahifalangan ro'yxat) javobi.
+ *
+ * Bu `GroupDto` EMAS: backend ro'yxat uchun alohida `GroupOverviewDto`
+ * qaytaradi (2026-09-15). Ikki muhim farqi bor — o'qituvchi ichma-ich
+ * `TeacherDto` emas, `{ id, name }`; daraja obyekt emas, tayyor `levelName`
+ * satri. Bitta guruhni olganda (`GET /group/{id}`) hamon to'liq `GroupDto`
+ * keladi, shuning uchun ikkalasi alohida turadi.
+ */
+export interface GroupOverviewDto {
+    id: string
+    name?: string
+    room?: string
+    /** Guruh boshlangan sana. */
+    startDate?: string
+    status?: GroupStatus
+    levelName?: string
+    teacher?: GroupLevelNameDto
+    timeTable?: TimeTableDto
+    currentMonth?: number
+    lessonsCount?: number
+    /** Guruhdagi faol o'quvchilar soni. */
+    activeStudentsCount?: number
+}
+
+/**
  * `GET /group/groups` (o'qituvchining guruhlari) javobi.
  *
  * Bu TO'LIQ `GroupDto` emas — backend `GroupNameProjection` qaytaradi,
