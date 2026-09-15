@@ -18,6 +18,7 @@ export const common: Record<CommonKeys, string> = {
     'common.back': 'Back',
     'common.notConnected': 'Not connected',
     'common.exportCsv': 'Export to Excel',
+    'common.print': 'Print',
     'nav.home': 'Home',
     'nav.attendance': 'Attendance',
     'nav.settings': 'Settings',
