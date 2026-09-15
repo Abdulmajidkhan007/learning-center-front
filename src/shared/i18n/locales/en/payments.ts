@@ -36,4 +36,7 @@ export const payments: Record<PaymentsKeys, string> = {
     'transaction.empty': 'No payments found',
     'transaction.hint': 'A payment attaches to the student\u2019s latest invoice. Without one it cannot be recorded.',
     'transaction.deleteConfirm': 'Delete the {{amount}} payment? This cannot be undone.',
+    'transaction.receiptTitle': 'Payment receipt',
+    'transaction.receiptEyebrow': 'EDUCATIONAL CENTER',
+    'transaction.remainingBalance': 'Remaining balance',
 }

@@ -21,8 +21,7 @@ interface InvoiceTableProps {
 export function InvoiceTable({ invoices, isLoading, onDelete, onPrint }: InvoiceTableProps) {
     const { t } = useT()
 
-    const rawPrintLabel = t('common.print' as any)
-    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
+    const printLabel = t('common.print')
 
     const columns: DataTableColumn<InvoiceDto>[] = [
         {
