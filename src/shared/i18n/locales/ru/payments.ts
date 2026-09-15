@@ -36,4 +36,7 @@ export const payments: Record<PaymentsKeys, string> = {
     'transaction.empty': 'Платежи не найдены',
     'transaction.hint': 'Платёж привязывается к последнему счёту ученика. Без счёта записать нельзя.',
     'transaction.deleteConfirm': 'Удалить платёж на сумму {{amount}}? Это необратимо.',
+    'transaction.receiptTitle': 'Квитанция об оплате',
+    'transaction.receiptEyebrow': 'УЧЕБНЫЙ ЦЕНТР',
+    'transaction.remainingBalance': 'Остаток баланса',
 }

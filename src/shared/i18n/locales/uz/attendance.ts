@@ -28,6 +28,16 @@ export const attendance = {
     'attendance.excusePlaceholder': 'Masalan: kasal, oilaviy sabab',
     'attendance.editPastLesson': '{{title}} darsini qayta tahrirlash',
     'attendance.hint': 'Kvadratni bossangiz keldi/kelmadi almashadi. Burchakdagi nuqta — sababli qilish.',
+    'attendance.printJournal': 'Chop etish',
+    'attendance.journalTitle': 'Davomat jurnali',
+    'attendance.centerName': "O'QUV MARKAZI",
+    'attendance.groupLabel': 'Guruh',
+    'attendance.monthLabel': 'Oy',
+    'attendance.teacherSignature': "O'qituvchi imzosi",
+    'attendance.presentSymbol': '+',
+    'attendance.absentSymbol': '−',
+    'attendance.excusedSymbol': 'S',
+    'attendance.legend': "Belgilar: '+' — keldi, '−' — kelmadi, 'S' — sababli",
 } as const
 
 export type AttendanceKeys = keyof typeof attendance

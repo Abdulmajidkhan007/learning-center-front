@@ -21,6 +21,7 @@ export const common = {
     'common.back': 'Orqaga',
     'common.notConnected': 'Ulanmagan',
     'common.exportCsv': 'Excel ga yuklash',
+    'common.print': 'Chop etish',
     'nav.home': 'Bosh sahifa',
     'nav.attendance': 'Davomat',
     'nav.settings': 'Sozlamalar',
