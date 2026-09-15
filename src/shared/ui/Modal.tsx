@@ -9,6 +9,8 @@ interface ModalProps {
     children: ReactNode
     /** Pastdagi tugmalar qatori. */
     footer?: ReactNode
+    /** Modalning kenglik klassi (standart: `max-w-md`). */
+    maxWidth?: string
 }
 
 /**
@@ -18,7 +20,7 @@ interface ModalProps {
  * fon bosilishi (sichqoncha) va tugma. Ichki bosishlar `stopPropagation`
  * bilan to'xtatiladi, aks holda formaning har bosilishi oynani yopib yuboradi.
  */
-export function Modal({ eyebrow, title, onClose, children, footer }: ModalProps) {
+export function Modal({ eyebrow, title, onClose, children, footer, maxWidth = 'max-w-md' }: ModalProps) {
     useEffect(() => {
         function handleKey(event: KeyboardEvent) {
             if (event.key === 'Escape') onClose()
@@ -35,7 +37,7 @@ export function Modal({ eyebrow, title, onClose, children, footer }: ModalProps)
             <div
                 role="dialog"
                 aria-modal="true"
-                className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-base bg-surface-card/88 p-7 shadow-[0_28px_80px_-32px_var(--fg)] backdrop-blur-xl"
+                className={`max-h-[85vh] w-full ${maxWidth} overflow-y-auto rounded-xl border border-border-base bg-surface-card/88 p-7 shadow-[0_28px_80px_-32px_var(--fg)] backdrop-blur-xl`}
                 onClick={(event) => event.stopPropagation()}
             >
                 {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}

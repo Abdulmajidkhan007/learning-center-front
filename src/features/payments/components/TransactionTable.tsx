@@ -22,8 +22,7 @@ interface TransactionTableProps {
 export function TransactionTable({ transactions, isLoading, onDelete, onPrint }: TransactionTableProps) {
     const { t } = useT()
 
-    const rawPrintLabel = t('common.print' as any)
-    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
+    const printLabel = t('common.print')
 
     const columns: DataTableColumn<TransactionDto>[] = [
         {

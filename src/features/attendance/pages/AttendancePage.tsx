@@ -7,7 +7,9 @@ import { useAttendanceRecords, useGroupInfo } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { downloadCsv, generateCsv, formatDate, type CsvColumn } from '@/shared/lib'
 import { AppShell, AttendanceTable, Button, EmptyState, ErrorBox, SegmentedControl, type PastLessonColumn } from '@/shared/ui'
+import { AttendancePrintModal } from '../components/AttendancePrintModal'
 import { DraftBar } from '../components/DraftBar'
+import { PrintIcon } from '../components/PrintIcon'
 import { useAttendanceDraft, type AttendanceDraftInitial } from '../hooks/useAttendanceDraft'
 import { useGroupStudents } from '../hooks/useGroupStudents'
 import { useSubmitAttendance } from '../hooks/useSubmitAttendance'
@@ -35,6 +37,7 @@ export function AttendancePage() {
     const groupId = state?.groupId ?? ''
 
     const [month, setMonth] = useState<MonthOption>('1')
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false)
     // O'tgan darslardan biri qayta tahrirlanayotgan bo'lsa shu yerda turadi.
     const [editingColumn, setEditingColumn] = useState<PastLessonColumn | null>(null)
 
@@ -191,6 +194,10 @@ export function AttendancePage() {
                     <Button size="sm" onClick={handleExportCsv} disabled={isLoading || students.length === 0}>
                         {t('common.exportCsv')}
                     </Button>
+                    <Button size="sm" onClick={() => setIsPrintModalOpen(true)} disabled={isLoading || students.length === 0} className="gap-1.5">
+                        <PrintIcon />
+                        {t('common.print')}
+                    </Button>
                     <Button size="sm" onClick={() => navigate('/')}>
                         ← {t('attendance.backToDashboard')}
                     </Button>
@@ -238,6 +245,23 @@ export function AttendancePage() {
                         onEditPastLesson={handleEditPastLesson}
                         plannedLessonCount={plannedLessonCount}
                     />
+
+                    {isPrintModalOpen && (
+                        <AttendancePrintModal
+                            students={students}
+                            pastColumns={pastColumns}
+                            draft={draft.draft}
+                            groupName={groupInfoQuery.data?.groupDto?.name || activeLesson?.group?.name || groupId || '—'}
+                            monthLabel={
+                                month === '1'
+                                    ? t('attendance.monthCurrent')
+                                    : month === '2'
+                                      ? t('attendance.monthPrevious')
+                                      : t('attendance.monthTwoAgo')
+                            }
+                            onClose={() => setIsPrintModalOpen(false)}
+                        />
+                    )}
                 </>
             )}
         </AppShell>

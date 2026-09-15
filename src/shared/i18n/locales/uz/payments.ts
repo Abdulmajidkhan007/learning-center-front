@@ -39,6 +39,9 @@ export const payments = {
     'transaction.empty': 'To‘lov topilmadi',
     'transaction.hint': 'To‘lov o‘quvchining eng so‘nggi hisobiga bog‘lanadi. Hisobi bo‘lmasa yozib bo‘lmaydi.',
     'transaction.deleteConfirm': '{{amount}} miqdoridagi to‘lov o‘chirilsinmi? Buni qaytarib bo‘lmaydi.',
+    'transaction.receiptTitle': "To'lov kvitansiyasi",
+    'transaction.receiptEyebrow': "O'QUV MARKAZI",
+    'transaction.remainingBalance': 'Qolgan balans',
 } as const
 
 export type PaymentsKeys = keyof typeof payments

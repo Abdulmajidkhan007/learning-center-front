@@ -56,18 +56,10 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
         window.print()
     }
 
-    const rawReceiptTitle = t('transaction.receiptTitle' as any)
-    const receiptTitle = rawReceiptTitle !== 'transaction.receiptTitle' ? rawReceiptTitle : "To'lov kvitansiyasi"
-
-    const rawReceiptEyebrow = t('transaction.receiptEyebrow' as any)
-    const receiptEyebrow = rawReceiptEyebrow !== 'transaction.receiptEyebrow' ? rawReceiptEyebrow : "O'QUV MARKAZI"
-
-    const rawRemainingBalance = t('transaction.remainingBalance' as any)
-    const remainingBalanceLabel =
-        rawRemainingBalance !== 'transaction.remainingBalance' ? rawRemainingBalance : 'Qolgan balans'
-
-    const rawPrintLabel = t('common.print' as any)
-    const printLabel = rawPrintLabel !== 'common.print' ? rawPrintLabel : 'Chop etish'
+    const receiptTitle = t('transaction.receiptTitle')
+    const receiptEyebrow = t('transaction.receiptEyebrow')
+    const remainingBalanceLabel = t('transaction.remainingBalance')
+    const printLabel = t('common.print')
 
     return (
         <Modal
