@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { useSession } from '@/app/providers/useAuth'
+import { useMyOrganization } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { formatDate } from '@/shared/lib'
 import { Button, Modal, type PastLessonColumn } from '@/shared/ui'
@@ -36,6 +38,13 @@ export function AttendancePrintModal({
     onClose,
 }: AttendancePrintModalProps) {
     const { t } = useT()
+    const session = useSession()
+    const { data: organization } = useMyOrganization(
+        session.token,
+        session.claims?.organizationId as string | undefined
+    )
+
+    const centerName = organization?.name || t('attendance.centerName')
 
     const columns = useMemo<PrintColumn[]>(() => {
         const result: PrintColumn[] = []
@@ -142,7 +151,7 @@ export function AttendancePrintModal({
                 {/* Jurnal sarlavhasi */}
                 <div className="border-b border-border-base pb-3 mb-4 text-center">
                     <p className="text-xs font-semibold tracking-wider text-fg-muted uppercase">
-                        {t('attendance.centerName')}
+                        {centerName}
                     </p>
                     <h3 className="text-xl font-bold font-display text-fg mt-0.5">
                         {t('attendance.journalTitle').toUpperCase()}

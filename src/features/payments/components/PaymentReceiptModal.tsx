@@ -1,3 +1,5 @@
+import { useSession } from '@/app/providers/useAuth'
+import { useMyOrganization } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { formatAmount, formatDate } from '@/shared/lib'
 import { Button, Modal } from '@/shared/ui'
@@ -19,6 +21,11 @@ interface PaymentReceiptModalProps {
  */
 export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentReceiptModalProps) {
     const { t } = useT()
+    const session = useSession()
+    const { data: organization } = useMyOrganization(
+        session.token,
+        session.claims?.organizationId as string | undefined
+    )
 
     // Tranzaksiya yoki Hisobdan ma'lumotlarni yig'amiz
     const studentName =
@@ -57,7 +64,7 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
     }
 
     const receiptTitle = t('transaction.receiptTitle')
-    const receiptEyebrow = t('transaction.receiptEyebrow')
+    const receiptEyebrow = organization?.name || t('transaction.receiptEyebrow')
     const remainingBalanceLabel = t('transaction.remainingBalance')
     const printLabel = t('common.print')
 
