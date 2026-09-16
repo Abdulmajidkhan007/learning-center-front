@@ -4,6 +4,23 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/renderWithProviders'
 import { AttendancePrintModal } from './AttendancePrintModal'
 import type { PastLessonColumn } from '@/shared/ui'
+
+vi.mock('@/app/providers/useAuth', () => ({
+    useSession: () => ({
+        token: 'test-token',
+        role: 'TEACHER',
+        claims: { organizationId: 'org-123' },
+    }),
+}))
+
+const useMyOrganizationMock = vi.fn()
+vi.mock('@/shared/hooks', async () => {
+    const actual = await vi.importActual('@/shared/hooks')
+    return {
+        ...actual,
+        useMyOrganization: (...args: unknown[]) => useMyOrganizationMock(...args),
+    }
+})
 import type { AttendanceDraft } from '../hooks/useAttendanceDraft'
 import type { StudentDto } from '@/shared/types'
 
@@ -44,7 +61,46 @@ const mockPastColumns: PastLessonColumn[] = [
 ]
 
 describe('AttendancePrintModal', () => {
+    it('tashkilot nomi yuklanganda haqiqiy markaz nomini ko‘rsatadi', () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: { id: 'org-123', name: 'Alia Education Center' },
+        })
+
+        renderWithProviders(
+            <AttendancePrintModal
+                students={mockStudents}
+                pastColumns={mockPastColumns}
+                groupName="Frontend-101"
+                monthLabel="Joriy oy"
+                onClose={vi.fn()}
+            />
+        )
+
+        expect(screen.getByText('Alia Education Center')).toBeInTheDocument()
+    })
+
+    it('tashkilot nomi yuklanmaganda fallback matn ko‘rsatiladi va sarlavha bo‘sh qolmaydi', () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: undefined,
+        })
+
+        renderWithProviders(
+            <AttendancePrintModal
+                students={mockStudents}
+                pastColumns={mockPastColumns}
+                groupName="Frontend-101"
+                monthLabel="Joriy oy"
+                onClose={vi.fn()}
+            />
+        )
+
+        expect(screen.getByText(/O'QUV MARKAZI|O‘QUV MARKAZI/i)).toBeInTheDocument()
+    })
+
     it("o'quvchilar ismi, guruh nomi, oy, belgilar va imzo joyini ko'rsatadi", () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: { id: 'org-123', name: 'Alia Education Center' },
+        })
         renderWithProviders(
             <AttendancePrintModal
                 students={mockStudents}
