@@ -995,3 +995,41 @@ Obuna tugaganda nima bo'ladi? Hozir `EXPIRED` holati bor, lekin uni
 kim va qachon qo'yadi — rejali ish (scheduler) bormi, yoki tekshiruv
 har so'rovda bo'ladimi? Frontda buni ko'rsatishimiz kerak: markaz
 `GRACE` ga tushganda administrator ogohlantirish ko'rishi kerakmi?
+
+
+---
+
+## KPI ta'riflari — kelishildi (2026-09-16)
+
+`GET /api/v1/group/{groupId}/stats` javobidagi yettita son. Ilgari
+nomlargina bor edi, endi ma'nosi ham aniq.
+
+### Bugun qilsa bo'ladigan beshtasi
+
+| Maydon | Ta'rifi |
+| --- | --- |
+| `active` | Guruhdagi o'chirilmagan `Enrollment` soni |
+| `new` | `Enrollment.createdAt` joriy oy ichida bo'lganlari |
+| `lost` | Joriy oyda o'chirilgan (`leavingReason` qo'yilgan) yozuvlar |
+| `absent` | Guruhning **eng oxirgi** darsida `ABSENT` bo'lganlar. `EXCUSED` sanalmaydi — u sababli |
+| `potentialFail` | Oxirgi 10 darsdan **KETMA-KET** 3 tasini qoldirganlar. Ketma-ket — shart: tarqoq uchta qoldirish tashvish emas, uchtasi surunkasiga esa ketish alomati |
+
+### Ikkitasi yangi imkoniyatga bog'liq
+
+**`redList` — uy vazifasi.** Qarzga bog'liq EMAS. O'quvchi 2-3 marta uy
+vazifasini bajarmasa shu ro'yxatga tushadi. Ya'ni bu son uy vazifasi
+imkoniyati qurilmaguncha hisoblanmaydi (`LessonStrip` dagi to'rtinchi
+katak ham o'shani kutyapti — bitta ish ikkalasini yopadi).
+
+**`blackList` — intizom.** Qarzga bog'liq EMAS. Qoida buzgan, janjal
+qilgan o'quvchi bloklanadi. `Student` o'chirilmaydi, statusi
+`blocked` bo'ladi.
+
+## O'qituvchiga moliya ko'rsatilmaydi — qaror
+
+`redList`/`blackList` ataylab pulga bog'lanmadi. O'qituvchining
+ekranida qarz ham, summa ham chiqmaydi: to'lov undirish ma'muriyatning
+ishi, o'qituvchi o'quvchiga bilimiga qarab munosabatda bo'lishi kerak.
+
+Hozirgi o'qituvchi ekranida moliyaviy ma'lumot umuman yo'q —
+tekshirildi, o'zgartirish talab qilinmaydi.

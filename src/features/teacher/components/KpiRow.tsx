@@ -22,9 +22,23 @@ const KPIS: Kpi[] = [
 /**
  * Guruh holati bo'yicha ko'rsatkichlar.
  *
- * Backendda bu ko'rsatkichlarni beradigan endpoint hali yo'q, shuning uchun
- * qiymat o'rnida "—" turadi va yonida "endpoint yo'q" belgisi ko'rinadi.
- * Blok ataylab chizilgan: bu backend uchun aniq ro'yxat bo'lib xizmat qiladi.
+ * Backendda endpoint hali yo'q, shuning uchun qiymat o'rnida "—" turadi.
+ * Blok ataylab chizilgan: u backend uchun aniq ro'yxat bo'lib xizmat qiladi.
+ *
+ * Ta'riflar kelishilgan (2026-09-16) — ular shu yerda yozib qo'yilgan,
+ * chunki nomdan ma'nosi ko'rinmaydi va keyingi odam qaytadan o'ylaydi:
+ *
+ *  active        — guruhdagi o'chirilmagan yozuvlar
+ *  new           — joriy oyda qo'shilganlar
+ *  lost          — joriy oyda ketganlar
+ *  absent        — eng oxirgi darsda kelmaganlar (EXCUSED sanalmaydi)
+ *  potentialFail — oxirgi 10 darsdan KETMA-KET 3 tasini qoldirganlar
+ *  redList       — uy vazifasini 2-3 marta bajarmaganlar (QARZ EMAS)
+ *  blackList     — intizom uchun bloklanganlar (QARZ EMAS)
+ *
+ * Oxirgi ikkitasi ataylab pulga bog'liq EMAS: o'qituvchining ekranida
+ * moliya ko'rsatilmaydi — qarz undirish ma'muriyatning ishi, o'qituvchi
+ * o'quvchiga bilimiga qarab munosabatda bo'lishi kerak.
  */
 export function KpiRow() {
     const { t } = useT()
