@@ -59,6 +59,30 @@ export interface GroupDto {
 }
 
 /**
+ * `GET /group/stats` javobi — o'qituvchining BARCHA guruhlari bo'yicha.
+ *
+ * Diqqat: `groupId` qabul qilmaydi. Backend kirgan o'qituvchini topib,
+ * uning hamma guruhlarini birga hisoblaydi — ya'ni bu bitta guruhning
+ * emas, o'qituvchining umumiy manzarasi.
+ *
+ * `redList` va `blackList` hozircha DOIM 0 bo'lib keladi (so'rovda
+ * `CAST(0 AS BIGINT)` yozilgan): birinchisi uy vazifasi imkoniyatini,
+ * ikkinchisi bloklangan o'quvchi statusini kutyapti. Shuning uchun
+ * ekranda ular raqam emas, "hali yo'q" belgisi bilan ko'rsatiladi —
+ * aks holda "0 ta muammoli o'quvchi" degan yolg'on chiqadi.
+ */
+export interface GroupStatsDto {
+    totalStudents?: number
+    activeStudents?: number
+    newStudents?: number
+    lostStudents?: number
+    /** Ketma-ket 3 va undan ko'p dars qoldirganlar. */
+    potentialFailStudents?: number
+    redList?: number
+    blackList?: number
+}
+
+/**
  * `GET /group` (sahifalangan ro'yxat) javobi.
  *
  * Bu `GroupDto` EMAS: backend ro'yxat uchun alohida `GroupOverviewDto`

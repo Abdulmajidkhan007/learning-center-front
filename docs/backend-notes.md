@@ -899,3 +899,66 @@ Ro'yxat javobi yangilandi: `teacher` ichma-ich `TeacherDto` emas,
 Front moslashtirildi — `GroupOverviewDto` tipi qo'shildi, admin
 jadvalidagi o'qituvchi ustuni tuzatildi (u yangi shaklda bo'sh chiqib
 qolgan edi) va yangi maydonlar ustun sifatida qo'shildi.
+
+
+---
+
+## 2026-09-17 — KPI, parol va obuna
+
+### 17. 🔴 `StudentService.createStudent` o'quvchini SAQLAMAYDI
+
+```java
+User user = userRepository.getReferenceById(userResponse.id());
+Student entity = mapper.toEntity(createDto);
+entity.setUser(user);
+return new StudentCreateResponseDto(
+        entity.getId(),        // ← saqlanmagani uchun null
+        userResponse, ...
+);
+```
+
+`repository.save(entity)` yo'q. Ilgari bor edi, qayta yozishda tushib
+qolgan. Natijada `User` va `UserOrganization` yaratiladi, `Student`
+qatori esa YO'Q.
+
+Oqibati: odam tizimga kira oladi, lekin o'quvchi emas —
+`GET /student/me` uni topolmaydi, guruhga qo'shib bo'lmaydi, balansi
+yo'q. Javobdagi `id` ham `null` bo'lib qaytadi.
+
+`TeacherService.createTeacher` da `repository.save(teacher)` bor —
+ya'ni bu faqat o'quvchi yo'lida.
+
+Tekshirish: o'quvchi qo'shing va javobdagi `id` ga qarang. `null`
+bo'lsa shu.
+
+### 18. 🟠 `newStudents` va `lostStudents` noto'g'ri sanaydi
+
+`getGroupStats` so'rovida ikkalasi ham `s.created_at` ga qarayapti —
+ya'ni O'QUVCHI qachon yaratilgan:
+
+```sql
+COUNT(... CASE WHEN s.created_at BETWEEN :monthAgo AND :now ...) AS newStudents
+COUNT(... CASE WHEN s.created_at BETWEEN :monthAgo AND :now
+                AND en.leaving_reason IS NOT NULL ...) AS lostStudents
+```
+
+- `newStudents` — bir yil oldin ro'yxatdan o'tgan, lekin bu oyda shu
+  guruhga qo'shilgan o'quvchi sanalmaydi. Sana `enrollments` dan
+  olinishi kerak.
+- `lostStudents` — shart ikki tomonlama: o'quvchi shu oyda yaratilgan
+  BO'LISHI kerak. Ya'ni uch oy oldin kelib, bu oyda ketgan odam
+  sanalmaydi. Amalda deyarli hamma ketgan o'quvchi tushib qoladi.
+
+### 19. ✅ `potentialFail` — to'g'ri yozilgan
+
+Ketma-ket qoldirishni oynali funksiyalar bilan sanash (gaps and
+islands) — aynan kelishilganidek. Rahmat.
+
+### 20. ✅ Obuna: yo'l va ruxsat tuzatildi
+
+`/api/v1/plans`, `/api/v1/subscriptions`, mutatsiyalarda
+`@PreAuthorize("hasRole('DEVELOPER')")`. Front allaqachon shu
+yo'llarga yozilgan edi.
+
+Yangi: `GET /subscriptions/my` (ADMINISTRATOR/SUPER_ADMIN) va
+`POST /subscriptions/renew/{orgId}`.

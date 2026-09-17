@@ -52,6 +52,14 @@ export function handleCrud(
         }
         const created = { id: nextId(resource[0]), ...flatten(body) } as Row
         ;(db[table] as unknown as Row[]).push(created)
+
+        // O'quvchi va o'qituvchi yaratilganda backend generatsiya qilingan
+        // parolni qaytaradi — administrator uni faqat shu yerda ko'radi.
+        if (table === 'students' || table === 'teachers') {
+            const user = (created.userDto ?? {}) as Record<string, unknown>
+            return json({ ...created, userDto: { ...user, password: 'demo-' + nextId('p') } })
+        }
+
         return json(created)
     }
 

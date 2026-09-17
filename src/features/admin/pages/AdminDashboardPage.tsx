@@ -11,6 +11,7 @@ import type { AdminSidebarLink } from '../components/AdminSidebar'
 import { AssignStudentsModal } from '../components/AssignStudentsModal'
 import { EntityFormModal } from '../components/EntityFormModal'
 import { EntityTable } from '../components/EntityTable'
+import { CredentialsModal, type CreatedCredentials } from '../components/CredentialsModal'
 import { StatsRow } from '../components/StatsRow'
 import { COLUMN_CONFIGS, inferColumns } from '../config/columns'
 import { entityByKey } from '../config/entities'
@@ -97,6 +98,10 @@ export function AdminDashboardPage() {
         setFormModal({ mode: 'edit', id: row.id, values })
     }
 
+    // Parol faqat yaratish javobida keladi — keyin uni hech qayerdan
+    // olib bo'lmaydi, shuning uchun darrov ko'rsatiladi.
+    const [credentials, setCredentials] = useState<CreatedCredentials | null>(null)
+
     function handleSubmit(values: FormValues) {
         if (!formModal) return
 
@@ -114,7 +119,13 @@ export function AdminDashboardPage() {
 
         save.mutate(
             { mode: formModal.mode, id: formModal.id, body },
-            { onSuccess: () => setFormModal(null) }
+            {
+                onSuccess: (created) => {
+                    setFormModal(null)
+                    const user = (created as { userDto?: CreatedCredentials })?.userDto
+                    if (formModal.mode === 'create' && user?.password) setCredentials(user)
+                },
+            }
         )
     }
 
@@ -248,6 +259,10 @@ export function AdminDashboardPage() {
                     onSubmit={handleSubmit}
                     onClose={() => setFormModal(null)}
                 />
+            )}
+
+            {credentials && (
+                <CredentialsModal credentials={credentials} onClose={() => setCredentials(null)} />
             )}
 
             {assignGroup && (
