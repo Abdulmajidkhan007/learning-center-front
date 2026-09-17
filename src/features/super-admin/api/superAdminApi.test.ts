@@ -3,6 +3,7 @@ import {
     createBranch,
     createOrganization,
     deleteBranch,
+    fetchAdminCount,
     fetchAnalytics,
     fetchBranches,
     fetchOrganizations,
@@ -109,5 +110,14 @@ describe('fetchAnalytics', () => {
         const res = await fetchAnalytics(TOKEN, 'student')
         expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/analytics/student')
         expect(res).toEqual({ studentCount: 10, studentsAddedInMonth: 2 })
+    })
+})
+
+describe('fetchAdminCount', () => {
+    it('GET /user?role=ADMINISTRATOR yuboradi va totalElements ni qaytaradi', async () => {
+        const fetchMock = mockFetch({ text: '{"content":[{"id":"u1"}],"totalElements":5}' })
+        const count = await fetchAdminCount(TOKEN)
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/user?page=0&size=1&role=ADMINISTRATOR')
+        expect(count).toBe(5)
     })
 })
