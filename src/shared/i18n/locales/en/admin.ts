@@ -75,4 +75,10 @@ export const admin: Record<AdminKeys, string> = {
     'admin.removeConfirm': 'Remove',
     'admin.removeReason': 'Reason for removal',
     'admin.removeReasonPlaceholder': 'reason (required)',
+    'onboarding.title': 'Getting started steps',
+    'onboarding.description': 'Complete the following steps in order to start using the system:',
+    'onboarding.step.level': 'Add a level (course)',
+    'onboarding.step.teacher': 'Add a teacher',
+    'onboarding.step.group': 'Create a group',
+    'onboarding.step.student': 'Add a student',
 }

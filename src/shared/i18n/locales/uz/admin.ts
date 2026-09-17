@@ -78,6 +78,12 @@ export const admin = {
     'admin.removeConfirm': 'Chiqarish',
     'admin.removeReason': 'Chiqarish sababi',
     'admin.removeReasonPlaceholder': 'sabab (majburiy)',
+    'onboarding.title': 'Boshlang‘ich sozlash qadamlari',
+    'onboarding.description': 'Tizimdan foydalanishni boshlash uchun ushbu qadamlarni ketma-ket bajaring:',
+    'onboarding.step.level': 'Daraja (kurs) qo‘shish',
+    'onboarding.step.teacher': 'O‘qituvchi qo‘shish',
+    'onboarding.step.group': 'Guruh yaratish',
+    'onboarding.step.student': 'O‘quvchi qo‘shish',
 } as const
 
 export type AdminKeys = keyof typeof admin
