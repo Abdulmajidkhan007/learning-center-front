@@ -13,6 +13,23 @@ export function handleSubscriptions(
     url: URL,
     body: Record<string, unknown>
 ): Response | null {
+    // Markazning o'z obunasi. Demo'da muddat ataylab yaqin qilingan —
+    // ogohlantirish qanday ko'rinishini ko'rsatish uchun.
+    if (path === '/subscriptions/my' && method === 'GET') {
+        const expires = new Date()
+        expires.setDate(expires.getDate() + 5)
+        return json({
+            id: 'sb-my',
+            organization: { id: db.organizations[0]?.id ?? '', name: db.organizations[0]?.name ?? '' },
+            plan: { id: 'pl-2', name: 'Standard' },
+            status: 'ACTIVE',
+            startsAt: new Date().toISOString(),
+            expiresAt: expires.toISOString(),
+            paidAmount: 450000,
+            currency: 'UZS',
+        })
+    }
+
     if (path === '/plans' && method === 'GET') {
         return page(db.plans as unknown as Row[], url)
     }

@@ -21,6 +21,7 @@ export { Panel } from './Panel'
 export { ProfileMenu } from './ProfileMenu'
 export { SegmentedControl } from './SegmentedControl'
 export { Select, type SelectOption } from './Select'
+export { SubscriptionStatusBadge } from './SubscriptionStatusBadge'
 export { ThemeToggle } from './ThemeToggle'
 export {
     ArrowDownIcon,

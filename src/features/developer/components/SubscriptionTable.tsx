@@ -1,8 +1,7 @@
 import { useT } from '@/shared/i18n'
 import { formatAmount, formatDate } from '@/shared/lib'
-import { Button, DataTable } from '@/shared/ui'
+import { Button, DataTable, SubscriptionStatusBadge } from '@/shared/ui'
 import type { DataTableColumn } from '@/shared/ui'
-import { SubscriptionStatusBadge } from './SubscriptionStatusBadge'
 import type { SubscriptionDto } from '@/shared/types'
 
 interface SubscriptionTableProps {

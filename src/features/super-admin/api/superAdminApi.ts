@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page } from '@/shared/types'
+import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page, SubscriptionDto } from '@/shared/types'
 
 // Backend yo'lni ko'plikdan birlikka o'zgartirdi (2026-09-11, `login apis fixes`).
 const ORGANIZATIONS = '/organization'
@@ -73,4 +73,15 @@ export function deleteBranch(token: string, id: string) {
 
 export function fetchAnalytics(token: string, category: AnalyticsCategory) {
     return apiFetch<AnalyticsStatDto>(`${ANALYTICS}/${category}`, { token })
+}
+
+/**
+ * Markazning o'z obunasi.
+ *
+ * `GET /subscriptions/my` — ADMINISTRATOR va SUPER_ADMIN uchun. Bu yerda
+ * tashkilot id'si yuborilmaydi: backend tokendan o'zi oladi, ya'ni
+ * boshqa markazning obunasini so'rab bo'lmaydi.
+ */
+export function fetchMySubscription(token: string) {
+    return apiFetch<SubscriptionDto>('/subscriptions/my', { token })
 }
