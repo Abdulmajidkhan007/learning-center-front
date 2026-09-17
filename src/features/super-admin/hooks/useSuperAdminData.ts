@@ -4,6 +4,7 @@ import {
     createBranch,
     createOrganization,
     deleteBranch,
+    fetchAdminCount,
     fetchBranches,
     fetchOrganizations,
     updateBranch,
@@ -97,4 +98,13 @@ export function useBranchMutations(token: string) {
     })
 
     return { save, remove }
+}
+
+export function useAdminCount(token: string) {
+    const query = useQuery({
+        queryKey: queryKeys.adminCount(),
+        queryFn: () => fetchAdminCount(token),
+        retry: false,
+    })
+    return query.data ?? 0
 }

@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page } from '@/shared/types'
+import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page, UserDto } from '@/shared/types'
 
 const ORGANIZATIONS = '/organizations'
 const BRANCHES = '/branch'
@@ -72,4 +72,14 @@ export function deleteBranch(token: string, id: string) {
 
 export function fetchAnalytics(token: string, category: AnalyticsCategory) {
     return apiFetch<AnalyticsStatDto>(`${ANALYTICS}/${category}`, { token })
+}
+
+// --- user / admin count ---
+
+export async function fetchAdminCount(token: string): Promise<number> {
+    const data = await apiFetch<Page<UserDto>>('/user', {
+        token,
+        params: { page: 0, size: 1, role: 'ADMINISTRATOR' },
+    })
+    return data?.totalElements ?? 0
 }

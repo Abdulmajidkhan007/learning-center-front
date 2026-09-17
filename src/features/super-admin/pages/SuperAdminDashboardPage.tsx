@@ -17,8 +17,10 @@ import { AnalyticsStatsRow } from '../components/AnalyticsStatsRow'
 import { BranchFormModal } from '../components/BranchFormModal'
 import { OrganizationFormModal } from '../components/OrganizationFormModal'
 import { SimpleTable, type SimpleColumn } from '../components/SimpleTable'
+import { SuperAdminOnboardingSteps } from '../components/SuperAdminOnboardingSteps'
 import { useAnalytics } from '../hooks/useAnalytics'
 import {
+    useAdminCount,
     useBranchMutations,
     useBranches,
     useOrganizationMutations,
@@ -53,6 +55,7 @@ export function SuperAdminDashboardPage() {
     const branchMutations = useBranchMutations(session.token)
 
     const analytics = useAnalytics(session.token)
+    const adminCount = useAdminCount(session.token)
 
     const organizationOptions = useMemo(
         () => organizations.rows.map((org) => ({ value: org.id, label: org.name || org.id })),
@@ -152,6 +155,15 @@ export function SuperAdminDashboardPage() {
             }
         >
             <AnalyticsStatsRow items={analytics.items} />
+
+            <SuperAdminOnboardingSteps
+                organizationCount={organizations.totalElements}
+                branchCount={branches.totalElements}
+                adminCount={adminCount}
+                onTabChange={changeTab}
+                onOpenOrgModal={() => setOrgForm({ value: null })}
+                onOpenBranchModal={() => setBranchForm({ value: null })}
+            />
 
             <Panel>
                 <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
