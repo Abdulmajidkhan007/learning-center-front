@@ -12,6 +12,7 @@ import { AssignStudentsModal } from '../components/AssignStudentsModal'
 import { EntityFormModal } from '../components/EntityFormModal'
 import { EntityTable } from '../components/EntityTable'
 import { CredentialsModal, type CreatedCredentials } from '../components/CredentialsModal'
+import { OnboardingSteps } from '../components/OnboardingSteps'
 import { StatsRow } from '../components/StatsRow'
 import { COLUMN_CONFIGS, inferColumns } from '../config/columns'
 import { entityByKey } from '../config/entities'
@@ -19,6 +20,7 @@ import { FORM_CONFIGS } from '../config/forms'
 import { useAdminPermissions } from '../hooks/useAdminPermissions'
 import { useEntityCounts } from '../hooks/useEntityCounts'
 import { useEntityList } from '../hooks/useEntityList'
+import { useGroupLevelNames } from '../hooks/useGroupLevelNames'
 import { useEntityMutations } from '../hooks/useEntityMutations'
 import { useGroupOptions } from '../hooks/useGroupOptions'
 import { useTeacherOptions } from '../hooks/useTeacherOptions'
@@ -61,6 +63,7 @@ export function AdminDashboardPage() {
         status: activeTab === 'groups' ? statusFilter : undefined,
     })
     const counts = useEntityCounts(session.token, visibleEntities)
+    const groupLevelNames = useGroupLevelNames(session.token)
     const teacherOptions = useTeacherOptions(session.token)
     const groupOptions = useGroupOptions(session.token)
     const { save, remove } = useEntityMutations(entity, session.token)
@@ -161,6 +164,14 @@ export function AdminDashboardPage() {
                     }
                 >
                     <StatsRow entities={visibleEntities} counts={counts} />
+
+                    <OnboardingSteps
+                        levelCount={groupLevelNames.data?.length ?? 0}
+                        teacherCount={counts.teachers ?? 0}
+                        groupCount={counts.groups ?? 0}
+                        studentCount={counts.students ?? 0}
+                        onTabChange={changeTab}
+                    />
 
                     <Panel>
                         <header className="mb-5 flex flex-wrap items-end justify-between gap-3">

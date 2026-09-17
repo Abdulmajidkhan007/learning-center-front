@@ -1,3 +1,5 @@
+import { useSession } from '@/app/providers/useAuth'
+import { useMyOrganization } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
 import { formatAmount, formatDate } from '@/shared/lib'
 import { Button, Modal } from '@/shared/ui'
@@ -26,6 +28,11 @@ export function PaymentReceiptModal({
     onClose,
 }: PaymentReceiptModalProps) {
     const { t } = useT()
+    const session = useSession()
+    const { data: organization } = useMyOrganization(
+        session.token,
+        session.claims?.organizationId as string | undefined
+    )
 
     // Tranzaksiya yoki Hisobdan ma'lumotlarni yig'amiz
     const studentName =
@@ -107,7 +114,7 @@ export function PaymentReceiptModal({
                 {/* Chek sarlavhasi */}
                 <div className="border-b border-border-base pb-3 mb-4 text-center">
                     <p className="text-xs font-semibold tracking-wider text-fg-muted uppercase">
-                        {t('transaction.receiptEyebrow')}
+                        {organization?.name || t('transaction.receiptEyebrow')}
                     </p>
                     <h3 className="text-lg font-bold font-display text-fg mt-0.5">
                         {t('transaction.receiptTitle').toUpperCase()}

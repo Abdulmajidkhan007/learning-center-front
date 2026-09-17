@@ -5,6 +5,23 @@ import { renderWithProviders } from '@/test/renderWithProviders'
 import { PaymentReceiptModal } from './PaymentReceiptModal'
 import type { TransactionDto } from '@/shared/types'
 
+vi.mock('@/app/providers/useAuth', () => ({
+    useSession: () => ({
+        token: 'test-token',
+        role: 'ADMINISTRATOR',
+        claims: { organizationId: 'org-123' },
+    }),
+}))
+
+const useMyOrganizationMock = vi.fn()
+vi.mock('@/shared/hooks', async () => {
+    const actual = await vi.importActual('@/shared/hooks')
+    return {
+        ...actual,
+        useMyOrganization: (...args: unknown[]) => useMyOrganizationMock(...args),
+    }
+})
+
 const mockTransaction: TransactionDto = {
     id: 'tx-123',
     type: 'PAID',
@@ -31,7 +48,30 @@ const mockTransaction: TransactionDto = {
 const groupOptions = [{ value: 'GRP-99', label: 'Ingliz tili — A2' }]
 
 describe('PaymentReceiptModal', () => {
+    it('tashkilot nomi yuklanganda haqiqiy markaz nomini ko‘rsatadi', () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: { id: 'org-123', name: 'Alia Education Center' },
+        })
+
+        renderWithProviders(<PaymentReceiptModal transaction={mockTransaction} onClose={vi.fn()} />)
+
+        expect(screen.getByText('Alia Education Center')).toBeInTheDocument()
+    })
+
+    it('tashkilot nomi yuklanmaganda fallback matn ko‘rsatiladi va sarlavha bo‘sh qolmaydi', () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: undefined,
+        })
+
+        renderWithProviders(<PaymentReceiptModal transaction={mockTransaction} onClose={vi.fn()} />)
+
+        expect(screen.getByText(/O'QUV MARKAZI|O‘QUV MARKAZI/i)).toBeInTheDocument()
+    })
+
     it('o‘quvchi ismi, guruh, summa, sana, to‘lov turi va balansni ko‘rsatadi', () => {
+        useMyOrganizationMock.mockReturnValue({
+            data: { id: 'org-123', name: 'Alia Education Center' },
+        })
         renderWithProviders(
             <PaymentReceiptModal
                 transaction={mockTransaction}

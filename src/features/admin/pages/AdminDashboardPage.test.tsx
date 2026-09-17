@@ -74,3 +74,43 @@ describe('AdminDashboardPage — ruxsatlar', () => {
         expect(screen.queryByText(/o.quvchilar/i)).not.toBeInTheDocument()
     })
 })
+
+describe('AdminDashboardPage — onboarding qadamlari', () => {
+    it('tizim bo‘sh bo‘lganda boshlang‘ich sozlash qadamlari bloki ko‘rinadi', async () => {
+        mockFetch()
+        sessionState.permissions = ['STUDENT_MANAGEMENT', 'TEACHER_MANAGEMENT', 'LEAD_MANAGEMENT', 'INVOICE_MANAGEMENT']
+
+        renderWithProviders(<AdminDashboardPage />)
+
+        expect(await screen.findByText(/boshlang‘ich sozlash qadamlari/i)).toBeInTheDocument()
+    })
+
+    it('barcha 4 ta qadam bajarilganda onboarding bloki ko‘rinmaydi', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockImplementation((url: unknown) => {
+                const urlString = typeof url === 'string' ? url : (url as { url: string })?.url || ''
+                let body: unknown = { content: [{ id: '1' }], totalPages: 1, totalElements: 1 }
+                if (urlString.includes('/group-level/names')) {
+                    body = [{ id: '1', name: 'A1' }]
+                } else if (urlString.includes('/count')) {
+                    body = 5
+                }
+                const text = JSON.stringify(body)
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    text: () => Promise.resolve(text),
+                    json: () => Promise.resolve(body),
+                })
+            })
+        )
+        sessionState.permissions = ['STUDENT_MANAGEMENT', 'TEACHER_MANAGEMENT']
+
+        renderWithProviders(<AdminDashboardPage />)
+
+        // Count so'rovlari va level so'rovi muvaffaqiyatli tugashini kutamiz
+        await screen.findAllByText('5')
+        expect(screen.queryByText(/boshlang‘ich sozlash qadamlari/i)).not.toBeInTheDocument()
+    })
+})
