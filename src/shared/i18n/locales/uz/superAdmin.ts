@@ -41,6 +41,11 @@ export const superAdmin = {
     'analytics.invoice': 'Hisob-fakturalar',
     'analytics.enrollment': 'A‘zolar',
     'analytics.branch': 'Filiallar',
+    'superAdmin.onboarding.title': 'Boshlang‘ich sozlash qadamlari',
+    'superAdmin.onboarding.description': 'Tizimdan foydalanishni boshlash uchun ushbu qadamlarni ketma-ket bajaring:',
+    'superAdmin.onboarding.step.organization': 'Tashkilot ma’lumotlarini to‘ldirish',
+    'superAdmin.onboarding.step.branch': 'Filial qo‘shish',
+    'superAdmin.onboarding.step.admin': 'Administrator qo‘shish',
 } as const
 
 export type SuperAdminKeys = keyof typeof superAdmin
