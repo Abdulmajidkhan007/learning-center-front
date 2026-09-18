@@ -1,8 +1,12 @@
 import { useState, type FormEvent } from 'react'
+import { useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
 import { formatHeader } from '@/shared/lib'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
+import { useUserByPhone } from '../hooks/useUserByPhone'
+import { ExistingUserNotice } from './ExistingUserNotice'
+import type { UserDto } from '@/shared/types'
 import type { EntityFormConfig, FormField, FormValues, ModalMode } from '../types'
 
 interface EntityFormModalProps {
@@ -41,7 +45,48 @@ export function EntityFormModal({
     onClose,
 }: EntityFormModalProps) {
     const { t } = useT()
+    const session = useSession()
     const [values, setValues] = useState<FormValues>(initialValues)
+
+    /*
+     * Telefon bo'yicha qidiruv — faqat yangi odam qo'shayotganda.
+     * Tahrirlashda odam allaqachon ma'lum, qidirishning ma'nosi yo'q.
+     */
+    const isLookup = mode === 'create' && formConfig?.lookupByPhone === true
+    const phone = String(values.phone ?? '')
+
+    /** `null` — hali javob yo'q; `'linked'` — tasdiqlangan; `'new'` — rad etilgan. */
+    const [decision, setDecision] = useState<'linked' | 'new' | null>(null)
+    /**
+     * Tasdiqlangan odam ALOHIDA saqlanadi, so'rov natijasidan olinmaydi:
+     * tasdiqdan keyin qidiruv o'chadi va natija yo'qoladi, ya'ni unga
+     * tayansak bloklash darrov tarqab ketardi.
+     */
+    const [linkedUser, setLinkedUser] = useState<UserDto | null>(null)
+    const { found, isSearching } = useUserByPhone(session.token, phone, isLookup && decision === null)
+
+    // Tasdiqlangan ma'lumot bu yerdan o'zgartirilmaydi: u boshqa markazlarda
+    // ham ishlatiladi, bu yerda tahrirlash o'sha yozuvlarni buzadi.
+    const lockedKeys = new Set(
+        linkedUser
+            ? [
+                  ...(linkedUser.fullName ? ['fullName'] : []),
+                  // Bazada yo'q maydon ochiq qoladi — uni shu yerda to'ldirish mumkin.
+                  ...(linkedUser.birthDate ? ['birthDate'] : []),
+              ]
+            : []
+    )
+
+    function confirmExisting() {
+        if (!found) return
+        setValues((current) => ({
+            ...current,
+            fullName: found.fullName ?? current.fullName,
+            birthDate: found.birthDate ?? current.birthDate,
+        }))
+        setLinkedUser(found)
+        setDecision('linked')
+    }
 
     const eyebrow = mode === 'create' ? t('admin.newRecord') : t('admin.editRecord')
     const title =
@@ -62,6 +107,12 @@ export function EntityFormModal({
     }
 
     function setValue(key: string, value: unknown) {
+        // Raqam o'zgarsa oldingi qaror kuchini yo'qotadi — boshqa odam
+        // haqida gap ketyapti.
+        if (key === 'phone') {
+            setDecision(null)
+            setLinkedUser(null)
+        }
         setValues((current) => ({ ...current, [key]: value }))
     }
 
@@ -88,9 +139,35 @@ export function EntityFormModal({
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 {formConfig
                     ? fields.map((field) => (
-                          <Field key={field.key} label={t(field.labelKey)}>
-                              {renderControl(field)}
-                          </Field>
+                          <div key={field.key} className="flex flex-col gap-1.5">
+                              <Field label={t(field.labelKey)}>
+                                  {renderControl(field)}
+                              </Field>
+                              {lockedKeys.has(field.key) && (
+                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
+                                      {t('lookup.locked')}
+                                  </p>
+                              )}
+                              {/* Xabar telefon maydonining ostida turadi:
+                                  administrator aynan shu yerga qarab turadi. */}
+                              {field.key === 'phone' && isLookup && found && decision === null && (
+                                  <ExistingUserNotice
+                                      user={found}
+                                      onConfirm={confirmExisting}
+                                      onReject={() => setDecision('new')}
+                                  />
+                              )}
+                              {field.key === 'phone' && decision === 'new' && (
+                                  <p className="text-[0.72rem] leading-snug text-danger-fg">
+                                      {t('lookup.rejected')}
+                                  </p>
+                              )}
+                              {field.key === 'phone' && isSearching && (
+                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
+                                      {t('common.loading')}
+                                  </p>
+                              )}
+                          </div>
                       ))
                     : fallbackColumns.map((key) => (
                           <Field key={key} label={formatHeader(key)}>
@@ -144,6 +221,11 @@ export function EntityFormModal({
         return (
             <Input
                 type={type}
+                readOnly={lockedKeys.has(key)}
+                // Telefon topilib, javob berilmaguncha qolganlari o'chiq turadi:
+                // aks holda administrator yozib bo'lgach ustiga boshqa ism
+                // tushadi va nima o'zgarganini sezmaydi.
+                disabled={isLookup && found !== null && decision === null && key !== 'phone'}
                 // `time` inputi 24 soatlik ko'rinishda chiqsin
                 lang={type === 'time' ? 'ru-RU' : undefined}
                 value={

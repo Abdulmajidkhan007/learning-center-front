@@ -80,6 +80,12 @@ export type ModalMode = 'create' | 'edit'
 
 export interface EntityFormConfig {
     fields: FormField[] | ((mode: ModalMode) => FormField[])
+    /**
+     * Yaratishda avval telefon so'raladi va u bo'yicha mavjud odam
+     * qidiriladi. Faqat odamga tegishli bo'limlarda (o'quvchi, o'qituvchi)
+     * ma'noga ega.
+     */
+    lookupByPhone?: boolean
     /** Faqat yaratish rejimida ko'rinadigan izoh (masalan boshlang'ich parol). */
     createHintKey?: TranslationKey
     getInitialValues: (row: AdminRow | null) => FormValues

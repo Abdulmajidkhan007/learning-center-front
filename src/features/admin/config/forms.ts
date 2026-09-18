@@ -24,6 +24,7 @@ const DAY_TYPE_OPTIONS = DAY_TYPES.map((dayType) => ({
 export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
     students: {
         createHintKey: 'admin.initialPasswordHint',
+        lookupByPhone: true,
         fields: [
             { key: 'fullName', labelKey: 'field.fullName', type: 'text' },
             { key: 'phone', labelKey: 'field.phone', type: 'tel' },
@@ -67,6 +68,7 @@ export const FORM_CONFIGS: Partial<Record<EntityKey, EntityFormConfig>> = {
 
     teachers: {
         createHintKey: 'admin.initialPasswordHint',
+        lookupByPhone: true,
         fields: [
             { key: 'fullName', labelKey: 'field.fullName', type: 'text' },
             { key: 'phone', labelKey: 'field.phone', type: 'tel' },

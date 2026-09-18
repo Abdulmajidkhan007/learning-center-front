@@ -962,3 +962,24 @@ yo'llarga yozilgan edi.
 
 Yangi: `GET /subscriptions/my` (ADMINISTRATOR/SUPER_ADMIN) va
 `POST /subscriptions/renew/{orgId}`.
+
+
+## 2026-09-18 — tuzatish: 17 va 18-bandlar
+
+`StudentService.createStudent` da `repository.save` **bor** va `newStudents`
+masalasi ham ko'rilgan. Yuqoridagi 17-band eskirgan nusxaga qarab
+yozilgan — o'sha paytdagi `origin/main` da `save` yo'q edi, keyin
+qo'shilgan. Yozuv tarix uchun qoldirildi, lekin **amalda emas**.
+
+Saboq: backend haqida xulosa yozishdan oldin `git fetch` qilinsin.
+
+### `GET /user/phone` — ulandi
+
+`@RequestParam String phone`, `where u.phone = :phone` (teng, `like` emas),
+topilmasa `null`. Front shu bo'yicha yozildi.
+
+Bitta eslatma: bu yo'lda `@PreAuthorize` yo'q. Ya'ni tokeni bor har kim —
+o'quvchi ham — istalgan raqam bo'yicha odamning ismi va tug'ilgan sanasini
+ololadi. O'zbek raqamlari taxmin qilish oson, ya'ni raqamlarni terib
+ro'yxat yig'ish mumkin. `ADMINISTRATOR`/`SUPER_ADMIN` sharti qo'yilsa
+yetarli.

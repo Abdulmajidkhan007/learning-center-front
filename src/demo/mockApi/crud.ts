@@ -15,6 +15,22 @@ export function handleCrud(
         return json(demoUser)
     }
 
+    // Telefon bo'yicha qidiruv. Demo'da bitta raqam "topiladi", shunda
+    // tasdiq oynasini ko'rish mumkin bo'ladi.
+    if (resource === 'user' && tail === 'phone' && method === 'GET') {
+        const phone = url.searchParams.get('phone') ?? ''
+        if (phone.replace(/\D/g, '').endsWith('901234567')) {
+            return json({
+                id: 'u-existing',
+                fullName: 'Nodir Aliyev',
+                phone,
+                birthDate: '2007-02-14',
+                role: 'STUDENT',
+            })
+        }
+        return json(null)
+    }
+
     // --- generik CRUD: /student, /teacher, /group, /lesson ---
     const table = {
         student: 'students',

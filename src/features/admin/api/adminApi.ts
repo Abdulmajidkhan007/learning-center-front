@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { GroupOverviewDto, Page, TeacherDto } from '@/shared/types'
+import type { GroupOverviewDto, Page, TeacherDto, UserDto } from '@/shared/types'
 import type { AdminRow } from '../types'
 
 export interface EntityListParams {
@@ -61,4 +61,15 @@ export async function fetchGroupOptions(token: string) {
         value: group.id,
         label: group.name || group.id,
     }))
+}
+
+/**
+ * Telefon bo'yicha mavjud foydalanuvchi.
+ *
+ * Bir odam bir nechta markazda o'qishi/ishlashi mumkin, shuning uchun yangi
+ * yozuv ochishdan oldin u tizimda bormi — shu tekshiriladi. Topilmasa
+ * backend bo'sh tana qaytaradi, `apiFetch` esa uni `null` qiladi.
+ */
+export function fetchUserByPhone(token: string, phone: string) {
+    return apiFetch<UserDto>('/user/phone', { token, params: { phone } })
 }
