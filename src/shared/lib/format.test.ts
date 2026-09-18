@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatAmount, formatCell, formatDate, formatHeader, formatTime, initials, singular, titleCase } from './format'
+import { formatAmount, formatCell, formatDate, formatDayMonth, formatHeader, formatTime, initials, singular, titleCase } from './format'
 
 /** `Intl` razryadlarni uzuq bo'shliq (U+00A0) bilan ajratadi. */
 const normalizeAmount = (value: string) => value.replace(/\u00a0/g, ' ')
@@ -97,5 +97,37 @@ describe('formatAmount', () => {
 
     it('nolni chiziqcha deb hisoblamaydi', () => {
         expect(formatAmount(0)).toBe('0')
+    })
+})
+
+describe('formatDayMonth', () => {
+    it('yilni tashlaydi va oyni nom bilan yozadi', () => {
+        expect(formatDayMonth('2026-09-16', 'uz')).toBe('16 sen')
+    })
+
+    // "09-03" o'qishga qiyin — boshidagi nol olib tashlanadi.
+    it('boshidagi nolni olib tashlaydi', () => {
+        expect(formatDayMonth('2026-02-03', 'uz')).toBe('3 fev')
+    })
+
+    it('ingliz tilida oy oldinda turadi', () => {
+        expect(formatDayMonth('2026-02-03', 'en')).toBe('Feb 3')
+    })
+
+    it('rus tilida o‘z qisqartmasi ishlatiladi', () => {
+        expect(formatDayMonth('2026-02-03', 'ru')).toBe('3 фев')
+    })
+
+    /*
+     * Kelgan qiymat mahalliy sana. `new Date('2026-09-16')` uni UTC deb
+     * o'qiydi va manfiy mintaqada 15-sentabr chiqib qoladi — shuning uchun
+     * satr sifatida ajratiladi.
+     */
+    it('vaqt mintaqasidan qat’i nazar o‘sha kunni beradi', () => {
+        expect(formatDayMonth('2026-01-01', 'uz')).toBe('1 yan')
+    })
+
+    it('bo‘sh qiymatda bo‘sh satr', () => {
+        expect(formatDayMonth(undefined)).toBe('')
     })
 })

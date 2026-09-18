@@ -4,6 +4,7 @@ export {
     formatAmount,
     formatCell,
     formatDate,
+    formatDayMonth,
     formatHeader,
     formatTime,
     initials,

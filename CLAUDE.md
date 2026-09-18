@@ -220,9 +220,17 @@ ya'ni tokeni bor har kim ularga to'g'ridan-to'g'ri kira oladi.
 
 ## Ma'lum chetlanishlar
 
-Hozircha yo'q. Ilgari uchtasi bor edi (`ThemeToggle` da `shared` dan `app`
-ga import, ikkita sahifada bo'limlararo import, ikkita fayl 250 qatordan
-oshgani) — uchalasi ham tuzatildi.
+**`AttendanceCell.tsx` — 9-qoidadan (inline `style` yo'q) bitta chetlanish.**
+Sabab izohi oynasi `createPortal` bilan `document.body` ga chiqariladi va
+o'rni tugmaning `getBoundingClientRect()` iga qarab piksel bilan beriladi.
+Tailwind klasslari ish vaqtida hisoblanadigan koordinatani ifodalay olmaydi.
+Busiz oyna jadvalning `overflow-x-auto` konteyneri ichida qirqilib qolardi va
+ortiqcha aylantirish paydo bo'lardi. Yangi joyda inline `style` kerak bo'lsa —
+avval boshqa yo'l qidiring, bu yagona istisno bo'lib qolsin.
+
+Ilgari yana uchtasi bor edi (`ThemeToggle` da `shared` dan `app` ga import,
+ikkita sahifada bo'limlararo import, ikkita fayl 250 qatordan oshgani) —
+uchalasi ham tuzatildi.
 
 Yangisini topsangiz shu yerga yozib qo'ying: aks holda keyingi odam yoki
 sessiya uni qayta "kashf qiladi".

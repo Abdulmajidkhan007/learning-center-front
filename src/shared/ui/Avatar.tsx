@@ -4,12 +4,14 @@ import { cn, initials } from '@/shared/lib'
 interface AvatarProps {
     name?: string
     src?: string
-    size?: 'md' | 'lg'
+    size?: 'sm' | 'md' | 'lg'
     /** `initials` — ism bosh harflari (standart), `silhouette` — jinsni bildirmaydigan neytral siymo. */
     fallback?: 'initials' | 'silhouette'
 }
 
-const SIZE_CLASSES = { md: 'size-11 text-sm', lg: 'size-13 text-base' } as const
+// `sm` — jadval qatori uchun: kattaroq rasm qatorni cho'zib yuboradi va
+// ekranga sig'adigan o'quvchi soni kamayadi.
+const SIZE_CLASSES = { sm: 'size-8 text-xs', md: 'size-11 text-sm', lg: 'size-13 text-base' } as const
 
 /** Bosh va yelka — jinsni bildirmaydigan neytral siluet, `currentColor` bilan chiziladi. */
 function SilhouetteIcon() {
