@@ -2,11 +2,10 @@ import { useState, type FormEvent } from 'react'
 import { useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { formatHeader } from '@/shared/lib'
+import { formatHeader, formatPhone, normalizePhone, UZ_PHONE_PREFIX } from '@/shared/lib'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
 import { useUserByPhone } from '../hooks/useUserByPhone'
 import { ExistingUserNotice } from './ExistingUserNotice'
-import type { UserDto } from '@/shared/types'
 import type { EntityFormConfig, FormField, FormValues, ModalMode } from '../types'
 
 interface EntityFormModalProps {
@@ -46,7 +45,13 @@ export function EntityFormModal({
 }: EntityFormModalProps) {
     const { t } = useT()
     const session = useSession()
-    const [values, setValues] = useState<FormValues>(initialValues)
+    const [values, setValues] = useState<FormValues>(() =>
+        // Yangi odam qo'shayotganda har safar "+998" ni qo'lda terish shart
+        // emas. Chet el raqami bo'lsa uni o'chirib yozaveradi.
+        mode === 'create' && formConfig?.lookupByPhone && !initialValues.phone
+            ? { ...initialValues, phone: UZ_PHONE_PREFIX }
+            : initialValues
+    )
 
     /*
      * Telefon bo'yicha qidiruv — faqat yangi odam qo'shayotganda.
@@ -57,26 +62,20 @@ export function EntityFormModal({
 
     /** `null` — hali javob yo'q; `'linked'` — tasdiqlangan; `'new'` — rad etilgan. */
     const [decision, setDecision] = useState<'linked' | 'new' | null>(null)
-    /**
-     * Tasdiqlangan odam ALOHIDA saqlanadi, so'rov natijasidan olinmaydi:
-     * tasdiqdan keyin qidiruv o'chadi va natija yo'qoladi, ya'ni unga
-     * tayansak bloklash darrov tarqab ketardi.
-     */
-    const [linkedUser, setLinkedUser] = useState<UserDto | null>(null)
-    const { found, isSearching } = useUserByPhone(session.token, phone, isLookup && decision === null)
-
-    // Tasdiqlangan ma'lumot bu yerdan o'zgartirilmaydi: u boshqa markazlarda
-    // ham ishlatiladi, bu yerda tahrirlash o'sha yozuvlarni buzadi.
-    const lockedKeys = new Set(
-        linkedUser
-            ? [
-                  ...(linkedUser.fullName ? ['fullName'] : []),
-                  // Bazada yo'q maydon ochiq qoladi — uni shu yerda to'ldirish mumkin.
-                  ...(linkedUser.birthDate ? ['birthDate'] : []),
-              ]
-            : []
+    const { found, isSearching } = useUserByPhone(
+        session.token,
+        normalizePhone(phone),
+        isLookup && decision === null
     )
 
+    /**
+     * Tasdiqlangach ma'lumot to'ladi, lekin BLOKLANMAYDI.
+     *
+     * Sabab: raqam boshqa odamga o'tgan bo'lishi mumkin va o'shanda yangi
+     * egasining ismi yozilishi kerak. Formada nima tursa, o'sha yuboriladi —
+     * backend mavjud odamni yangilaydi. Administrator xato yozsa, odam
+     * o'zi kelib aytadi va administrator to'g'rilaydi.
+     */
     function confirmExisting() {
         if (!found) return
         setValues((current) => ({
@@ -84,7 +83,6 @@ export function EntityFormModal({
             fullName: found.fullName ?? current.fullName,
             birthDate: found.birthDate ?? current.birthDate,
         }))
-        setLinkedUser(found)
         setDecision('linked')
     }
 
@@ -109,16 +107,22 @@ export function EntityFormModal({
     function setValue(key: string, value: unknown) {
         // Raqam o'zgarsa oldingi qaror kuchini yo'qotadi — boshqa odam
         // haqida gap ketyapti.
-        if (key === 'phone') {
-            setDecision(null)
-            setLinkedUser(null)
-        }
+        if (key === 'phone') setDecision(null)
         setValues((current) => ({ ...current, [key]: value }))
     }
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        onSubmit(values)
+        // Bo'shliqlar faqat ko'rinish uchun edi: serverga tozalangan
+        // ko'rinishda ketmasa, "+998 90 …" va "+99890…" ikki xil raqam
+        // bo'lib qoladi va yagonalik sharti ishlamaydi.
+        onSubmit({
+            ...values,
+            ...(values.phone ? { phone: normalizePhone(String(values.phone)) } : {}),
+            ...(values.parentPhone
+                ? { parentPhone: normalizePhone(String(values.parentPhone)) }
+                : {}),
+        })
     }
 
     if (!formConfig && fallbackColumns.length === 0) {
@@ -143,11 +147,6 @@ export function EntityFormModal({
                               <Field label={t(field.labelKey)}>
                                   {renderControl(field)}
                               </Field>
-                              {lockedKeys.has(field.key) && (
-                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
-                                      {t('lookup.locked')}
-                                  </p>
-                              )}
                               {/* Xabar telefon maydonining ostida turadi:
                                   administrator aynan shu yerga qarab turadi. */}
                               {field.key === 'phone' && isLookup && found && decision === null && (
@@ -158,8 +157,8 @@ export function EntityFormModal({
                                   />
                               )}
                               {field.key === 'phone' && decision === 'new' && (
-                                  <p className="text-[0.72rem] leading-snug text-danger-fg">
-                                      {t('lookup.rejected')}
+                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
+                                      {t('lookup.replacing')}
                                   </p>
                               )}
                               {field.key === 'phone' && isSearching && (
@@ -221,7 +220,6 @@ export function EntityFormModal({
         return (
             <Input
                 type={type}
-                readOnly={lockedKeys.has(key)}
                 // Telefon topilib, javob berilmaguncha qolganlari o'chiq turadi:
                 // aks holda administrator yozib bo'lgach ustiga boshqa ism
                 // tushadi va nima o'zgarganini sezmaydi.
@@ -233,7 +231,9 @@ export function EntityFormModal({
                         ? JSON.stringify(raw)
                         : ((raw as string | number | undefined) ?? '')
                 }
-                onChange={(event) => setValue(key, event.target.value)}
+                onChange={(event) =>
+                    setValue(key, type === 'tel' ? formatPhone(event.target.value) : event.target.value)
+                }
             />
         )
     }
