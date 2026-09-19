@@ -39,4 +39,9 @@ export const superAdmin: Record<SuperAdminKeys, string> = {
     'analytics.invoice': 'Invoices',
     'analytics.enrollment': 'Enrollments',
     'analytics.branch': 'Branches',
+    'superAdmin.onboarding.title': 'Getting started steps',
+    'superAdmin.onboarding.description': 'Complete the following steps in order to start using the system:',
+    'superAdmin.onboarding.step.organization': 'Fill in organization information',
+    'superAdmin.onboarding.step.branch': 'Add a branch',
+    'superAdmin.onboarding.step.admin': 'Add an administrator',
 }

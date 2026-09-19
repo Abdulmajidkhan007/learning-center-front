@@ -1,5 +1,13 @@
 import { apiFetch } from '@/shared/api'
-import type { AnalyticsCategory, AnalyticsStatDto, BranchDto, OrganizationDto, Page, SubscriptionDto } from '@/shared/types'
+import type {
+    AnalyticsCategory,
+    AnalyticsStatDto,
+    BranchDto,
+    OrganizationDto,
+    Page,
+    SubscriptionDto,
+    UserDto,
+} from '@/shared/types'
 
 // Backend yo'lni ko'plikdan birlikka o'zgartirdi (2026-09-11, `login apis fixes`).
 const ORGANIZATIONS = '/organization'
@@ -84,4 +92,14 @@ export function fetchAnalytics(token: string, category: AnalyticsCategory) {
  */
 export function fetchMySubscription(token: string) {
     return apiFetch<SubscriptionDto>('/subscriptions/my', { token })
+}
+
+// --- user / admin count ---
+
+export async function fetchAdminCount(token: string): Promise<number> {
+    const data = await apiFetch<Page<UserDto>>('/user', {
+        token,
+        params: { page: 0, size: 1, role: 'ADMINISTRATOR' },
+    })
+    return data?.totalElements ?? 0
 }

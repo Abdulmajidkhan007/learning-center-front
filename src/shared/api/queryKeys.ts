@@ -57,4 +57,6 @@ export const queryKeys = {
     mySubscription: () => ['subscription', 'my'] as const,
 
     images: (params?: Record<string, unknown>) => ['images', params] as const,
+
+    adminCount: () => ['user', 'adminCount'] as const,
 } as const
