@@ -978,8 +978,10 @@ Saboq: backend haqida xulosa yozishdan oldin `git fetch` qilinsin.
 `@RequestParam String phone`, `where u.phone = :phone` (teng, `like` emas),
 topilmasa `null`. Front shu bo'yicha yozildi.
 
-Bitta eslatma: bu yo'lda `@PreAuthorize` yo'q. Ya'ni tokeni bor har kim —
-o'quvchi ham — istalgan raqam bo'yicha odamning ismi va tug'ilgan sanasini
-ololadi. O'zbek raqamlari taxmin qilish oson, ya'ni raqamlarni terib
-ro'yxat yig'ish mumkin. `ADMINISTRATOR`/`SUPER_ADMIN` sharti qo'yilsa
-yetarli.
+~~Bitta eslatma: bu yo'lda `@PreAuthorize` yo'q.~~ **Noto'g'ri edi.**
+`UserController` KLASS tepasida
+`@PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMINISTRATOR')")` turibdi va u
+barcha metodlarni qamraydi. Men faqat metod ustiga qaragan ekanman.
+
+Saboq: annotatsiyani metodda topmasangiz, klass tepasiga ham qarang —
+Spring'da u meros bo'lib o'tadi.
