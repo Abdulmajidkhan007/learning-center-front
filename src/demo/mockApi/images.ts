@@ -1,5 +1,5 @@
 import type { ImageDto } from '@/shared/types'
-import { demoUser, json, nextId, noContent, page, type Row } from './state'
+import { demoUser, json, nextId, noContent } from './state'
 
 /**
  * Demo rasmlari — `data:` URI ko'rinishida.
@@ -32,14 +32,18 @@ if (!demoUser.imageUrl && demoImages[0]) {
 export function handleImages(
     path: string,
     method: string,
-    url: URL,
+    _url: URL,
     body: Record<string, unknown>
 ): Response | null {
     if (!path.startsWith('/image')) return null
 
     // GET /image
     if (path === '/image' && method === 'GET') {
-        return page(demoImages as unknown as Row[], url)
+        // Haqiqiy backend `List<ImageDto>` qaytaradi, sahifalangan obyekt
+        // EMAS. Ilgari bu yerda `page(...)` turgani uchun demo ishlar edi-yu,
+        // productionda galereya bo'sh chiqardi — demo haqiqatdan farq
+        // qilmasligi kerak.
+        return json(demoImages)
     }
 
     // POST /image/upload

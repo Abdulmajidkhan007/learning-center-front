@@ -112,7 +112,7 @@ export function ImageGallery({ token: propToken }: ImageGalleryProps) {
         })
     }
 
-    const images = imagesData?.content ?? []
+    const images = imagesData ?? []
 
     return (
         <SettingsSection title={t('settings.myImages')} description={t('settings.myImagesHint')}>

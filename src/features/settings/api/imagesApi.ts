@@ -10,13 +10,20 @@ export interface GetImagesParams {
 /**
  * Foydalanuvchining rasmlari ro'yxatini oladi.
  * Backend faqat tizimga kirgan foydalanuvchiga tegishli rasmlarni qaytaradi.
+ *
+ * `GET /image` SAHIFALANGAN emas, oddiy massiv qaytaradi
+ * (`ResponseEntity<List<ImageDto>>`). Ilgari bu yerda `Page` kutilar edi va
+ * `content` doim `undefined` chiqib, yuklangan rasm ham galereyada
+ * ko'rinmasdi. Ikkalasini ham qabul qilamiz: backend keyin sahifalashga
+ * o'tsa, ekran jimgina bo'shab qolmasin.
  */
-export async function getImages(params?: GetImagesParams, token?: string): Promise<Page<ImageDto>> {
-    const result = await apiFetch<Page<ImageDto>>('/image', {
+export async function getImages(params?: GetImagesParams, token?: string): Promise<ImageDto[]> {
+    const result = await apiFetch<ImageDto[] | Page<ImageDto>>('/image', {
         params: params as Record<string, string | number | undefined | null>,
         token,
     })
-    return result ?? { content: [], totalPages: 1, totalElements: 0 }
+    if (Array.isArray(result)) return result
+    return result?.content ?? []
 }
 
 /**

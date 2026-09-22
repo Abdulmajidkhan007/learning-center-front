@@ -136,11 +136,12 @@ describe('mockApi', () => {
     })
 
     it('handles /image endpoints correctly', async () => {
-        // GET /image
-        const getPage = await apiFetch<Record<string, unknown>>('/image', { token: 'demo' })
-        expect(getPage).not.toBeNull()
-        const content = getPage?.content as Array<Record<string, unknown>>
-        expect(content.length).toBeGreaterThan(0)
+        // GET /image — haqiqiy backend MASSIV qaytaradi, sahifalangan
+        // obyekt emas. Demo ham shunday bo'lishi kerak: farq qilsa,
+        // productionda galereya bo'sh chiqadi va demo buni ko'rsatmaydi.
+        const list = await apiFetch<Array<Record<string, unknown>>>('/image', { token: 'demo' })
+        expect(Array.isArray(list)).toBe(true)
+        expect(list?.length ?? 0).toBeGreaterThan(0)
 
         // POST /image/upload
         const formData = new FormData()
