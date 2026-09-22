@@ -43,6 +43,7 @@ export const admin = {
     'lookup.notSame': 'Yo‘q, boshqa odam',
     'lookup.replacing': 'Yangi ma’lumot eski yozuv ustiga yoziladi — raqam boshqa odamga o‘tgan bo‘lsa shunday bo‘lishi kerak.',
     'field.fullName': 'To’liq ism',
+    'field.organizationName': 'Tashkilot nomi',
     'field.phone': 'Telefon',
     'field.birthDate': 'Tug’ilgan sana',
     'field.parentPhone': 'Ota-ona telefoni',

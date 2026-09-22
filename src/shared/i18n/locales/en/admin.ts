@@ -40,6 +40,7 @@ export const admin: Record<AdminKeys, string> = {
     'lookup.notSame': 'No, someone else',
     'lookup.replacing': 'The new details replace the old record, which is what should happen when a number has changed hands.',
     'field.fullName': 'Full name',
+    'field.organizationName': 'Organisation name',
     'field.phone': 'Phone',
     'field.birthDate': 'Birth date',
     'field.parentPhone': 'Parent phone',

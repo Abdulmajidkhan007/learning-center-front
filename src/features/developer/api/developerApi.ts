@@ -7,6 +7,7 @@ import type {
     SubscriptionCreatePayload,
     SubscriptionDto,
     SubscriptionUpdatePayload,
+    UserDto,
 } from '@/shared/types'
 
 /*
@@ -75,4 +76,52 @@ export async function fetchOrganizationOptions(token: string) {
         value: organization.id,
         label: organization.name || organization.id,
     }))
+}
+
+// --- tashkilotlar ---
+
+const ORGANIZATIONS = '/organization'
+
+/**
+ * Barcha tashkilotlar. `GET /organization/{id}` dan foydalanilmaydi — u
+ * chaqiruvchining O'Z tashkiloti bilan solishtiradi, ya'ni dasturchi
+ * boshqasini ocha olmaydi. Ro'yxatning o'zi yetarli.
+ */
+export function fetchOrganizations(token: string, params: ListParams) {
+    return apiFetch<Page<OrganizationDto>>(ORGANIZATIONS, { token, params })
+}
+
+export interface OrganizationPayload {
+    name: string
+    email?: string
+    phone?: string
+    website?: string
+    daysBeforeDebt?: number
+}
+
+export function createOrganization(token: string, body: OrganizationPayload) {
+    return apiFetch<OrganizationDto>(ORGANIZATIONS, { method: 'POST', token, body })
+}
+
+export interface SuperAdminPayload {
+    fullName: string
+    phone: string
+    password: string
+    branchId?: string
+}
+
+/**
+ * Tashkilotga birinchi super-admin ochadi.
+ *
+ * Bu yerda parol QO'LDA beriladi (backend `AdminUserCreateDto` da shunday) —
+ * boshqa joylarda parol generatsiya qilinadi. Shuning uchun uni ekranda
+ * ko'rsatib, dasturchining o'zi tanlashiga qo'yamiz.
+ */
+export function createSuperAdmin(token: string, organizationId: string, body: SuperAdminPayload) {
+    return apiFetch<UserDto>('/developer/create-super-admin', {
+        method: 'POST',
+        token,
+        params: { organizationId },
+        body,
+    })
 }

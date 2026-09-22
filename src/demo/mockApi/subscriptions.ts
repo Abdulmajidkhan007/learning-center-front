@@ -30,6 +30,12 @@ export function handleSubscriptions(
         })
     }
 
+    // Dasturchi paneli tashkilot ham ochadi — demo'da ro'yxat super-admin
+    // bilan bir xil manbadan keladi.
+    if (path === '/developer/create-super-admin' && method === 'POST') {
+        return json({ id: nextId('u'), ...body, role: 'SUPER_ADMIN' }, 201)
+    }
+
     if (path === '/plans' && method === 'GET') {
         return page(db.plans as unknown as Row[], url)
     }

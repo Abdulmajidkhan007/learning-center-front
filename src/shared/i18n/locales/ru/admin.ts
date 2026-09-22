@@ -40,6 +40,7 @@ export const admin: Record<AdminKeys, string> = {
     'lookup.notSame': 'Нет, другой человек',
     'lookup.replacing': 'Новые данные заменят прежнюю запись — так и должно быть, если номер перешёл к другому человеку.',
     'field.fullName': 'Полное имя',
+    'field.organizationName': 'Название организации',
     'field.phone': 'Телефон',
     'field.birthDate': 'Дата рождения',
     'field.parentPhone': 'Телефон родителя',

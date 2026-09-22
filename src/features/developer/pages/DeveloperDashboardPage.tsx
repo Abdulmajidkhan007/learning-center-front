@@ -7,14 +7,18 @@ import { useT } from '@/shared/i18n'
 import { AppShell, Button, ErrorBox, Input, Pagination, Panel, SegmentedControl } from '@/shared/ui'
 import { fetchOrganizationOptions } from '../api/developerApi'
 import { NewSubscriptionModal } from '../components/NewSubscriptionModal'
+import { OrganizationFormModal } from '../components/OrganizationFormModal'
+import { OrganizationsPanel } from '../components/OrganizationsPanel'
+import { SuperAdminFormModal } from '../components/SuperAdminFormModal'
 import { PlanFormModal } from '../components/PlanFormModal'
 import { PlanTable } from '../components/PlanTable'
 import { SubscriptionTable } from '../components/SubscriptionTable'
 import { usePlanMutations, usePlans } from '../hooks/usePlans'
+import { useOrganizationMutations } from '../hooks/useOrganizations'
 import { useSubscriptionMutations, useSubscriptions } from '../hooks/useSubscriptions'
-import type { PlanDto, SubscriptionDto } from '@/shared/types'
+import type { OrganizationDto, PlanDto, SubscriptionDto } from '@/shared/types'
 
-type Tab = 'plans' | 'subscriptions'
+type Tab = 'organizations' | 'plans' | 'subscriptions'
 
 /**
  * Dasturchi paneli.
@@ -30,12 +34,14 @@ export function DeveloperDashboardPage() {
     const { signOut } = useAuth()
     const { theme, toggleTheme } = useTheme()
 
-    const [tab, setTab] = useState<Tab>('subscriptions')
+    const [tab, setTab] = useState<Tab>('organizations')
     const [page, setPage] = useState(0)
     const [search, setSearch] = useState('')
     const [editingPlan, setEditingPlan] = useState<PlanDto | null>(null)
     const [isPlanFormOpen, setIsPlanFormOpen] = useState(false)
     const [isSubscriptionFormOpen, setIsSubscriptionFormOpen] = useState(false)
+    const [isOrganizationFormOpen, setIsOrganizationFormOpen] = useState(false)
+    const [superAdminFor, setSuperAdminFor] = useState<OrganizationDto | null>(null)
 
     const { plans, isLoading: plansLoading, error: plansError } = usePlans(session.token)
     const planMutations = usePlanMutations(session.token)
@@ -51,6 +57,7 @@ export function DeveloperDashboardPage() {
         queryFn: () => fetchOrganizationOptions(session.token),
         staleTime: 5 * 60_000,
     })
+    const organizationMutations = useOrganizationMutations(session.token)
 
     function closePlanForm() {
         setIsPlanFormOpen(false)
@@ -70,23 +77,50 @@ export function DeveloperDashboardPage() {
                 <SegmentedControl
                     label={t('developer.title')}
                     value={tab}
-                    onChange={(next) => setTab(next as Tab)}
+                    onChange={(next) => {
+                        // Qidiruv va sahifa tab'ga bog'liq — almashganda
+                        // eski qidiruv yangi ro'yxatni bo'sh ko'rsatardi.
+                        setTab(next as Tab)
+                        setSearch('')
+                        setPage(0)
+                    }}
                     options={[
+                        { value: 'organizations', label: t('developer.organizationsTab') },
                         { value: 'subscriptions', label: t('developer.subscriptionsTab') },
                         { value: 'plans', label: t('developer.plansTab') },
                     ]}
                 />
 
-                {tab === 'plans' ? (
+                {tab === 'organizations' && (
+                    <Button variant="primary" size="sm" onClick={() => setIsOrganizationFormOpen(true)}>
+                        {t('organization.new')}
+                    </Button>
+                )}
+                {tab === 'plans' && (
                     <Button variant="primary" size="sm" onClick={() => setIsPlanFormOpen(true)}>
                         {t('plan.new')}
                     </Button>
-                ) : (
+                )}
+                {tab === 'subscriptions' && (
                     <Button variant="primary" size="sm" onClick={() => setIsSubscriptionFormOpen(true)}>
                         {t('subscription.new')}
                     </Button>
                 )}
             </div>
+
+            {tab === 'organizations' && (
+                <OrganizationsPanel
+                    token={session.token}
+                    page={page}
+                    search={search}
+                    onPageChange={setPage}
+                    onSearchChange={(next) => {
+                        setSearch(next)
+                        setPage(0)
+                    }}
+                    onAddSuperAdmin={setSuperAdminFor}
+                />
+            )}
 
             {tab === 'plans' ? (
                 <Panel>
@@ -150,6 +184,34 @@ export function DeveloperDashboardPage() {
                         )
                     }
                     onClose={closePlanForm}
+                />
+            )}
+
+            {isOrganizationFormOpen && (
+                <OrganizationFormModal
+                    isSaving={organizationMutations.create.isPending}
+                    error={organizationMutations.create.error}
+                    onSubmit={(body) =>
+                        organizationMutations.create.mutate(body, {
+                            onSuccess: () => setIsOrganizationFormOpen(false),
+                        })
+                    }
+                    onClose={() => setIsOrganizationFormOpen(false)}
+                />
+            )}
+
+            {superAdminFor && (
+                <SuperAdminFormModal
+                    organizationName={superAdminFor.name ?? ''}
+                    isSaving={organizationMutations.addSuperAdmin.isPending}
+                    error={organizationMutations.addSuperAdmin.error}
+                    onSubmit={(body) =>
+                        organizationMutations.addSuperAdmin.mutate(
+                            { organizationId: superAdminFor.id, body },
+                            { onSuccess: () => setSuperAdminFor(null) }
+                        )
+                    }
+                    onClose={() => setSuperAdminFor(null)}
                 />
             )}
 
