@@ -15,6 +15,22 @@ export function handleCrud(
         return json(demoUser)
     }
 
+    // Telefon bo'yicha qidiruv. Demo'da bitta raqam "topiladi", shunda
+    // tasdiq oynasini ko'rish mumkin bo'ladi.
+    if (resource === 'user' && tail === 'phone' && method === 'GET') {
+        const phone = url.searchParams.get('phone') ?? ''
+        if (phone.replace(/\D/g, '').endsWith('901234567')) {
+            return json({
+                id: 'u-existing',
+                fullName: 'Nodir Aliyev',
+                phone,
+                birthDate: '2007-02-14',
+                role: 'STUDENT',
+            })
+        }
+        return json(null)
+    }
+
     // --- generik CRUD: /student, /teacher, /group, /lesson ---
     const table = {
         student: 'students',
@@ -52,6 +68,14 @@ export function handleCrud(
         }
         const created = { id: nextId(resource[0]), ...flatten(body) } as Row
         ;(db[table] as unknown as Row[]).push(created)
+
+        // O'quvchi va o'qituvchi yaratilganda backend generatsiya qilingan
+        // parolni qaytaradi — administrator uni faqat shu yerda ko'radi.
+        if (table === 'students' || table === 'teachers') {
+            const user = (created.userDto ?? {}) as Record<string, unknown>
+            return json({ ...created, userDto: { ...user, password: 'demo-' + nextId('p') } })
+        }
+
         return json(created)
     }
 

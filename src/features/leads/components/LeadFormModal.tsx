@@ -4,7 +4,7 @@ import { LEAD_SOURCES } from '@/shared/types'
 import { useT } from '@/shared/i18n'
 import { Button, ErrorBox, Field, Input, Modal, Select } from '@/shared/ui'
 import { useLeadCourseOptions } from '../hooks/useLeads'
-import { isValidPhone, normalizePhone } from '../lib/phone'
+import { isValidPhone, normalizePhone } from '@/shared/lib'
 
 export interface LeadFormModalProps {
     token: string

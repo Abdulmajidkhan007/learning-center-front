@@ -10,6 +10,7 @@ import { MoonIcon, SettingsIcon, SignOutIcon, SunIcon } from './icons'
 
 /** Rolni tarjima kalitiga o'giradi — har bo'limda o'z `<bo'lim>.role` kaliti bor. */
 const ROLE_LABEL_KEY: Record<Role, TranslationKey> = {
+    DEVELOPER: 'superAdmin.developerRole',
     SUPER_ADMIN: 'superAdmin.role',
     ADMINISTRATOR: 'admin.role',
     TEACHER: 'teacher.role',

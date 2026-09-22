@@ -16,6 +16,18 @@ export interface ColumnConfig {
 }
 
 /**
+ * O'qituvchining ismi ikki xil shaklda kelishi mumkin: guruhlar ro'yxatida
+ * `{ id, name }`, boshqa joyda ichma-ich `TeacherDto`. Ikkalasini shu yerda
+ * yechamiz — ustun konfiguratsiyasi bundan xabardor bo'lmasin.
+ */
+function teacherName(row: AdminRow): string | undefined {
+    const teacher = row.teacher
+    if (!teacher) return undefined
+    if ('userDto' in teacher && teacher.userDto) return teacher.userDto.fullName
+    return 'name' in teacher ? teacher.name : undefined
+}
+
+/**
  * Ustunlar formadagi maydonlarni takrorlaydi — shunda jadvalda ichma-ich
  * obyektlarning JSON dumpi emas, haqiqiy qiymatlar ko'rinadi.
  *
@@ -36,9 +48,12 @@ export const COLUMN_CONFIGS: Partial<Record<EntityKey, ColumnConfig[]>> = {
     ],
     groups: [
         { key: 'name', labelKey: 'field.groupName', get: (row) => row.name },
+        { key: 'level', labelKey: 'field.level', get: (row) => row.levelName },
         { key: 'room', labelKey: 'field.room', get: (row) => row.room },
-        { key: 'teacher', labelKey: 'field.teacher', get: (row) => row.teacher?.userDto?.fullName },
+        { key: 'teacher', labelKey: 'field.teacher', get: (row) => teacherName(row) },
         { key: 'timetable', labelKey: 'field.days', render: (row) => <TimetableCell timeTable={row.timeTable} /> },
+        { key: 'startDate', labelKey: 'field.startDate', get: (row) => formatDate(row.startDate) || undefined },
+        { key: 'students', labelKey: 'field.studentCount', get: (row) => row.activeStudentsCount },
         { key: 'status', labelKey: 'field.status', render: (row) => <GroupStatusBadge status={row.status} /> },
     ],
     lessons: [

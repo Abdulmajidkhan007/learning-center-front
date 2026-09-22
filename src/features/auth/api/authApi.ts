@@ -7,6 +7,21 @@ export function login(credentials: LoginCredentials) {
 }
 
 /**
+ * Kirishning ikkinchi bosqichi: tashkilot tanlangach yakuniy token olinadi.
+ *
+ * Telefon va parol qaytadan yuboriladi — birinchi bosqichda token
+ * berilmagan, ya'ni o'zimizni tanitadigan boshqa narsa yo'q. Backend ham
+ * ikkalasini qaytadan tekshiradi (`AuthService.selectOrganization`).
+ */
+export function selectOrganization(organizationId: string, credentials: LoginCredentials) {
+    return apiFetch<AuthResponse>('/auth/select-organization', {
+        method: 'POST',
+        params: { organizationId },
+        body: credentials,
+    })
+}
+
+/**
  * httpOnly refresh cookie orqali yangi access token oladi.
  * Cookie bo'lmasa backend 401 qaytaradi — bu normal holat (kirilmagan).
  */
@@ -16,7 +31,10 @@ export function refreshSession() {
 
 /**
  * Token javobidan sessiya yasaydi.
- * Rolni o'qib bo'lmasa `null` — chaqiruvchi buni xato deb ko'rsatadi.
+ *
+ * Token bo'lmasligi xato EMAS: bir nechta markazda o'qiydigan o'quvchiga
+ * birinchi javob tokensiz keladi va avval tashkilot tanlanishi kerak.
+ * Rolni o'qib bo'lmasa ham `null` — chaqiruvchi ikkalasini ajratadi.
  */
 export function toSession(response: AuthResponse | null): Session | null {
     if (!response?.token) return null

@@ -23,6 +23,33 @@ function mockLoginResponse(body: object, ok = true, status = 200) {
     )
 }
 
+/** Ikki bosqich: login tashkilot so'raydi, `select-organization` token beradi. */
+function mockTwoStepLogin(organizations: { id: string; name: string }[], token: string) {
+    const respond = (payload: unknown) => ({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve(JSON.stringify(payload)),
+        json: () => Promise.resolve(payload),
+    })
+
+    vi.stubGlobal(
+        'fetch',
+        vi.fn().mockImplementation((url: string) =>
+            Promise.resolve(
+                String(url).includes('/auth/select-organization')
+                    ? respond({ token })
+                    : respond({ requiresOrganizationSelection: true, organizations })
+            )
+        )
+    )
+}
+
+/** Login so'rovining tanasi — birinchi chaqiruv tashkilotlar ro'yxati bo'lishi mumkin. */
+function loginRequestBody() {
+    const call = vi.mocked(fetch).mock.calls.find(([url]) => String(url).includes('/auth/login'))
+    return JSON.parse(String(call?.[1]?.body))
+}
+
 afterEach(() => {
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
@@ -55,9 +82,77 @@ describe('LoginForm', () => {
         await user.click(screen.getByLabelText(/meni eslab qol/i))
         await user.click(screen.getByRole('button', { name: /kirish/i }))
 
-        await waitFor(() => expect(fetch).toHaveBeenCalled())
-        const [, init] = vi.mocked(fetch).mock.calls[0]
-        expect(JSON.parse(String(init?.body))).toMatchObject({ rememberMe: true })
+        await waitFor(() => expect(loginRequestBody()).toMatchObject({ rememberMe: true }))
+    })
+
+    /*
+     * Telefon-parol to'g'ri, lekin odam tanlangan markazga a'zo emas:
+     * backend `403` qaytaradi. "Parol noto'g'ri" deb yozsak, odam parolini
+     * qayta-qayta terib ovora bo'ladi — holbuki buni administrator hal qiladi.
+     */
+    it('a’zo bo’lmagan markaz tanlansa administratorga yo’naltiradi', async () => {
+        const user = userEvent.setup()
+        mockLoginResponse({ message: 'Forbidden' }, false, 403)
+
+        renderWithProviders(<LoginForm onLoggedIn={vi.fn()} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(/administrator/i)
+    })
+
+    /*
+     * Backend hozir bitta a'zolikda ham ro'yxat qaytaryapti (undagi `return`
+     * tushib qolgan). Bitta variantli ro'yxatdan tanlashni so'rash ma'nosiz,
+     * shuning uchun forma o'zi o'tkazib yuboradi — backend tuzatilgandan
+     * keyin ham bu to'g'ri xatti-harakat bo'lib qoladi.
+     */
+    it('bitta a’zolik bo’lsa tanlashni so’ramasdan kiradi', async () => {
+        const user = userEvent.setup()
+        mockTwoStepLogin([{ id: 'org-1', name: 'Alia markazi' }], tokenWithRole('ADMINISTRATOR'))
+        const onLoggedIn = vi.fn()
+
+        renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        await waitFor(() => expect(onLoggedIn).toHaveBeenCalledTimes(1))
+        expect(screen.queryByLabelText(/tashkilot/i)).not.toBeInTheDocument()
+    })
+
+    /*
+     * Bir nechta markazda o'qiydigan o'quvchi: birinchi javobda token emas,
+     * markazlar ro'yxati keladi va faqat tanlangandan keyin kiriladi.
+     */
+    it('bir nechta markaz bo’lsa avval tanlashni so’raydi', async () => {
+        const user = userEvent.setup()
+        mockTwoStepLogin(
+            [
+                { id: 'org-1', name: 'Alia markazi' },
+                { id: 'org-2', name: 'Bilim markazi' },
+            ],
+            tokenWithRole('STUDENT')
+        )
+        const onLoggedIn = vi.fn()
+
+        renderWithProviders(<LoginForm onLoggedIn={onLoggedIn} />)
+
+        await user.type(screen.getByLabelText(/telefon raqami/i), '+998901234567')
+        await user.type(screen.getByLabelText(/parol/i), 'secret')
+        await user.click(screen.getByRole('button', { name: /kirish/i }))
+
+        const select = await screen.findByLabelText(/tashkilot/i)
+        expect(onLoggedIn).not.toHaveBeenCalled()
+
+        await user.selectOptions(select, 'org-2')
+        await user.click(screen.getByRole('button', { name: /davom etish/i }))
+
+        await waitFor(() => expect(onLoggedIn).toHaveBeenCalledTimes(1))
+        expect(onLoggedIn.mock.calls[0][0]).toMatchObject({ role: 'STUDENT' })
     })
 
     it('noto’g’ri ma’lumotda xato xabarini ko’rsatadi', async () => {

@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { FullGroupDto, GroupNameDto, LessonDto } from '@/shared/types'
+import type { FullGroupDto, GroupNameDto, LessonDto, GroupStatsDto } from '@/shared/types'
 
 const GROUP_ENDPOINT = '/group'
 const LESSON_ENDPOINT = '/lesson'
@@ -26,4 +26,12 @@ export interface StartLessonPayload {
 
 export function startLesson(token: string, payload: StartLessonPayload) {
     return apiFetch<LessonDto>(LESSON_ENDPOINT, { method: 'POST', token, body: payload })
+}
+
+/**
+ * O'qituvchining barcha guruhlari bo'yicha ko'rsatkichlar.
+ * `groupId` yuborilmaydi — backend kirgan o'qituvchini o'zi aniqlaydi.
+ */
+export function fetchGroupStats(token: string) {
+    return apiFetch<GroupStatsDto>(`${GROUP_ENDPOINT}/stats`, { token })
 }

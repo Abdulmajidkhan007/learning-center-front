@@ -14,11 +14,13 @@ import {
     SegmentedControl,
 } from '@/shared/ui'
 import { AnalyticsStatsRow } from '../components/AnalyticsStatsRow'
+import { MySubscriptionPanel } from '../components/MySubscriptionPanel'
 import { BranchFormModal } from '../components/BranchFormModal'
 import { OrganizationFormModal } from '../components/OrganizationFormModal'
 import { SimpleTable, type SimpleColumn } from '../components/SimpleTable'
 import { SuperAdminOnboardingSteps } from '../components/SuperAdminOnboardingSteps'
 import { useAnalytics } from '../hooks/useAnalytics'
+import { useMySubscription } from '../hooks/useMySubscription'
 import {
     useAdminCount,
     useBranchMutations,
@@ -55,6 +57,7 @@ export function SuperAdminDashboardPage() {
     const branchMutations = useBranchMutations(session.token)
 
     const analytics = useAnalytics(session.token)
+    const mySubscription = useMySubscription(session.token)
     const adminCount = useAdminCount(session.token)
 
     const organizationOptions = useMemo(
@@ -154,6 +157,11 @@ export function SuperAdminDashboardPage() {
                 </>
             }
         >
+            <MySubscriptionPanel
+                subscription={mySubscription.subscription}
+                isLoading={mySubscription.isLoading}
+            />
+
             <AnalyticsStatsRow items={analytics.items} />
 
             <SuperAdminOnboardingSteps

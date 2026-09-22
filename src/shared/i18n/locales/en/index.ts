@@ -9,6 +9,7 @@ import { superAdmin } from './superAdmin'
 import { settings } from './settings'
 import { student } from './student'
 import { leads } from './leads'
+import { developer } from './developer'
 
 /**
  * Inglizcha.
@@ -28,4 +29,5 @@ export const en: Translations = {
     ...settings,
     ...student,
     ...leads,
+    ...developer,
 }

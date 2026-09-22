@@ -30,6 +30,8 @@ export const teacher: Record<TeacherKeys, string> = {
     'teacher.homeworkDone': 'Домашнее задание сдано',
     'teacher.homeworkMissing': 'Не сдано',
     'teacher.groupProgress': 'Прогресс группы',
+    'kpi.total': 'Всего',
+    'kpi.allGroups': 'По всем вашим группам',
     'kpi.active': 'Активные',
     'kpi.new': 'Новые',
     'kpi.lost': 'Ушли',

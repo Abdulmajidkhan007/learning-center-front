@@ -33,6 +33,8 @@ export const teacher = {
     'teacher.homeworkDone': 'Uy vazifasi bajarilgan',
     'teacher.homeworkMissing': 'Bajarilmagan',
     'teacher.groupProgress': 'Guruh progressi',
+    'kpi.total': 'Jami',
+    'kpi.allGroups': 'Barcha guruhlaringiz bo‘yicha',
     'kpi.active': 'Faol',
     'kpi.new': 'Yangi',
     'kpi.lost': 'Ketgan',

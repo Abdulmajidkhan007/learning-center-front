@@ -9,6 +9,8 @@ import { PrintIcon } from './PrintIcon'
 interface PaymentReceiptModalProps {
     transaction?: TransactionDto | null
     invoice?: InvoiceDto | null
+    /** Guruhlar ro'yxati — chekda id emas, nom chiqishi uchun. */
+    groupOptions?: { value: string; label: string }[]
     onClose: () => void
 }
 
@@ -19,7 +21,12 @@ interface PaymentReceiptModalProps {
  * balans ma'lumotlarini A5 formatida ko'rsatadi va `window.print()` orqali
  * chop etish imkonini beradi.
  */
-export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentReceiptModalProps) {
+export function PaymentReceiptModal({
+    transaction,
+    invoice,
+    groupOptions = [],
+    onClose,
+}: PaymentReceiptModalProps) {
     const { t } = useT()
     const session = useSession()
     const { data: organization } = useMyOrganization(
@@ -34,10 +41,12 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
         invoice?.enrollmentDto?.studentFullName ||
         '—'
 
-    const groupName =
-        transaction?.invoice?.enrollmentDto?.groupId ||
-        invoice?.enrollmentDto?.groupId ||
-        '—'
+    // `EnrollmentDto` da guruh NOMI yo'q, faqat `groupId`. Uni shundoq
+    // chop etsak chekda UUID chiqadi — shuning uchun ro'yxatdan nomini
+    // topamiz. Topilmasa qatorni umuman ko'rsatmaymiz: bo'sh joy
+    // tushunarsiz identifikatordan yaxshiroq.
+    const groupId = transaction?.invoice?.enrollmentDto?.groupId || invoice?.enrollmentDto?.groupId
+    const groupName = groupOptions.find((option) => option.value === groupId)?.label
 
     const amount = transaction?.amount ?? invoice?.amount
     const formattedAmount = formatAmount(amount)
@@ -63,15 +72,11 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
         window.print()
     }
 
-    const receiptTitle = t('transaction.receiptTitle')
-    const receiptEyebrow = organization?.name || t('transaction.receiptEyebrow')
-    const remainingBalanceLabel = t('transaction.remainingBalance')
-    const printLabel = t('common.print')
 
     return (
         <Modal
             eyebrow={t('transaction.eyebrow')}
-            title={receiptTitle}
+            title={t('transaction.receiptTitle')}
             onClose={onClose}
         >
             <style>{`
@@ -109,10 +114,10 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
                 {/* Chek sarlavhasi */}
                 <div className="border-b border-border-base pb-3 mb-4 text-center">
                     <p className="text-xs font-semibold tracking-wider text-fg-muted uppercase">
-                        {receiptEyebrow}
+                        {organization?.name || t('transaction.receiptEyebrow')}
                     </p>
                     <h3 className="text-lg font-bold font-display text-fg mt-0.5">
-                        {receiptTitle.toUpperCase()}
+                        {t('transaction.receiptTitle').toUpperCase()}
                     </h3>
                     {(transaction?.id || invoice?.invoiceNumber) && (
                         <p className="text-[0.75rem] font-mono text-fg-muted mt-1">
@@ -128,10 +133,14 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
                         <span className="font-semibold text-fg text-right">{studentName}</span>
                     </div>
 
-                    <div className="flex justify-between items-center py-1 border-b border-border-base/50">
-                        <span className="text-fg-muted font-medium">{t('invoice.createForGroup')}:</span>
-                        <span className="font-semibold text-fg text-right">{groupName}</span>
-                    </div>
+                    {groupName && (
+                        <div className="flex justify-between items-center py-1 border-b border-border-base/50">
+                            <span className="text-fg-muted font-medium">
+                                {t('invoice.createForGroup')}:
+                            </span>
+                            <span className="font-semibold text-fg text-right">{groupName}</span>
+                        </div>
+                    )}
 
                     <div className="flex justify-between items-center py-1 border-b border-border-base/50">
                         <span className="text-fg-muted font-medium">{t('transaction.type')}:</span>
@@ -149,7 +158,7 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
                     </div>
 
                     <div className="flex justify-between items-center py-1 pt-2">
-                        <span className="text-fg-muted font-medium">{remainingBalanceLabel}:</span>
+                        <span className="text-fg-muted font-medium">{t('transaction.remainingBalance')}:</span>
                         <span className="font-semibold text-fg text-right tabular-nums">{formattedBalance}</span>
                     </div>
                 </div>
@@ -159,7 +168,7 @@ export function PaymentReceiptModal({ transaction, invoice, onClose }: PaymentRe
                 <Button onClick={onClose}>{t('common.close')}</Button>
                 <Button variant="primary" onClick={handlePrint} className="gap-1.5">
                     <PrintIcon />
-                    {printLabel}
+                    {t('common.print')}
                 </Button>
             </div>
         </Modal>

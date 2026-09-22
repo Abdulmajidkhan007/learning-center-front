@@ -61,3 +61,35 @@ export function formatAmount(amount?: number | null): string {
     if (amount === undefined || amount === null || Number.isNaN(amount)) return '—'
     return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount)
 }
+
+/** Qisqartirilgan oy nomlari — jadval sarlavhalari uchun. */
+const SHORT_MONTHS: Record<string, string[]> = {
+    uz: ['yan', 'fev', 'mar', 'apr', 'may', 'iyn', 'iyl', 'avg', 'sen', 'okt', 'noy', 'dek'],
+    ru: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+}
+
+/**
+ * Jadval sarlavhasidagi sana: "16 sen" (uz/ru) yoki "Sep 16" (en).
+ *
+ * Yil ataylab yo'q — jadval bir necha oylik oraliqni ko'rsatadi, yil esa
+ * baribir joriy yil bo'ladi va har ustunda takrorlanib joy egallaydi.
+ * Boshidagi nol ham olib tashlanadi: "09-03" o'qishga qiyin, "3 sen" esa
+ * darrov tushunarli.
+ *
+ * `Date` ataylab ishlatilmaydi: kelgan qiymat "2026-09-16" ko'rinishidagi
+ * MAHALLIY sana, uni `Date` ga bersak brauzer UTC deb o'qib, vaqt mintaqasi
+ * manfiy bo'lgan joyda bir kun oldinga surib yuboradi.
+ */
+export function formatDayMonth(value?: string | null, locale = 'uz'): string {
+    if (!value) return ''
+    const [year, month, day] = value.slice(0, 10).split('-')
+    if (!year || !month || !day) return formatDate(value)
+
+    const months = SHORT_MONTHS[locale] ?? SHORT_MONTHS.uz
+    const name = months[Number(month) - 1]
+    if (!name) return formatDate(value)
+
+    const dayNumber = Number(day)
+    return locale === 'en' ? `${name} ${dayNumber}` : `${dayNumber} ${name}`
+}

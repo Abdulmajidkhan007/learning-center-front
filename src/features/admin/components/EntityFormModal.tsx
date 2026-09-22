@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { useSession } from '@/app/providers/useAuth'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { formatHeader } from '@/shared/lib'
+import { formatHeader, formatPhone, normalizePhone, UZ_PHONE_PREFIX } from '@/shared/lib'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
+import { useUserByPhone } from '../hooks/useUserByPhone'
+import { ExistingUserNotice } from './ExistingUserNotice'
 import type { EntityFormConfig, FormField, FormValues, ModalMode } from '../types'
 
 interface EntityFormModalProps {
@@ -41,7 +44,47 @@ export function EntityFormModal({
     onClose,
 }: EntityFormModalProps) {
     const { t } = useT()
-    const [values, setValues] = useState<FormValues>(initialValues)
+    const session = useSession()
+    const [values, setValues] = useState<FormValues>(() =>
+        // Yangi odam qo'shayotganda har safar "+998" ni qo'lda terish shart
+        // emas. Chet el raqami bo'lsa uni o'chirib yozaveradi.
+        mode === 'create' && formConfig?.lookupByPhone && !initialValues.phone
+            ? { ...initialValues, phone: UZ_PHONE_PREFIX }
+            : initialValues
+    )
+
+    /*
+     * Telefon bo'yicha qidiruv — faqat yangi odam qo'shayotganda.
+     * Tahrirlashda odam allaqachon ma'lum, qidirishning ma'nosi yo'q.
+     */
+    const isLookup = mode === 'create' && formConfig?.lookupByPhone === true
+    const phone = String(values.phone ?? '')
+
+    /** `null` — hali javob yo'q; `'linked'` — tasdiqlangan; `'new'` — rad etilgan. */
+    const [decision, setDecision] = useState<'linked' | 'new' | null>(null)
+    const { found, isSearching } = useUserByPhone(
+        session.token,
+        normalizePhone(phone),
+        isLookup && decision === null
+    )
+
+    /**
+     * Tasdiqlangach ma'lumot to'ladi, lekin BLOKLANMAYDI.
+     *
+     * Sabab: raqam boshqa odamga o'tgan bo'lishi mumkin va o'shanda yangi
+     * egasining ismi yozilishi kerak. Formada nima tursa, o'sha yuboriladi —
+     * backend mavjud odamni yangilaydi. Administrator xato yozsa, odam
+     * o'zi kelib aytadi va administrator to'g'rilaydi.
+     */
+    function confirmExisting() {
+        if (!found) return
+        setValues((current) => ({
+            ...current,
+            fullName: found.fullName ?? current.fullName,
+            birthDate: found.birthDate ?? current.birthDate,
+        }))
+        setDecision('linked')
+    }
 
     const eyebrow = mode === 'create' ? t('admin.newRecord') : t('admin.editRecord')
     const title =
@@ -62,12 +105,24 @@ export function EntityFormModal({
     }
 
     function setValue(key: string, value: unknown) {
+        // Raqam o'zgarsa oldingi qaror kuchini yo'qotadi — boshqa odam
+        // haqida gap ketyapti.
+        if (key === 'phone') setDecision(null)
         setValues((current) => ({ ...current, [key]: value }))
     }
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        onSubmit(values)
+        // Bo'shliqlar faqat ko'rinish uchun edi: serverga tozalangan
+        // ko'rinishda ketmasa, "+998 90 …" va "+99890…" ikki xil raqam
+        // bo'lib qoladi va yagonalik sharti ishlamaydi.
+        onSubmit({
+            ...values,
+            ...(values.phone ? { phone: normalizePhone(String(values.phone)) } : {}),
+            ...(values.parentPhone
+                ? { parentPhone: normalizePhone(String(values.parentPhone)) }
+                : {}),
+        })
     }
 
     if (!formConfig && fallbackColumns.length === 0) {
@@ -88,9 +143,30 @@ export function EntityFormModal({
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                 {formConfig
                     ? fields.map((field) => (
-                          <Field key={field.key} label={t(field.labelKey)}>
-                              {renderControl(field)}
-                          </Field>
+                          <div key={field.key} className="flex flex-col gap-1.5">
+                              <Field label={t(field.labelKey)}>
+                                  {renderControl(field)}
+                              </Field>
+                              {/* Xabar telefon maydonining ostida turadi:
+                                  administrator aynan shu yerga qarab turadi. */}
+                              {field.key === 'phone' && isLookup && found && decision === null && (
+                                  <ExistingUserNotice
+                                      user={found}
+                                      onConfirm={confirmExisting}
+                                      onReject={() => setDecision('new')}
+                                  />
+                              )}
+                              {field.key === 'phone' && decision === 'new' && (
+                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
+                                      {t('lookup.replacing')}
+                                  </p>
+                              )}
+                              {field.key === 'phone' && isSearching && (
+                                  <p className="text-[0.72rem] leading-snug text-fg-faint">
+                                      {t('common.loading')}
+                                  </p>
+                              )}
+                          </div>
                       ))
                     : fallbackColumns.map((key) => (
                           <Field key={key} label={formatHeader(key)}>
@@ -144,6 +220,10 @@ export function EntityFormModal({
         return (
             <Input
                 type={type}
+                // Telefon topilib, javob berilmaguncha qolganlari o'chiq turadi:
+                // aks holda administrator yozib bo'lgach ustiga boshqa ism
+                // tushadi va nima o'zgarganini sezmaydi.
+                disabled={isLookup && found !== null && decision === null && key !== 'phone'}
                 // `time` inputi 24 soatlik ko'rinishda chiqsin
                 lang={type === 'time' ? 'ru-RU' : undefined}
                 value={
@@ -151,7 +231,9 @@ export function EntityFormModal({
                         ? JSON.stringify(raw)
                         : ((raw as string | number | undefined) ?? '')
                 }
-                onChange={(event) => setValue(key, event.target.value)}
+                onChange={(event) =>
+                    setValue(key, type === 'tel' ? formatPhone(event.target.value) : event.target.value)
+                }
             />
         )
     }

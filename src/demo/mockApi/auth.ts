@@ -1,6 +1,11 @@
 import { demoUser, getDemoRole, json, makeToken } from './state'
 
 export function handleAuth(path: string): Response | null {
+    // Demo'da kirish har doim bir bosqichda — tashkilot tanlash faqat bir
+    // nechta markazda o'qiydigan o'quvchida chiqadi, demo esa bitta markaz.
+    if (path === '/auth/select-organization') {
+        return json({ token: makeToken(getDemoRole()), expiry: '2099-01-01T00:00:00Z' })
+    }
     if (path === '/auth/refresh-token' || path === '/auth/login') {
         return json({ token: makeToken(getDemoRole()), expiry: '2099-01-01T00:00:00Z' })
     }

@@ -222,7 +222,7 @@ export function AttendancePage() {
             {!isLoading && students.length > 0 && (
                 <>
                     {pastColumns.length > 0 && (
-                        <p className="mb-4 font-mono text-xs text-fg-faint">
+                        <p className="mb-2 font-mono text-xs text-fg-faint">
                             {t('attendance.pastLessons', { count: pastColumns.length })}
                         </p>
                     )}

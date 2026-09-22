@@ -6,6 +6,7 @@
  */
 export const superAdmin = {
     'superAdmin.role': 'Super-admin',
+    'superAdmin.developerRole': 'Dasturchi',
     'superAdmin.eyebrow': 'Tizim',
     'superAdmin.section': 'Bo‘lim',
     'superAdmin.search': 'nom bo‘yicha qidirish…',

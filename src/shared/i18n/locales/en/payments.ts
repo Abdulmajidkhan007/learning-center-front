@@ -28,6 +28,9 @@ export const payments: Record<PaymentsKeys, string> = {
     'transaction.eyebrow': 'Transactions',
     'transaction.new': '+ Add payment',
     'transaction.newTitle': 'New payment',
+    'transaction.receiptTitle': 'Payment receipt',
+    'transaction.receiptEyebrow': 'LEARNING CENTRE',
+    'transaction.remainingBalance': 'Remaining balance',
     'transaction.date': 'Date',
     'transaction.type': 'Type',
     'transaction.type.PAID': 'Paid',
@@ -36,7 +39,4 @@ export const payments: Record<PaymentsKeys, string> = {
     'transaction.empty': 'No payments found',
     'transaction.hint': 'A payment attaches to the student\u2019s latest invoice. Without one it cannot be recorded.',
     'transaction.deleteConfirm': 'Delete the {{amount}} payment? This cannot be undone.',
-    'transaction.receiptTitle': 'Payment receipt',
-    'transaction.receiptEyebrow': 'EDUCATIONAL CENTER',
-    'transaction.remainingBalance': 'Remaining balance',
 }

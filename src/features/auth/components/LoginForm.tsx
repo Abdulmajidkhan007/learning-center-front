@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { errorMessage } from '@/shared/api'
+import { ApiError, errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
-import { Button, ErrorBox, Field, Input } from '@/shared/ui'
+import { Button, ErrorBox, Field, Input, Select } from '@/shared/ui'
 import { useLogin } from '../hooks/useLogin'
 import type { Session } from '@/shared/types'
 
@@ -10,12 +10,63 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
+    const [organizationId, setOrganizationId] = useState('')
 
-    const { mutate, isPending, error } = useLogin(onLoggedIn)
+    const { submitCredentials, submitOrganization, organizations, isPending, error } =
+        useLogin(onLoggedIn)
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        mutate({ phone, password, rememberMe })
+        if (organizations) {
+            submitOrganization(organizationId)
+            return
+        }
+        submitCredentials({ phone, password, rememberMe })
+    }
+
+    // Xato turi bo'yicha xabar: `403` — telefon-parol to'g'ri, lekin odam
+    // tanlangan markazga tegishli emas. Bunda "parol noto'g'ri" deyish
+    // chalg'itadi: odam parolini qayta-qayta terib ovora bo'ladi, holbuki
+    // buni faqat administrator hal qiladi.
+    function messageFor(cause: unknown) {
+        if (cause instanceof Error && cause.message === 'ROLE_MISSING') return t('auth.roleMissing')
+        if (cause instanceof ApiError && cause.status === 403) return t('auth.notAMember')
+        return errorMessage(cause, t('auth.invalidCredentials'))
+    }
+
+    // Ikkinchi bosqichda telefon va parol maydonlari ko'rsatilmaydi: ular
+    // allaqachon to'g'ri deb tasdiqlangan, qayta so'rash faqat chalg'itadi.
+    if (organizations) {
+        return (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <p className="text-sm leading-snug text-fg-muted">{t('auth.chooseOrganization')}</p>
+
+                <Field label={t('auth.organization')}>
+                    <Select
+                        required
+                        autoFocus
+                        value={organizationId}
+                        onChange={(event) => setOrganizationId(event.target.value)}
+                        options={organizations.map((organization) => ({
+                            value: organization.id,
+                            label: organization.name,
+                        }))}
+                        placeholder={t('auth.organizationPlaceholder')}
+                    />
+                </Field>
+
+                {error && <ErrorBox>{messageFor(error)}</ErrorBox>}
+
+                <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isPending || organizationId === ''}
+                    className="mt-2 py-3"
+                >
+                    {isPending ? t('auth.signingIn') : t('auth.continue')}
+                </Button>
+            </form>
+        )
     }
 
     return (
@@ -42,13 +93,6 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 />
             </Field>
 
-            {/* Boshlang'ich parol — tug'ilgan sana. Busiz birinchi marta
-                kirayotgan odam nima yozishini bilmaydi va "parol xato" deb
-                o'ylab qoladi. */}
-            <p className="-mt-1 text-[0.72rem] leading-snug text-fg-faint">
-                {t('auth.firstTimeHint')}
-            </p>
-
             <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                     type="checkbox"
@@ -59,7 +103,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: (session: Session) => vo
                 {t('auth.keepSignedIn')}
             </label>
 
-            {error && <ErrorBox>{errorMessage(error, t('auth.invalidCredentials'))}</ErrorBox>}
+            {error && <ErrorBox>{messageFor(error)}</ErrorBox>}
 
             <Button type="submit" variant="primary" disabled={isPending} className="mt-2 py-3">
                 {isPending ? t('auth.signingIn') : t('auth.signIn')}

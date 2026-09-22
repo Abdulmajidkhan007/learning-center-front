@@ -17,6 +17,12 @@ export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number]
 export interface JwtClaims {
     role?: string
     permissions?: AdminPermission[]
+    /**
+     * Kirilgan markaz. Bitta odam bir nechta markazga a'zo bo'lishi mumkin,
+     * shuning uchun bu "qaysi markazga kirdi" degani — `userId` kabi qat'iy
+     * emas, har kirishda o'zgarishi mumkin.
+     */
+    organizationId?: string
     [claim: string]: unknown
 }
 
@@ -36,8 +42,27 @@ export interface Session {
  * `refresh_token` cookie'siga yozadi (`AuthService.setRefreshCookie`).
  */
 export interface AuthResponse {
-    token: string
+    /**
+     * Bir nechta markazda o'qiydigan o'quvchida birinchi javob TOKENSIZ
+     * keladi — avval tashkilot tanlanishi kerak.
+     */
+    token?: string | null
     expiry?: string
+    /** `true` bo'lsa `organizations` dan bittasi tanlanib, ikkinchi bosqich chaqiriladi. */
+    requiresOrganizationSelection?: boolean
+    organizations?: OrganizationViewDto[] | null
+}
+
+/**
+ * Kirish paytida tanlanadigan a'zolik.
+ *
+ * `role` shu markazdagi rol: bitta odam bir joyda o'qituvchi, boshqasida
+ * o'quvchi bo'lishi mumkin, shuning uchun u markaz bilan birga keladi.
+ */
+export interface OrganizationViewDto {
+    id: string
+    name: string
+    role?: Role
 }
 
 export interface LoginCredentials {
@@ -46,4 +71,4 @@ export interface LoginCredentials {
     rememberMe: boolean
 }
 
-export type Role = 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'
+export type Role = 'DEVELOPER' | 'SUPER_ADMIN' | 'ADMINISTRATOR' | 'TEACHER' | 'STUDENT'

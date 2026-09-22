@@ -7,15 +7,15 @@ export function handleSuperAdmin(
     url: URL,
     body: Record<string, unknown>
 ): Response | null {
-    if (path === '/organizations' && method === 'GET') {
+    if (path === '/organization' && method === 'GET') {
         return page(db.organizations as unknown as Row[], url)
     }
-    if (path === '/organizations' && method === 'POST') {
+    if (path === '/organization' && method === 'POST') {
         const org = { id: nextId('o'), ...body } as OrganizationDto
         db.organizations = [...db.organizations, org]
         return json(org)
     }
-    if (path.startsWith('/organizations/') && method === 'PUT') {
+    if (path.startsWith('/organization/') && method === 'PUT') {
         const id = path.split('/')[2]
         db.organizations = db.organizations.map((org) =>
             org.id === id ? { ...org, ...body } : org

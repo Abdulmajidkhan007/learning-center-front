@@ -1,5 +1,5 @@
 import { apiFetch } from '@/shared/api'
-import type { GroupDto, InvoiceDto, InvoiceStatus, Page, StudentDto } from '@/shared/types'
+import type { GroupOverviewDto, InvoiceDto, InvoiceStatus, Page, StudentDto } from '@/shared/types'
 
 const ENDPOINT = '/invoice'
 
@@ -65,7 +65,7 @@ export async function fetchStudentOptions(token: string) {
 
 /** Hisob yaratish tugmasidagi guruh tanlagichi. */
 export async function fetchGroupOptions(token: string) {
-    const data = await apiFetch<Page<GroupDto>>('/group', { token, params: { page: 0, size: 200 } })
+    const data = await apiFetch<Page<GroupOverviewDto>>('/group', { token, params: { page: 0, size: 200 } })
     return (data?.content ?? []).map((group) => ({
         value: group.id,
         label: group.name || group.id,

@@ -220,6 +220,7 @@ export function PaymentsPage() {
                 <PaymentReceiptModal
                     transaction={receiptTransaction}
                     invoice={receiptInvoice}
+                    groupOptions={groupOptions}
                     onClose={() => {
                         setReceiptTransaction(null)
                         setReceiptInvoice(null)

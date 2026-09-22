@@ -5,4 +5,10 @@ export interface Page<T> {
     totalElements?: number
 }
 
+/** Backendning `IdNameDto` record'i — tanlagichlar uchun qisqartirilgan yozuv. */
+export interface IdNameDto {
+    id: string
+    name: string
+}
+
 export * from './auth'

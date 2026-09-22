@@ -864,3 +864,172 @@ private String paymentNote;          // "Karta: … , izohda ism-familiya"
 ```
 
 Har markazniki har xil bo'lgani uchun uni kodga yozib bo'lmaydi.
+
+
+---
+
+# 2026-09-16 — hozirgi holat va kerakli API'lar
+
+Bu bo'lim eskilarini almashtiradi: yuqoridagilar tarix uchun qoldirilgan.
+
+## Frontda nima tayyor
+
+Ekranlarning deyarli hammasi qurilgan va ulangan:
+
+| Ekran | Holat |
+| --- | --- |
+| Kirish (ikki bosqichli, ko'p markazli) | ✅ |
+| Administrator: o'quvchi, o'qituvchi, guruh, dars | ✅ |
+| Davomat (+ CSV, + chop etish) | ✅ |
+| To'lovlar (hisob, tranzaksiya, + chek) | ✅ |
+| Lidlar | ✅ |
+| Daraja (group-level) | ✅ |
+| Sozlamalar, rasm galereyasi | ✅ |
+| Super-admin: tashkilot, filial, analitika | ✅ |
+| O'quvchi paneli | ✅ |
+| O'qituvchi paneli | ✅ |
+
+To'sib turgan narsa UI emas — quyidagi to'rtta endpoint.
+
+## 1. 🔴 Yaratilgan o'quvchi va o'qituvchi TIZIMGA KIRA OLMAYDI
+
+Eng shoshilinch. `POST /student` va `POST /teacher` `UserOrganization`
+yaratmaydi:
+
+```java
+public StudentDto create(StudentCreateDto createDto) {
+    validator.validate(createDto);
+    Student entity = mapper.toEntity(createDto);
+    return mapper.toDto(repository.save(entity));   // a'zolik YO'Q
+}
+```
+
+A'zolikni faqat `UserService.createUser` yaratadi. Login esa a'zolik
+bo'lmasa `ORGANIZATION_NOT_FOUND` tashlaydi — ya'ni administrator
+qo'shgan har bir o'quvchi kira olmaydi.
+
+Ustiga-ustak `UserCreateDto` da parol maydoni yo'q va `StudentService`
+`generatePassword` ni chaqirmaydi, ya'ni `User.password` **`null`**
+bo'lib qoladi.
+
+Kerak: `POST /student` va `POST /teacher` ham `createUser` yo'lidan
+o'tsin — parol generatsiya qilinsin, a'zolik yaratilsin, va javobda
+`UserCreatedResponseDto` dagidek **generatsiya qilingan parol
+qaytarilsin**. Frontda uni administratorga ko'rsatamiz.
+
+## 2. O'qituvchi paneli — KPI kartalar
+
+Ko'rinish tayyor (`KpiRow.tsx`), qiymat o'rnida "—" turibdi. Guruh
+bo'yicha yettita son kerak:
+
+`active`, `new`, `lost`, `potentialFail`, `absent`, `redList`, `blackList`
+
+Taklif: `GET /group/{groupId}/stats` → shu yettita maydonli obyekt.
+
+## 3. Uy vazifasi
+
+`LessonStrip` dagi to'rtinchi katak kutyapti. Dars bo'yicha: berilgan
+va bajargan o'quvchilar soni. `LessonDto` ga ikkita son qo'shilsa ham
+yetarli.
+
+## 4. Parolni tiklash
+
+Hozir front tomonda "Parolni unutdim" ekrani YO'Q, chunki endpoint yo'q.
+Ikkita alohida narsa kerak:
+
+- **Administrator tiklashi:** `POST /user/{id}/reset-password` → yangi
+  parolni javobda qaytarsin (1-banddagi bilan bir xil usul).
+- **O'zi tiklashi:** hozircha shart emas — o'quvchi administratorga
+  murojaat qiladi. Bot tayyor bo'lganda qaytamiz.
+
+## 5. Mayda, lekin har ekranda sezilади
+
+`GET /auth/me` javobiga kirilgan markazning `id` va `name` i qo'shilsa.
+
+Hozir markaz nomini bilish uchun tokendagi `organizationId` ni o'qib,
+`GET /organization/{id}` ga alohida so'rov yuborish kerak. U chekda,
+davomat jurnalida va sarlavhada kerak bo'ladi — ya'ni har safar
+ortiqcha so'rov. `/auth/me` da kelsa bitta so'rov qisqaradi.
+
+
+---
+
+## Obuna (subscription) — front boshlandi
+
+Dasturchi paneli yozildi: tariflar (qo'shish, tahrirlash, o'chirish) va
+obunalar (ro'yxat, qidiruv, faollashtirish, bekor qilish).
+`DEVELOPER` roli endi bo'sh ekran emas, shu panelga tushadi.
+
+Ikkita narsa kerak.
+
+### S-1. 🟠 Yo'l `v1` siz qolgan
+
+```java
+@RequestMapping("/api/plans")           // PlanController
+@RequestMapping("/api/subscriptions")   // SubscriptionController
+@RequestMapping("/api/v1/developer")    // DeveloperController — to'g'ri
+```
+
+Qolgan yigirmata kontroller `/api/v1/…` da. `apiFetch` hamma so'rovga
+`/api/v1` ni qo'shadi, ya'ni ikkitagina yo'l uchun istisno yozish kerak
+bo'ladi — va o'sha istisno keyin unutiladi.
+
+Front `/api/v1/plans` va `/api/v1/subscriptions` deb yozildi. `v1`
+qo'shsangiz o'zi ishlab ketadi.
+
+### S-2. 🔴 Tarif va obunani HAR KIM o'zgartira oladi
+
+Ikkala kontrollerda ham `@PreAuthorize` yo'q va ular `WHITE_LIST` da
+emas — ya'ni tokeni bor har kim kira oladi. Amalda:
+
+- markazning o'z administratori `POST /subscriptions` bilan o'ziga
+  bepul `PRO` obuna yozib qo'ya oladi,
+- `DELETE /plans/{id}` bilan narxlarni o'chirib tashlashi mumkin.
+
+Bu — pul bilan bog'liq yagona joy. Ikkalasiga ham `DEVELOPER` sharti
+qo'yilishi kerak.
+
+### Savol
+
+Obuna tugaganda nima bo'ladi? Hozir `EXPIRED` holati bor, lekin uni
+kim va qachon qo'yadi — rejali ish (scheduler) bormi, yoki tekshiruv
+har so'rovda bo'ladimi? Frontda buni ko'rsatishimiz kerak: markaz
+`GRACE` ga tushganda administrator ogohlantirish ko'rishi kerakmi?
+
+
+---
+
+## KPI ta'riflari — kelishildi (2026-09-16)
+
+`GET /api/v1/group/{groupId}/stats` javobidagi yettita son. Ilgari
+nomlargina bor edi, endi ma'nosi ham aniq.
+
+### Bugun qilsa bo'ladigan beshtasi
+
+| Maydon | Ta'rifi |
+| --- | --- |
+| `active` | Guruhdagi o'chirilmagan `Enrollment` soni |
+| `new` | `Enrollment.createdAt` joriy oy ichida bo'lganlari |
+| `lost` | Joriy oyda o'chirilgan (`leavingReason` qo'yilgan) yozuvlar |
+| `absent` | Guruhning **eng oxirgi** darsida `ABSENT` bo'lganlar. `EXCUSED` sanalmaydi — u sababli |
+| `potentialFail` | Oxirgi 10 darsdan **KETMA-KET** 3 tasini qoldirganlar. Ketma-ket — shart: tarqoq uchta qoldirish tashvish emas, uchtasi surunkasiga esa ketish alomati |
+
+### Ikkitasi yangi imkoniyatga bog'liq
+
+**`redList` — uy vazifasi.** Qarzga bog'liq EMAS. O'quvchi 2-3 marta uy
+vazifasini bajarmasa shu ro'yxatga tushadi. Ya'ni bu son uy vazifasi
+imkoniyati qurilmaguncha hisoblanmaydi (`LessonStrip` dagi to'rtinchi
+katak ham o'shani kutyapti — bitta ish ikkalasini yopadi).
+
+**`blackList` — intizom.** Qarzga bog'liq EMAS. Qoida buzgan, janjal
+qilgan o'quvchi bloklanadi. `Student` o'chirilmaydi, statusi
+`blocked` bo'ladi.
+
+## O'qituvchiga moliya ko'rsatilmaydi — qaror
+
+`redList`/`blackList` ataylab pulga bog'lanmadi. O'qituvchining
+ekranida qarz ham, summa ham chiqmaydi: to'lov undirish ma'muriyatning
+ishi, o'qituvchi o'quvchiga bilimiga qarab munosabatda bo'lishi kerak.
+
+Hozirgi o'qituvchi ekranida moliyaviy ma'lumot umuman yo'q —
+tekshirildi, o'zgartirish talab qilinmaydi.

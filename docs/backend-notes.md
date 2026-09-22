@@ -696,3 +696,292 @@ Ya'ni eski hisobga to'lov yozib bo'lmaydi, va o'quvchida umuman hisob
 bo'lmasa `POST /transaction` 404 qaytaradi. Hozircha yetarli, lekin
 `TransactionCreateDto` ga ixtiyoriy `invoiceId` qo'shilsa moslashuvchan
 bo'lardi.
+
+---
+
+## 2026-09-11 — `login apis fixes` (9795c65)
+
+### 5. 🔴 LOGINDA AYLANMA BOG'LIQLIK — hech kim kira olmaydi
+
+Uchta narsa bir-birini bog'lab qo'ygan:
+
+1. `LoginRequest.organizationId` — `@NotBlank`, yuborilmasa `400`.
+2. Uni bilishning yagona yo'li — `GET /api/v1/organization/name`.
+3. Lekin `OrganizationService.getByName()` birinchi qatoridayoq
+   `userValidator.authenticateAndGetOrganizationId()` chaqiradi, u esa
+   `SecurityContext` bo'sh bo'lsa `UNAUTHORIZED` tashlaydi.
+
+`SecurityConfig` bu yo'lni `WHITE_LIST` ga qo'shgani yordam bermaydi:
+Spring so'rovni ichkariga kiritadi, keyin servisning o'zi rad etadi.
+
+Ya'ni: **kirish uchun `organizationId` kerak, `organizationId` ni bilish
+uchun esa avval kirish kerak.** Kirmagan odam bu halqadan chiqa olmaydi.
+
+Yechim ikkitadan biri:
+- `getByName()` dan `authenticateAndGetOrganizationId()` ni olib tashlash
+  (u baribir ishlatilmayapti — pastda 6-bandga qarang), yoki
+- `organizationId` ni `@NotBlank` dan chiqarish.
+
+Front tomonda vaqtinchalik himoya qo'yildi: ro'yxat kelmasa "Kirish"
+tugmasi ochiq qoladi va xatoni backend aytadi — aks holda bitta nosozlik
+butun tizimga kirishni yopib qo'yardi.
+
+### 6. 🟠 `getByName()` chaqiruvchining tashkilotini tekshiradi, lekin filtrlamaydi
+
+```java
+String organizationId = userValidator.authenticateAndGetOrganizationId();
+validator.validateAndGetId(organizationId);
+List<Organization> organizations = repository.findAll();   // HAMMASI
+```
+
+Chaqiruvchining tashkiloti olinadi, tekshiriladi — va keyin e'tiborga
+olinmaydi: `findAll()` tizimdagi BARCHA tashkilotlarni qaytaradi. Kirish
+oynasi uchun aynan shu kerak (lekin tokensiz), kirgan foydalanuvchi uchun
+esa bu boshqa mijozlarning ro'yxatini ko'rsatib qo'yish.
+
+### 7. 🔴 `LoginRequest.organizationId` talab qilinadi, lekin ISHLATILMAYDI
+
+`LoginRequest` ga `@NotBlank private String organizationId` qo'shildi.
+`AuthService` esa uni umuman o'qimaydi — foydalanuvchi ilgarigiday faqat
+telefon bo'yicha topiladi:
+
+```java
+User user = userRepository.findByPhoneAndDeletedFalse(phone)
+```
+
+Ya'ni hozir bu maydon **hech nimani hal qilmaydi**, faqat yuborilmasa
+login `400` qaytaradi. Frontend moslashtirildi (kirish oynasiga tashkilot
+tanlagichi qo'shildi), lekin ikkita savol ochiq:
+
+1. Bir xil telefon raqami ikki tashkilotda bo'lsa nima bo'ladi?
+   Hozircha **bo'la olmaydi**: `User.phone` da `@Column(unique = true)`
+   turibdi, ya'ni raqam butun tizim bo'ylab yagona. Demak telefonning
+   o'zi foydalanuvchini aniqlab beradi va `organizationId` ortiqcha.
+   Agar "bir odam ikki markazda" modeli kerak bo'lsa, avval shu
+   `unique = true` yechilishi kerak — bu ma'lumotlar bazasi qarori,
+   login formasining qarori emas.
+2. Agar 1-band bajarilmasa, maydonni `@NotBlank` dan olib tashlash
+   kerak — hech nima hal qilmaydigan majburiy maydon faqat xatolik
+   manbai.
+
+Bu o'zi taklif qilgan "avval kirish, keyin tashkilot tanlash" modeliga
+ham zid: ro'yxat kirishdan OLDIN ochiq turibdi (`WHITE_LIST` da
+`/api/v1/organization/name` bor), ya'ni tashqaridan har kim barcha
+tashkilotlar nomini ko'ra oladi.
+
+### 8. 🟡 `/api/v1/organizations` → `/api/v1/organization`
+
+Yo'l ko'plikdan birlikka o'zgardi. Frontend moslashtirildi
+(`superAdminApi.ts`). Eslatma: bunday o'zgarish oldindan aytilmasa
+super-admin paneli jimgina `404` bo'ladi — tekshirib ko'rmaguncha
+bilinmaydi.
+
+
+---
+
+## 2026-09-14 — ikki bosqichli login (42dfd27)
+
+`LoginRequest` dan `organizationId` olib tashlandi, `LoginResponse` ga
+`requiresOrganizationSelection` va `organizations: List<IdNameDto>`
+qo'shildi, `POST /auth/select-organization` paydo bo'ldi va
+`WHITE_LIST` ga kiritildi. Front shu oqimga o'tkazildi.
+
+### 9. 🔴 O'quvchilar ro'yxati hamon `User.organizationId` ni o'qiydi
+
+`Student` ga `organizationId` qo'shildi, lekin uchta so'rov hamon
+foydalanuvchi ustunini o'qiyapti:
+
+```sql
+where u.organizationId = :orgId          -- searchStudentsByOrganization
+where u.organizationId = :organizationId -- getAnalyticStudent
+where s.user.organizationId = :orgId     -- countStudentsByOrganizationId
+```
+
+`User` qatori faqat BIR marta — birinchi markazda — yaratiladi va o'sha
+markaz bilan muhrlanadi. Demak ikkinchi markazga yozilgan o'quvchi:
+
+- o'sha markazning ro'yxatida **umuman ko'rinmaydi**,
+- birinchi markazning ro'yxatida esa **ketgandan keyin ham turaveradi**,
+- hisobot va statistikada ham shunday.
+
+Uchalasi `s.organizationId` ga o'tishi kerak.
+
+### 10. 🔴 O'chirilgan a'zolik hamon kirish huquqini beradi
+
+`findAllByUserId` va `findStudentByOrganizationIdAndUserId` da
+`deleted = false` sharti yo'q. Ya'ni A markazidan chiqarilgan o'quvchi
+tanlash ro'yxatida A ni ko'raveradi va tanlasa token ham oladi.
+
+### 11. 🟠 Bitta a'zolikdagi tekshiruv foydalanuvchi ustuniga qaraydi
+
+```java
+Student student = studentList.get(0);
+if (!student.getOrganizationId().equals(user.getOrganizationId()))
+    throw new RestException(ErrorType.WRONG_ORGANIZATION, ...);
+```
+
+10-band tuzatilgach bu qulf bo'lib qoladi: A dan chiqib B da o'qiyotgan
+o'quvchida bitta a'zolik (B) qoladi, `user.organizationId` esa A —
+natijada u boshqa hech qachon kira olmaydi. Bitta a'zolik bo'lsa
+shundoq `student.getOrganizationId()` olinsa kifoya; `User` dagi ustun
+"hisob qayerda ochilgan" degani, huquq bermaydi.
+
+### 12. 🟡 Mayda narsalar
+
+- `searchStudentsByOrganization` da `and u.deleted = false` ikki marta.
+- `select-organization` da `organizationId` — `@RequestParam`, ya'ni
+  manzil satrida. Server va proxy jurnallariga tushadi; telefon va
+  parol bilan bitta tanada yuborilgani tozaroq bo'lardi.
+
+
+---
+
+## 2026-09-15 — a'zolik modeli (`UserOrganization`) va guruh ro'yxati
+
+Katta va to'g'ri o'zgarish: `User` endi faqat shaxsni saqlaydi (ism,
+telefon, parol, rasm, tug'ilgan sana), `role`, `branch` va `permissions`
+esa yangi `UserOrganization` jadvaliga ko'chdi. `refreshToken` ham
+a'zolikni qayta tekshiradi. Bu ilgari taklif qilingan model.
+
+### 13. 🔴 Loginda `return` tushib qolgan — HAMMA shu yo'lga tushadi
+
+```java
+if (allByUserId.size() == 1) {
+    UserOrganization userOrganization = allByUserId.get(0);
+    getLoginResponse(response, userOrganization);   // ← return YO'Q
+}
+return LoginResponse.builder()
+        .requiresOrganizationSelection(true)
+        ...
+```
+
+`getLoginResponse` `LoginResponse` qaytaradi, lekin natijasi
+tashlab yuborilyapti va kod pastga tushib ketadi. Natijada **bitta
+a'zoligi bor har bir foydalanuvchi** — ya'ni deyarli hamma:
+administrator, o'qituvchi, ko'pchilik o'quvchi — token o'rniga bitta
+elementli "markazni tanlang" ro'yxatini oladi.
+
+Access token yasalgan, refresh cookie ham qo'yilgan, faqat javobga
+tushmagan. Bitta `return` yetishmayapti.
+
+Front tomonda vaqtinchalik qoplama qo'yildi: ro'yxatda bitta element
+bo'lsa forma so'ramasdan ikkinchi bosqichni o'zi chaqiradi. Bu backend
+tuzatilgandan keyin ham to'g'ri xatti-harakat bo'lib qoladi, lekin
+hozir ortiqcha bitta so'rov ketyapti.
+
+### 14. 🔴 O'quvchilar ro'yxati HAMON `User.organizationId` ni o'qiydi
+
+9-band tuzatilmagan. `User` da endi `organizationId` ustuni faqat
+`BaseEntity` dan kelyapti va a'zolik `UserOrganization` ga ko'chgani
+uchun bu so'rovlar butunlay noto'g'ri manbaga qarab qoldi:
+
+```sql
+where u.organizationId = :orgId          -- searchStudentsByOrganization
+where u.organizationId = :organizationId -- getAnalyticStudent
+where s.user.organizationId = :orgId     -- countStudentsByOrganizationId
+```
+
+`s.organizationId` ga o'tishi kerak.
+
+### 15. 🟠 `findStudentByOrganizationIdAndUserId` da `deleted` filtri yo'q
+
+`findAllStudentOrganizationsByUserId` ga `s.deleted = false` qo'shildi
+(rahmat), lekin ikkinchi bosqichdagi tekshiruv hamon filtrsiz. Ro'yxatda
+ko'rinmasa ham, o'chirilgan a'zolikning id'sini qo'lda yuborib token
+olish mumkin.
+
+### 16. ✅ `GET /group` endi `GroupOverviewDto` qaytaradi
+
+Ro'yxat javobi yangilandi: `teacher` ichma-ich `TeacherDto` emas,
+`{ id, name }`; daraja obyekt emas, `levelName` satri; qo'shimcha
+`startDate` va `activeStudentsCount` keldi.
+
+Front moslashtirildi — `GroupOverviewDto` tipi qo'shildi, admin
+jadvalidagi o'qituvchi ustuni tuzatildi (u yangi shaklda bo'sh chiqib
+qolgan edi) va yangi maydonlar ustun sifatida qo'shildi.
+
+
+---
+
+## 2026-09-17 — KPI, parol va obuna
+
+### 17. 🔴 `StudentService.createStudent` o'quvchini SAQLAMAYDI
+
+```java
+User user = userRepository.getReferenceById(userResponse.id());
+Student entity = mapper.toEntity(createDto);
+entity.setUser(user);
+return new StudentCreateResponseDto(
+        entity.getId(),        // ← saqlanmagani uchun null
+        userResponse, ...
+);
+```
+
+`repository.save(entity)` yo'q. Ilgari bor edi, qayta yozishda tushib
+qolgan. Natijada `User` va `UserOrganization` yaratiladi, `Student`
+qatori esa YO'Q.
+
+Oqibati: odam tizimga kira oladi, lekin o'quvchi emas —
+`GET /student/me` uni topolmaydi, guruhga qo'shib bo'lmaydi, balansi
+yo'q. Javobdagi `id` ham `null` bo'lib qaytadi.
+
+`TeacherService.createTeacher` da `repository.save(teacher)` bor —
+ya'ni bu faqat o'quvchi yo'lida.
+
+Tekshirish: o'quvchi qo'shing va javobdagi `id` ga qarang. `null`
+bo'lsa shu.
+
+### 18. 🟠 `newStudents` va `lostStudents` noto'g'ri sanaydi
+
+`getGroupStats` so'rovida ikkalasi ham `s.created_at` ga qarayapti —
+ya'ni O'QUVCHI qachon yaratilgan:
+
+```sql
+COUNT(... CASE WHEN s.created_at BETWEEN :monthAgo AND :now ...) AS newStudents
+COUNT(... CASE WHEN s.created_at BETWEEN :monthAgo AND :now
+                AND en.leaving_reason IS NOT NULL ...) AS lostStudents
+```
+
+- `newStudents` — bir yil oldin ro'yxatdan o'tgan, lekin bu oyda shu
+  guruhga qo'shilgan o'quvchi sanalmaydi. Sana `enrollments` dan
+  olinishi kerak.
+- `lostStudents` — shart ikki tomonlama: o'quvchi shu oyda yaratilgan
+  BO'LISHI kerak. Ya'ni uch oy oldin kelib, bu oyda ketgan odam
+  sanalmaydi. Amalda deyarli hamma ketgan o'quvchi tushib qoladi.
+
+### 19. ✅ `potentialFail` — to'g'ri yozilgan
+
+Ketma-ket qoldirishni oynali funksiyalar bilan sanash (gaps and
+islands) — aynan kelishilganidek. Rahmat.
+
+### 20. ✅ Obuna: yo'l va ruxsat tuzatildi
+
+`/api/v1/plans`, `/api/v1/subscriptions`, mutatsiyalarda
+`@PreAuthorize("hasRole('DEVELOPER')")`. Front allaqachon shu
+yo'llarga yozilgan edi.
+
+Yangi: `GET /subscriptions/my` (ADMINISTRATOR/SUPER_ADMIN) va
+`POST /subscriptions/renew/{orgId}`.
+
+
+## 2026-09-18 — tuzatish: 17 va 18-bandlar
+
+`StudentService.createStudent` da `repository.save` **bor** va `newStudents`
+masalasi ham ko'rilgan. Yuqoridagi 17-band eskirgan nusxaga qarab
+yozilgan — o'sha paytdagi `origin/main` da `save` yo'q edi, keyin
+qo'shilgan. Yozuv tarix uchun qoldirildi, lekin **amalda emas**.
+
+Saboq: backend haqida xulosa yozishdan oldin `git fetch` qilinsin.
+
+### `GET /user/phone` — ulandi
+
+`@RequestParam String phone`, `where u.phone = :phone` (teng, `like` emas),
+topilmasa `null`. Front shu bo'yicha yozildi.
+
+~~Bitta eslatma: bu yo'lda `@PreAuthorize` yo'q.~~ **Noto'g'ri edi.**
+`UserController` KLASS tepasida
+`@PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMINISTRATOR')")` turibdi va u
+barcha metodlarni qamraydi. Men faqat metod ustiga qaragan ekanman.
+
+Saboq: annotatsiyani metodda topmasangiz, klass tepasiga ham qarang —
+Spring'da u meros bo'lib o'tadi.

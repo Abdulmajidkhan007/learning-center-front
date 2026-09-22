@@ -8,6 +8,7 @@ import { useT } from '@/shared/i18n'
 import { AppShell, AttendanceTable, Button, EmptyState, ErrorBox, SegmentedControl, type PastLessonColumn } from '@/shared/ui'
 import { GroupTabs } from '../components/GroupTabs'
 import { KpiRow } from '../components/KpiRow'
+import { useGroupStats } from '../hooks/useGroupStats'
 import { LessonBanner } from '../components/LessonBanner'
 import { LessonStrip } from '../components/LessonStrip'
 import { StartLessonModal } from '../components/StartLessonModal'
@@ -21,6 +22,7 @@ import type { LessonDto, StudentDto } from '@/shared/types'
 export function TeacherDashboardPage() {
     const { t } = useT()
     const session = useSession()
+    const { stats } = useGroupStats(session.token)
     const { signOut } = useAuth()
     const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
@@ -121,7 +123,7 @@ export function TeacherDashboardPage() {
                 </>
             }
         >
-            <KpiRow />
+            <KpiRow stats={stats} />
 
             <GroupTabs groups={visibleGroups} selectedId={selectedGroupId} onSelect={switchGroup} />
 

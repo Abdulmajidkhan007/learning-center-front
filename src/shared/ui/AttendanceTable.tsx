@@ -1,6 +1,7 @@
 import { useT } from '@/shared/i18n'
+import { Avatar } from './Avatar'
 import { DotBadge } from './Badge'
-import { cn, formatDate } from '@/shared/lib'
+import { cn, formatDayMonth } from '@/shared/lib'
 import type { AttendanceStatus, StatusReasonDto, StudentDto } from '@/shared/types'
 import { STATUS_TONE } from '@/shared/lib/attendanceStatus'
 import { AttendanceCell } from './AttendanceCell'
@@ -61,7 +62,7 @@ export function AttendanceTable({
     onEditPastLesson,
     plannedLessonCount,
 }: AttendanceTableProps) {
-    const { t } = useT()
+    const { t, locale } = useT()
 
     // Qoralama o'tgan dars ustunlaridan biriga tegishli bo'lsa — bu ustun
     // tahrirlanmoqda, alohida oxirgi ustun qo'shilmaydi (ikkilanish bo'lmasin).
@@ -82,7 +83,7 @@ export function AttendanceTable({
             <table className="min-w-full border-collapse text-sm">
                 <thead>
                     <tr>
-                        <th className="sticky left-0 z-20 border-b border-border-base bg-surface px-4 py-3 text-left font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase">
+                        <th className="sticky left-0 z-20 border-b border-border-base bg-surface px-4 py-2 text-left font-mono text-[0.66rem] tracking-[0.05em] whitespace-nowrap text-fg-faint uppercase">
                             {t('attendance.student')}
                         </th>
                         {pastColumns.map((column) => {
@@ -91,8 +92,8 @@ export function AttendanceTable({
                             // dars raqami ikkinchi darajali (pastda).
                             const label = (
                                 <>
-                                    <span className="block text-sm font-semibold tabular-nums text-fg-muted">
-                                        {formatDate(column.date)}
+                                    <span className="block text-sm font-semibold text-fg-muted">
+                                        {formatDayMonth(column.date, locale)}
                                     </span>
                                     <span className="block font-mono text-[0.62rem] text-fg-faint">
                                         {column.lessonTitle}
@@ -127,7 +128,7 @@ export function AttendanceTable({
                         {draft && !editingPastLessonId && (
                             <th className="min-w-18 border-b border-brand bg-brand/10 px-2 py-1.5 text-center whitespace-nowrap">
                                 <span className="block text-sm font-semibold tabular-nums text-fg-muted">
-                                    {formatDate(draft.lesson.lessonDate)}
+                                    {formatDayMonth(draft.lesson.lessonDate, locale)}
                                 </span>
                                 <span className="block font-mono text-[0.62rem] text-fg-faint">
                                     {t('attendance.lessonNumber', { number: draft.lesson.title ?? '' })}
@@ -145,23 +146,33 @@ export function AttendanceTable({
                 <tbody>
                     {students.map((student, index) => (
                         <tr key={student.id} className="group hover:bg-surface-hover">
-                            <td className="sticky left-0 z-10 border-b border-border-base bg-surface-card px-4 py-2.5 whitespace-nowrap group-hover:bg-surface-hover">
-                                <span className="mr-2.5 inline-block w-5 font-mono text-xs font-bold tabular-nums text-accent-fg">
-                                    {index + 1}
-                                </span>
-                                {onSelectStudent ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => onSelectStudent(student)}
-                                        className="cursor-pointer font-display font-medium text-fg hover:underline"
-                                    >
-                                        {student.userDto?.fullName || '—'}
-                                    </button>
-                                ) : (
-                                    <span className="font-display font-medium text-fg">
-                                        {student.userDto?.fullName || '—'}
+                            <td className="sticky left-0 z-10 border-b border-border-base bg-surface-card px-4 py-1.5 whitespace-nowrap group-hover:bg-surface-hover">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-5 shrink-0 font-mono text-xs font-bold tabular-nums text-accent-fg">
+                                        {index + 1}
                                     </span>
-                                )}
+                                    {/* Rasm o'qituvchiga ismni emas, YUZNI tanishga yordam
+                                        beradi — guruhda o'xshash ismlar ko'p bo'ladi. */}
+                                    <Avatar
+                                        name={student.userDto?.fullName}
+                                        src={student.userDto?.imageUrl}
+                                        size="sm"
+                                        fallback="silhouette"
+                                    />
+                                    {onSelectStudent ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => onSelectStudent(student)}
+                                            className="cursor-pointer font-display font-medium text-fg hover:underline"
+                                        >
+                                            {student.userDto?.fullName || '—'}
+                                        </button>
+                                    ) : (
+                                        <span className="font-display font-medium text-fg">
+                                            {student.userDto?.fullName || '—'}
+                                        </span>
+                                    )}
+                                </div>
                             </td>
 
                             {pastColumns.map((column) => {
