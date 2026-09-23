@@ -1,43 +1,26 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useAuth, useSession } from '@/app/providers/useAuth'
 import { useTheme } from '@/app/providers/useTheme'
-import { errorMessage } from '@/shared/api'
+import { useMyOrganization } from '@/shared/hooks'
 import { useT } from '@/shared/i18n'
-import {
-    AppShell,
-    Button,
-    ErrorBox,
-    Eyebrow,
-    Input,
-    Pagination,
-    Panel,
-    SegmentedControl,
-} from '@/shared/ui'
+import { AppShell } from '@/shared/ui'
 import { AnalyticsStatsRow } from '../components/AnalyticsStatsRow'
+import { BranchesPanel } from '../components/BranchesPanel'
 import { MySubscriptionPanel } from '../components/MySubscriptionPanel'
-import { BranchFormModal } from '../components/BranchFormModal'
-import { OrganizationFormModal } from '../components/OrganizationFormModal'
-import { SimpleTable, type SimpleColumn } from '../components/SimpleTable'
+import { OrganizationPanel } from '../components/OrganizationPanel'
+import { PeoplePanel } from '../components/PeoplePanel'
 import { SuperAdminOnboardingSteps } from '../components/SuperAdminOnboardingSteps'
+import { SuperAdminSidebar, type SuperAdminSection } from '../components/SuperAdminSidebar'
 import { useAnalytics } from '../hooks/useAnalytics'
+import { useAdminCount, useBranches } from '../hooks/useSuperAdminData'
 import { useMySubscription } from '../hooks/useMySubscription'
-import {
-    useAdminCount,
-    useBranchMutations,
-    useBranches,
-    useOrganizationMutations,
-    useOrganizations,
-} from '../hooks/useSuperAdminData'
-import type { BranchDto, OrganizationDto } from '@/shared/types'
-
-type Tab = 'organizations' | 'branches'
 
 /**
- * Super-admin paneli: tashkilotlar va filiallar.
+ * Markaz egasining paneli.
  *
- * Ikkala ro'yxat ham bir vaqtda yuklanadi — filial formasidagi tashkilot
- * tanlagichi baribir tashkilotlar ro'yxatini talab qiladi, ya'ni tab
- * almashganda kutish kerak bo'lmaydi.
+ * Tashkilotlar RO'YXATI bu yerda yo'q va yangi tashkilot ham ochilmaydi:
+ * super-admin BITTA markazning egasi, boshqalarni ko'rmasligi kerak.
+ * Ikkalasi ham dasturchi panelida.
  */
 export function SuperAdminDashboardPage() {
     const { t } = useT()
@@ -45,85 +28,24 @@ export function SuperAdminDashboardPage() {
     const { signOut } = useAuth()
     const { theme, toggleTheme } = useTheme()
 
-    const [tab, setTab] = useState<Tab>('organizations')
+    const [section, setSection] = useState<SuperAdminSection>('students')
     const [page, setPage] = useState(0)
     const [search, setSearch] = useState('')
-    const [orgForm, setOrgForm] = useState<{ value: OrganizationDto | null } | null>(null)
-    const [branchForm, setBranchForm] = useState<{ value: BranchDto | null } | null>(null)
 
-    const organizations = useOrganizations(session.token, tab === 'organizations' ? page : 0, search)
-    const branches = useBranches(session.token, tab === 'branches' ? page : 0, search)
-    const saveOrganization = useOrganizationMutations(session.token)
-    const branchMutations = useBranchMutations(session.token)
-
+    const organizationId = session.claims?.organizationId
+    const { data: organization } = useMyOrganization(session.token, organizationId)
     const analytics = useAnalytics(session.token)
     const mySubscription = useMySubscription(session.token)
+    const branches = useBranches(session.token, 0, '')
     const adminCount = useAdminCount(session.token)
 
-    const organizationOptions = useMemo(
-        () => organizations.rows.map((org) => ({ value: org.id, label: org.name || org.id })),
-        [organizations.rows]
-    )
-
-    const list = tab === 'organizations' ? organizations : branches
-
-    function changeTab(next: Tab) {
-        setTab(next)
-        setPage(0)
+    function changeSection(next: SuperAdminSection) {
+        // Qidiruv va sahifa bo'limga tegishli — almashganda tozalanadi,
+        // aks holda yangi ro'yxat eski qidiruv bilan bo'sh chiqadi.
+        setSection(next)
         setSearch('')
+        setPage(0)
     }
-
-    const orgColumns: SimpleColumn<OrganizationDto>[] = [
-        {
-            key: 'name',
-            label: t('org.name'),
-            render: (row) => (
-                <span className="inline-block max-w-48 truncate font-medium text-fg" title={row.name || '—'}>
-                    {row.name || '—'}
-                </span>
-            ),
-        },
-        { key: 'phone', label: t('org.phone'), render: (row) => row.phone || '—' },
-        {
-            key: 'email',
-            label: t('org.email'),
-            render: (row) => (
-                <span className="inline-block max-w-48 truncate text-fg-muted" title={row.email || '—'}>
-                    {row.email || '—'}
-                </span>
-            ),
-        },
-        {
-            key: 'website',
-            label: t('org.website'),
-            render: (row) => (
-                <span className="inline-block max-w-48 truncate text-fg-muted" title={row.website || '—'}>
-                    {row.website || '—'}
-                </span>
-            ),
-        },
-    ]
-
-    const branchColumns: SimpleColumn<BranchDto>[] = [
-        {
-            key: 'name',
-            label: t('branch.name'),
-            render: (row) => (
-                <span className="inline-block max-w-48 truncate font-medium text-fg" title={row.name || '—'}>
-                    {row.name || '—'}
-                </span>
-            ),
-        },
-        {
-            key: 'address',
-            label: t('branch.address'),
-            render: (row) => (
-                <span className="inline-block max-w-60 truncate text-fg-muted" title={row.address || '—'}>
-                    {row.address || '—'}
-                </span>
-            ),
-        },
-    ]
 
     return (
         <AppShell
@@ -132,30 +54,6 @@ export function SuperAdminDashboardPage() {
             token={session.token}
             theme={theme}
             toggleTheme={toggleTheme}
-            actions={
-                <>
-                    <SegmentedControl<Tab>
-                        label={t('superAdmin.section')}
-                        value={tab}
-                        onChange={changeTab}
-                        options={[
-                            { value: 'organizations', label: t('org.plural') },
-                            { value: 'branches', label: t('branch.plural') },
-                        ]}
-                    />
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() =>
-                            tab === 'organizations'
-                                ? setOrgForm({ value: null })
-                                : setBranchForm({ value: null })
-                        }
-                    >
-                        {tab === 'organizations' ? t('org.new') : t('branch.new')}
-                    </Button>
-                </>
-            }
         >
             <MySubscriptionPanel
                 subscription={mySubscription.subscription}
@@ -165,108 +63,49 @@ export function SuperAdminDashboardPage() {
             <AnalyticsStatsRow items={analytics.items} />
 
             <SuperAdminOnboardingSteps
-                organizationCount={organizations.totalElements}
                 branchCount={branches.totalElements}
                 adminCount={adminCount}
-                onTabChange={changeTab}
-                onOpenOrgModal={() => setOrgForm({ value: null })}
-                onOpenBranchModal={() => setBranchForm({ value: null })}
+                onOpenBranches={() => changeSection('branches')}
             />
 
-            <Panel>
-                <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                    <div className="min-w-0">
-                        <Eyebrow>{t('superAdmin.eyebrow')}</Eyebrow>
-                        <h1 className="mt-1 font-display text-2xl font-semibold text-fg">
-                            {tab === 'organizations' ? t('org.plural') : t('branch.plural')}
-                        </h1>
-                    </div>
-                    <Input
-                        className="min-w-40 flex-1 sm:w-56 sm:flex-none"
-                        placeholder={t('superAdmin.search')}
-                        value={search}
-                        onChange={(event) => {
-                            setSearch(event.target.value)
-                            setPage(0)
-                        }}
-                    />
-                </header>
+            <div className="flex gap-6">
+                <SuperAdminSidebar active={section} onChange={changeSection} />
 
-                {list.error != null && (
-                    <div className="mb-4">
-                        <ErrorBox>{errorMessage(list.error)}</ErrorBox>
-                    </div>
-                )}
+                <div className="min-w-0 flex-1">
+                    {section === 'branches' && (
+                        <BranchesPanel
+                            token={session.token}
+                            page={page}
+                            search={search}
+                            organizationId={organizationId}
+                            organizationName={organization?.name}
+                            onPageChange={setPage}
+                            onSearchChange={(next) => {
+                                setSearch(next)
+                                setPage(0)
+                            }}
+                        />
+                    )}
 
-                {branchMutations.remove.error != null && (
-                    <div className="mb-4">
-                        <ErrorBox>{errorMessage(branchMutations.remove.error)}</ErrorBox>
-                    </div>
-                )}
+                    {section === 'organization' && (
+                        <OrganizationPanel token={session.token} organizationId={organizationId} />
+                    )}
 
-                {tab === 'organizations' ? (
-                    <SimpleTable
-                        rows={organizations.rows}
-                        columns={orgColumns}
-                        isLoading={organizations.isLoading}
-                        emptyText={t('org.empty')}
-                        onEdit={(row) => setOrgForm({ value: row })}
-                        // O'chirish tugmasi ATAYLAB yo'q — backendda
-                        // `OrganizationService.delete` bo'sh metod, lekin 204
-                        // qaytaradi, ya'ni "o'chdi" degan yolg'on ko'rsatardik.
-                    />
-                ) : (
-                    <SimpleTable
-                        rows={branches.rows}
-                        columns={branchColumns}
-                        isLoading={branches.isLoading}
-                        emptyText={t('branch.empty')}
-                        onEdit={(row) => setBranchForm({ value: row })}
-                        onDelete={(row) => {
-                            if (!confirm(t('branch.deleteConfirm', { name: row.name ?? '' }))) return
-                            branchMutations.remove.mutate(row.id)
-                        }}
-                    />
-                )}
-
-                <Pagination
-                    page={page}
-                    totalPages={list.totalPages}
-                    totalElements={list.totalElements}
-                    onPageChange={setPage}
-                />
-            </Panel>
-
-            {orgForm && (
-                <OrganizationFormModal
-                    organization={orgForm.value}
-                    isSaving={saveOrganization.isPending}
-                    error={saveOrganization.error}
-                    onSubmit={(body) =>
-                        saveOrganization.mutate(
-                            { id: orgForm.value?.id ?? null, body },
-                            { onSuccess: () => setOrgForm(null) }
-                        )
-                    }
-                    onClose={() => setOrgForm(null)}
-                />
-            )}
-
-            {branchForm && (
-                <BranchFormModal
-                    branch={branchForm.value}
-                    organizationOptions={organizationOptions}
-                    isSaving={branchMutations.save.isPending}
-                    error={branchMutations.save.error}
-                    onSubmit={(body) =>
-                        branchMutations.save.mutate(
-                            { id: branchForm.value?.id ?? null, body },
-                            { onSuccess: () => setBranchForm(null) }
-                        )
-                    }
-                    onClose={() => setBranchForm(null)}
-                />
-            )}
+                    {section !== 'branches' && section !== 'organization' && (
+                        <PeoplePanel
+                            token={session.token}
+                            kind={section}
+                            page={page}
+                            search={search}
+                            onPageChange={setPage}
+                            onSearchChange={(next) => {
+                                setSearch(next)
+                                setPage(0)
+                            }}
+                        />
+                    )}
+                </div>
+            </div>
         </AppShell>
     )
 }

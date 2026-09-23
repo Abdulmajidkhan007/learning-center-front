@@ -3,69 +3,51 @@ import { cn } from '@/shared/lib'
 import { Panel } from '@/shared/ui'
 
 interface SuperAdminOnboardingStepsProps {
-    organizationCount: number
     branchCount: number
     adminCount: number
-    onTabChange: (tab: 'organizations' | 'branches') => void
-    onOpenOrgModal: () => void
-    onOpenBranchModal: () => void
+    onOpenBranches: () => void
 }
 
 interface StepItem {
     id: string
-    titleKey:
-        | 'superAdmin.onboarding.step.organization'
-        | 'superAdmin.onboarding.step.branch'
-        | 'superAdmin.onboarding.step.admin'
+    titleKey: 'superAdmin.onboarding.step.branch' | 'superAdmin.onboarding.step.admin'
     isCompleted: boolean
     onClick: () => void
 }
 
 /**
  * Super-admin uchun dastlabki sozlash qadamlari:
- * 1. Tashkilot ma'lumotlarini to'ldirish
- * 2. Filial qo'shish
- * 3. Administrator qo'shish
+ * 1. Filial qo'shish
+ * 2. Administrator qo'shish
  *
- * Barcha 3 qadam bajarilgach, bu blok umuman ko'rsatilmaydi.
+ * "Tashkilot ma'lumotlarini to'ldirish" ATAYLAB yo'q: tashkilotni
+ * dasturchi ochadi va unga faqat nom kerak. Qolgan ma'lumotni egasi
+ * xohlagan paytida "Tashkilot" bo'limidan kiritadi — birinchi kundayoq
+ * majburlash ortiqcha.
+ *
+ * Ikkala qadam bajarilgach blok umuman ko'rsatilmaydi.
  */
 export function SuperAdminOnboardingSteps({
-    organizationCount,
     branchCount,
     adminCount,
-    onTabChange,
-    onOpenOrgModal,
-    onOpenBranchModal,
+    onOpenBranches,
 }: SuperAdminOnboardingStepsProps) {
     const { t } = useT()
 
     const steps: StepItem[] = [
         {
-            id: 'organization',
-            titleKey: 'superAdmin.onboarding.step.organization',
-            isCompleted: organizationCount > 0,
-            onClick: () => {
-                onTabChange('organizations')
-                onOpenOrgModal()
-            },
-        },
-        {
             id: 'branch',
             titleKey: 'superAdmin.onboarding.step.branch',
             isCompleted: branchCount > 0,
-            onClick: () => {
-                onTabChange('branches')
-                onOpenBranchModal()
-            },
+            onClick: onOpenBranches,
         },
         {
             id: 'admin',
             titleKey: 'superAdmin.onboarding.step.admin',
             isCompleted: adminCount > 0,
-            onClick: () => {
-                onTabChange('organizations')
-                onOpenOrgModal()
-            },
+            // Administrator administrator panelida qo'shiladi; bu yerda
+            // faqat "qilindimi" belgisi ko'rsatiladi.
+            onClick: () => {},
         },
     ]
 

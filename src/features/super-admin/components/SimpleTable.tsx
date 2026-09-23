@@ -14,7 +14,8 @@ interface SimpleTableProps<T> {
     columns: SimpleColumn<T>[]
     isLoading: boolean
     emptyText: string
-    onEdit: (row: T) => void
+    /** Berilmasa tahrirlash tugmasi ko'rsatilmaydi. */
+    onEdit?: (row: T) => void
     /** Berilmasa o'chirish tugmasi umuman ko'rsatilmaydi. */
     onDelete?: (row: T) => void
 }
@@ -49,19 +50,31 @@ export function SimpleTable<T extends { id: string }>({
             loadingText={t('common.loading')}
             emptyText={emptyText}
             getRowKey={(row) => row.id}
-            actionsHeader={t('admin.actions')}
-            renderActions={(row) => (
-                <>
-                    <IconButton label={t('common.edit')} onClick={() => onEdit(row)}>
-                        <EditIcon />
-                    </IconButton>
-                    {onDelete && (
-                        <IconButton label={t('common.delete')} tone="danger" onClick={() => onDelete(row)}>
-                            <TrashIcon />
-                        </IconButton>
-                    )}
-                </>
-            )}
+            // Ikkalasi ham berilmasa ustun umuman chizilmaydi: hech nima
+            // qilmaydigan tugma tugma yo'qligidan yomonroq.
+            actionsHeader={onEdit || onDelete ? t('admin.actions') : undefined}
+            renderActions={
+                onEdit || onDelete
+                    ? (row) => (
+                          <>
+                              {onEdit && (
+                                  <IconButton label={t('common.edit')} onClick={() => onEdit(row)}>
+                                      <EditIcon />
+                                  </IconButton>
+                              )}
+                              {onDelete && (
+                                  <IconButton
+                                      label={t('common.delete')}
+                                      tone="danger"
+                                      onClick={() => onDelete(row)}
+                                  >
+                                      <TrashIcon />
+                                  </IconButton>
+                              )}
+                          </>
+                      )
+                    : undefined
+            }
         />
     )
 }

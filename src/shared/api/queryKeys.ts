@@ -55,6 +55,7 @@ export const queryKeys = {
     plans: (params: Record<string, unknown>) => ['plan', 'list', params] as const,
     subscriptions: (params: Record<string, unknown>) => ['subscription', 'list', params] as const,
     mySubscription: () => ['subscription', 'my'] as const,
+    people: (kind: string, params: Record<string, unknown>) => ['people', kind, params] as const,
 
     images: (params?: Record<string, unknown>) => ['images', params] as const,
 

@@ -103,3 +103,55 @@ export async function fetchAdminCount(token: string): Promise<number> {
     })
     return data?.totalElements ?? 0
 }
+
+// --- odamlar ---
+
+/** Sidebardagi odamlar bo'limlari. Har biri o'z endpointidan keladi. */
+export type PeopleKind = 'students' | 'teachers' | 'administrators'
+
+const PEOPLE_ENDPOINT: Record<PeopleKind, string> = {
+    students: '/student',
+    teachers: '/teacher',
+    administrators: '/user',
+}
+
+export interface PersonRow {
+    id: string
+    userDto?: UserDto
+    parentPhone?: string
+}
+
+/**
+ * Bo'lim bo'yicha odamlar ro'yxati.
+ *
+ * `/user` roldan qat'i nazar hammasini qaytaradi, shuning uchun
+ * administratorlar uchun `role` filtri yuboriladi. `/student` va
+ * `/teacher` esa allaqachon o'z turini biladi.
+ *
+ * `/user` qatorlari YASSI (`UserDto` ning o'zi), `/student` va `/teacher`
+ * esa ichma-ich `userDto` bilan keladi — shuning uchun bitta shaklga
+ * keltiriladi, jadval ikki xil ko'rinishni bilmasin.
+ */
+export async function fetchPeople(
+    token: string,
+    kind: PeopleKind,
+    params: ListParams
+): Promise<Page<PersonRow>> {
+    const data = await apiFetch<Page<PersonRow & UserDto>>(PEOPLE_ENDPOINT[kind], {
+        token,
+        params: kind === 'administrators' ? { ...params, role: 'ADMINISTRATOR' } : params,
+    })
+
+    return {
+        content: (data?.content ?? []).map((row) =>
+            kind === 'administrators' ? { id: row.id ?? '', userDto: row } : row
+        ),
+        totalPages: data?.totalPages ?? 0,
+        totalElements: data?.totalElements ?? 0,
+    }
+}
+
+/** Super-admin o'z tashkilotini tahrirlaydi. */
+export function updateOwnOrganization(token: string, id: string, body: OrganizationPayload) {
+    return apiFetch<OrganizationDto>(`${ORGANIZATIONS}/${id}`, { method: 'PUT', token, body })
+}
