@@ -985,3 +985,54 @@ barcha metodlarni qamraydi. Men faqat metod ustiga qaragan ekanman.
 
 Saboq: annotatsiyani metodda topmasangiz, klass tepasiga ham qarang —
 Spring'da u meros bo'lib o'tadi.
+
+
+---
+
+## 2026-09-23 — 🔴 `lower(bytea)`: tarif va obuna ro'yxati yiqiladi
+
+Dasturchi panelida "Obunalar" tabi qizil xato bilan ochiladi:
+
+```
+ERROR: function lower(bytea) does not exist
+  ... where (? is null or lower(o1_0.name) like lower(('%'||?||'%')) escape '')
+```
+
+Sabab: `SubscriptionRepository.findAll` va `PlanRepository.findAll` da
+
+```sql
+where (:search is null or lower(o.name) like lower(concat('%', :search, '%')))
+```
+
+`:search` **null** bo'lganda PostgreSQL `concat` ichidagi parametrning
+turini aniqlay olmaydi va uni `bytea` deb oladi. `lower(bytea)` esa
+mavjud emas — so'rov butunlay yiqiladi.
+
+Ya'ni **qidiruvsiz ochilganda ro'yxat umuman kelmaydi**. Ikkala tab ham
+shunday: obunalar va tariflar.
+
+Yechim — parametr turini ochiq ko'rsatish:
+
+```sql
+where (:search is null or lower(o.name) like lower(concat('%', cast(:search as string), '%')))
+```
+
+Front tomonda vaqtinchalik chora qo'yildi: `search` endi bo'sh satr
+bo'lib yuboriladi (`usePlans.ts`, `useSubscriptions.ts`). Shunda tur
+aniq bo'ladi va `like '%%'` hammasini qaytaradi. Backend tuzatilgach bu
+chorani olib tashlash mumkin, lekin zarari yo'q.
+
+### 🟠 Yonida: tashkilot qidiruvi teskari yozilgan
+
+`OrganizationRepository`:
+
+```sql
+where (:search is null or :search ilike o.name)
+```
+
+Taqqoslash teskari: naqsh sifatida FOYDALANUVCHI kiritgan satr
+ishlatilyapti, ustun esa qiymat. To'g'risi `o.name ilike :search`
+bo'lishi kerak, va naqsh `%…%` bilan o'ralishi kerak.
+
+Hozir yiqilmaydi (shuning uchun tashkilotlar tabi ochilyapti), lekin
+qidiruv ishlamaydi: "org" deb yozilsa hech nima topilmaydi.
