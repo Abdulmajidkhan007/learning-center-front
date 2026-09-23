@@ -3,7 +3,18 @@ import { queryKeys } from '@/shared/api'
 import { createPlan, deletePlan, fetchPlans, updatePlan } from '../api/developerApi'
 import type { PlanPayload } from '@/shared/types'
 
-const PAGE = { page: 0, size: 50 }
+/*
+ * `search` ataylab bo'sh SATR, tashlab ketilmaydi.
+ *
+ * Backend so'rovida `lower(concat('%', :search, '%'))` turibdi. `:search`
+ * null bo'lsa PostgreSQL parametr turini aniqlay olmaydi va uni `bytea`
+ * deb oladi — natijada "function lower(bytea) does not exist" xatosi
+ * chiqib, ro'yxat umuman yuklanmaydi. Bo'sh satr yuborilsa tur aniq
+ * bo'ladi va `like '%%'` hammasini qaytaradi.
+ *
+ * Bu VAQTINCHALIK: to'g'ri yechim backendda (`docs/backend-notes.md`).
+ */
+const PAGE = { page: 0, size: 50, search: '' }
 
 export function usePlans(token: string) {
     const query = useQuery({

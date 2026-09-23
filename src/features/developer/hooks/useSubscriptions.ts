@@ -4,7 +4,9 @@ import { createSubscription, fetchSubscriptions, updateSubscription } from '../a
 import type { SubscriptionCreatePayload, SubscriptionUpdatePayload } from '@/shared/types'
 
 export function useSubscriptions(token: string, page: number, search: string) {
-    const params = { page, size: 10, ...(search ? { search } : {}) }
+    // `search` doim yuboriladi, bo'sh bo'lsa ham — `usePlans.ts` dagi
+    // izohga qarang: null yuborilsa backend so'rovi yiqiladi.
+    const params = { page, size: 10, search }
 
     const query = useQuery({
         queryKey: queryKeys.subscriptions(params),

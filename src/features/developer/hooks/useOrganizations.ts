@@ -9,6 +9,14 @@ import {
 } from '../api/developerApi'
 
 export function useOrganizations(token: string, page: number, search: string) {
+    /*
+     * Bu yerda, aksincha, bo'sh `search` YUBORILMAYDI.
+     *
+     * Tashkilotlar so'rovi boshqacha yozilgan: `:search ilike o.name`.
+     * Bo'sh satr yuborilsa u hech bir nom bilan mos kelmaydi va ro'yxat
+     * bo'sh chiqadi. Null bo'lsa esa shart butunlay o'tkazib yuboriladi.
+     * Ya'ni tarif va obunadagidan teskari — shuning uchun alohida izoh.
+     */
     const params = { page, size: 10, ...(search ? { search } : {}) }
 
     const query = useQuery({

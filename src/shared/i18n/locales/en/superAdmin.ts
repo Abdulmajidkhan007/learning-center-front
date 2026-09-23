@@ -2,6 +2,15 @@ import type { SuperAdminKeys } from '../uz/superAdmin'
 
 /** Super-admin: tashkilotlar va filiallar. (inglizcha) */
 export const superAdmin: Record<SuperAdminKeys, string> = {
+    'superAdmin.group.people': 'People',
+    'superAdmin.group.settings': 'Settings',
+    'superAdmin.section.students': 'Students',
+    'superAdmin.section.teachers': 'Teachers',
+    'superAdmin.section.administrators': 'Administrators',
+    'superAdmin.section.branches': 'Branches',
+    'superAdmin.section.organization': 'Organisation',
+    'superAdmin.organizationSaved': 'Saved.',
+    'superAdmin.peopleEmpty': 'Nobody added yet.',
     'superAdmin.role': 'Super admin',
     'superAdmin.developerRole': 'Developer',
     'superAdmin.eyebrow': 'System',

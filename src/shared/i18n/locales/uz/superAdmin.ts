@@ -5,6 +5,15 @@
  * keyin `ru/` va `en/` dagi shu nomli faylga.
  */
 export const superAdmin = {
+    'superAdmin.group.people': 'Odamlar',
+    'superAdmin.group.settings': 'Sozlamalar',
+    'superAdmin.section.students': 'O‘quvchilar',
+    'superAdmin.section.teachers': 'O‘qituvchilar',
+    'superAdmin.section.administrators': 'Administratorlar',
+    'superAdmin.section.branches': 'Filiallar',
+    'superAdmin.section.organization': 'Tashkilot',
+    'superAdmin.organizationSaved': 'Saqlandi.',
+    'superAdmin.peopleEmpty': 'Hali hech kim qo‘shilmagan.',
     'superAdmin.role': 'Super-admin',
     'superAdmin.developerRole': 'Dasturchi',
     'superAdmin.eyebrow': 'Tizim',
