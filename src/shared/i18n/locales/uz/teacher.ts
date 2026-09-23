@@ -15,6 +15,7 @@ export const teacher = {
     'teacher.inProgress': 'Davom etmoqda',
     'teacher.lessonStarted': '{{number}}-dars boshlandi',
     'teacher.markAttendance': 'Davomatni belgilash',
+    'teacher.myGroups': 'Mening guruhlarim',
     'teacher.switchGroup': 'Guruhni almashtirish',
     'teacher.selectGroup': 'Guruhni tanlang',
     'teacher.roster': "Ro'yxat",
