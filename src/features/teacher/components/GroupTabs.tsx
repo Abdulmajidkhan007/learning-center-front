@@ -9,10 +9,11 @@ interface GroupTabsProps {
 }
 
 /**
- * Guruhlar tasmasi.
+ * Guruhlar TASMASI — faqat tor ekran uchun.
  *
- * Ochiladigan ro'yxat o'rniga tab'lar: o'qituvchida odatda 2–6 ta guruh
- * bo'ladi va ularni bir qarashda ko'rish qulayroq. Tor ekranda siljiydi.
+ * Kompyuterda `GroupSidebar` ishlatiladi: administrator va super-admin
+ * panellarida chap ustun bor, o'qituvchida esa yo'q edi va uchta panel
+ * uch xil ko'rinardi.
  *
  * Vaqt ko'rsatilmaydi — `GET /group/groups` faqat `id` va `name` beradi.
  */
@@ -25,7 +26,7 @@ export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
         <div
             role="tablist"
             aria-label={t('teacher.switchGroup')}
-            className="mb-5 flex gap-2 overflow-x-auto rounded-lg border border-border-base bg-surface-card p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mb-4 flex gap-2 overflow-x-auto lg:hidden rounded-lg border border-border-base bg-surface-card p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
             {groups.map((group) => {
                 const isActive = group.id === selectedId
@@ -58,5 +59,58 @@ export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
                 )
             })}
         </div>
+    )
+}
+
+/**
+ * Guruhlar ustuni — kompyuter uchun.
+ *
+ * Tasma o'rniga ustun: guruh nomlari uzun bo'lishi mumkin va yonma-yon
+ * turganda ular qisqarib, o'qituvchi qaysi guruhda ekanini darrov
+ * ajrata olmaydi. Ustunda har biri to'liq ko'rinadi.
+ */
+export function GroupSidebar({ groups, selectedId, onSelect }: GroupTabsProps) {
+    const { t } = useT()
+
+    if (groups.length === 0) return null
+
+    return (
+        <nav
+            aria-label={t('teacher.switchGroup')}
+            className="hidden w-52 shrink-0 flex-col gap-1 lg:flex"
+        >
+            <p className="px-3 pb-1 font-mono text-[0.6rem] tracking-[0.05em] text-fg-faint uppercase">
+                {t('teacher.myGroups')}
+            </p>
+            {groups.map((group) => {
+                const isActive = group.id === selectedId
+                return (
+                    <button
+                        key={group.id}
+                        type="button"
+                        aria-current={isActive ? 'true' : undefined}
+                        onClick={() => onSelect(group.id)}
+                        className={cn(
+                            'min-h-11 w-full rounded-lg px-3 text-left transition-colors',
+                            isActive ? 'bg-purple-soft' : 'hover:bg-surface-hover'
+                        )}
+                    >
+                        <span
+                            className={cn(
+                                'block text-sm font-medium',
+                                isActive ? 'text-purple-fg' : 'text-fg'
+                            )}
+                        >
+                            {group.name}
+                        </span>
+                        {group.dayType && (
+                            <span className="mt-0.5 block font-mono text-[0.58rem] text-fg-faint uppercase">
+                                {t(`group.dayType.${group.dayType}`)}
+                            </span>
+                        )}
+                    </button>
+                )
+            })}
+        </nav>
     )
 }

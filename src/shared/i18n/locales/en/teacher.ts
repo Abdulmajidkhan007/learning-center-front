@@ -12,6 +12,7 @@ export const teacher: Record<TeacherKeys, string> = {
     'teacher.inProgress': 'In progress',
     'teacher.lessonStarted': 'Lesson {{number}} started',
     'teacher.markAttendance': 'Mark attendance',
+    'teacher.myGroups': 'My groups',
     'teacher.switchGroup': 'Switch group',
     'teacher.selectGroup': 'Select group',
     'teacher.roster': 'Roster',
