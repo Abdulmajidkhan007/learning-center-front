@@ -17,7 +17,18 @@ export function handleTeacher(path: string, url: URL): Response | null {
     }
 
     if (path === '/group/groups') {
-        return json(db.groups.filter((group) => group.status !== 'COMPLETED'))
+        // Backend `GroupNameProjection` qaytaradi: id, name va dayType.
+        // Demo ham shu uchtasini bersin — ilgari `dayType` yo'q edi va
+        // juft/toq filtri demoda umuman ko'rinmasdi.
+        return json(
+            db.groups
+                .filter((group) => group.status !== 'COMPLETED')
+                .map((group) => ({
+                    id: group.id,
+                    name: group.name,
+                    dayType: group.timeTable?.dayType,
+                }))
+        )
     }
     if (path === '/group/groupInfo') {
         return json(fullGroup(url.searchParams.get('groupId') ?? 'g1'))

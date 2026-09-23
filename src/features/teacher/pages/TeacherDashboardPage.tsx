@@ -11,7 +11,6 @@ import {
   Button,
   EmptyState,
   ErrorBox,
-  SegmentedControl,
   type PastLessonColumn,
 } from "@/shared/ui";
 import { GroupSidebar, GroupTabs } from "../components/GroupTabs";
@@ -132,18 +131,6 @@ export function TeacherDashboardPage() {
           >
             ▶ {t("teacher.startLesson")}
           </Button>
-          {showDayFilter && (
-            <SegmentedControl<DayFilter>
-              label={t("teacher.allDays")}
-              value={dayFilter}
-              onChange={setDayFilter}
-              options={[
-                { value: "all", label: t("teacher.allDays") },
-                { value: "ODD", label: t("group.dayType.ODD") },
-                { value: "EVEN", label: t("group.dayType.EVEN") },
-              ]}
-            />
-          )}
         </>
       }
     >
@@ -155,6 +142,8 @@ export function TeacherDashboardPage() {
         groups={visibleGroups}
         selectedId={selectedGroupId}
         onSelect={switchGroup}
+        dayFilter={showDayFilter ? dayFilter : undefined}
+        onDayFilterChange={showDayFilter ? setDayFilter : undefined}
       />
 
       <div className="flex gap-6">
@@ -162,6 +151,8 @@ export function TeacherDashboardPage() {
           groups={visibleGroups}
           selectedId={selectedGroupId}
           onSelect={switchGroup}
+          dayFilter={showDayFilter ? dayFilter : undefined}
+          onDayFilterChange={showDayFilter ? setDayFilter : undefined}
         />
 
         <div className="min-w-0 flex-1">

@@ -1,11 +1,57 @@
 import { useT } from '@/shared/i18n'
 import { cn } from '@/shared/lib'
+import { SegmentedControl } from '@/shared/ui'
 import type { GroupNameDto } from '@/shared/types'
+
+export type DayFilter = 'all' | 'ODD' | 'EVEN'
 
 interface GroupTabsProps {
     groups: GroupNameDto[]
     selectedId: string
     onSelect: (groupId: string) => void
+    /** Berilmasa juft/toq tanlagichi ko'rsatilmaydi. */
+    dayFilter?: DayFilter
+    onDayFilterChange?: (value: DayFilter) => void
+}
+
+/**
+ * Juft/toq tanlagichi.
+ *
+ * Guruhlar RO'YXATI USTIDA turadi, yuqori qatorda emas: u aynan shu
+ * ro'yxatni filtrlaydi va undan uzoqda tursa, nimaga ta'sir qilayotgani
+ * ko'rinmaydi.
+ */
+function DayFilterControl({
+    value,
+    onChange,
+    compact = false,
+}: {
+    value: DayFilter
+    onChange: (value: DayFilter) => void
+    /** Chap ustunda joy tor — qisqa nomlar ishlatiladi. */
+    compact?: boolean
+}) {
+    const { t } = useT()
+
+    return (
+        <SegmentedControl<DayFilter>
+            label={t('teacher.allDays')}
+            value={value}
+            onChange={onChange}
+            className="mb-2"
+            options={[
+                { value: 'all', label: compact ? t('teacher.allShort') : t('teacher.allDays') },
+                {
+                    value: 'ODD',
+                    label: compact ? t('teacher.oddShort') : t('group.dayType.ODD'),
+                },
+                {
+                    value: 'EVEN',
+                    label: compact ? t('teacher.evenShort') : t('group.dayType.EVEN'),
+                },
+            ]}
+        />
+    )
 }
 
 /**
@@ -17,12 +63,22 @@ interface GroupTabsProps {
  *
  * Vaqt ko'rsatilmaydi — `GET /group/groups` faqat `id` va `name` beradi.
  */
-export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
+export function GroupTabs({
+    groups,
+    selectedId,
+    onSelect,
+    dayFilter,
+    onDayFilterChange,
+}: GroupTabsProps) {
     const { t } = useT()
 
-    if (groups.length === 0) return null
+    if (groups.length === 0 && !onDayFilterChange) return null
 
     return (
+        <div className="lg:hidden">
+            {dayFilter && onDayFilterChange && (
+                <DayFilterControl value={dayFilter} onChange={onDayFilterChange} />
+            )}
         <div
             role="tablist"
             aria-label={t('teacher.switchGroup')}
@@ -59,6 +115,7 @@ export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
                 )
             })}
         </div>
+        </div>
     )
 }
 
@@ -69,10 +126,16 @@ export function GroupTabs({ groups, selectedId, onSelect }: GroupTabsProps) {
  * turganda ular qisqarib, o'qituvchi qaysi guruhda ekanini darrov
  * ajrata olmaydi. Ustunda har biri to'liq ko'rinadi.
  */
-export function GroupSidebar({ groups, selectedId, onSelect }: GroupTabsProps) {
+export function GroupSidebar({
+    groups,
+    selectedId,
+    onSelect,
+    dayFilter,
+    onDayFilterChange,
+}: GroupTabsProps) {
     const { t } = useT()
 
-    if (groups.length === 0) return null
+    if (groups.length === 0 && !onDayFilterChange) return null
 
     return (
         <nav
@@ -82,6 +145,9 @@ export function GroupSidebar({ groups, selectedId, onSelect }: GroupTabsProps) {
             <p className="px-3 pb-1 font-mono text-[0.6rem] tracking-[0.05em] text-fg-faint uppercase">
                 {t('teacher.myGroups')}
             </p>
+            {dayFilter && onDayFilterChange && (
+                <DayFilterControl value={dayFilter} onChange={onDayFilterChange} compact />
+            )}
             {groups.map((group) => {
                 const isActive = group.id === selectedId
                 return (
