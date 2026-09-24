@@ -38,14 +38,14 @@ export function InvoiceFilters({
     const { t } = useT()
 
     return (
-        <div className="mb-4 flex flex-wrap items-end gap-2">
-            <Field label={t('field.status')}>
+        <div className="mb-4 flex flex-wrap items-end gap-2.5">
+            <Field label={t('field.status')} className="w-full sm:w-auto">
                 <Select
                     aria-label={t('admin.filterStatus')}
                     // `w-auto` EMAS: `inputClasses` ichida `w-full` bor va ikkalasi
                     // bir xil breakpoint'da bo'lgani uchun qaysi biri yutishi CSS
                     // tartibiga qolib ketadi. `sm:` esa aniq keyin keladi.
-                    className="sm:w-44"
+                    className="w-full sm:w-44"
                     options={[
                         { value: '', label: t('invoice.allStatuses') },
                         ...statuses.map((value) => ({ value, label: t(`invoice.status.${value}`) })),
@@ -55,28 +55,30 @@ export function InvoiceFilters({
                 />
             </Field>
 
-            <Field label={t('invoice.search')}>
+            <Field label={t('invoice.search')} className="w-full sm:w-auto">
                 <Input
-                    className="min-w-40 sm:w-56"
+                    className="w-full min-w-0 sm:w-56"
                     placeholder={t('invoice.search')}
                     value={search}
                     onChange={(event) => onSearchChange(event.target.value)}
                 />
             </Field>
 
-            <Field label={t('invoice.from')}>
-                <Input type="date" className="sm:w-44" value={from} onChange={(e) => onFromChange(e.target.value)} />
-            </Field>
+            <div className="flex w-full flex-wrap items-end gap-2.5 sm:w-auto">
+                <Field label={t('invoice.from')} className="flex-1 sm:w-36 sm:flex-none">
+                    <Input type="date" className="w-full" value={from} onChange={(e) => onFromChange(e.target.value)} />
+                </Field>
 
-            <Field label={t('invoice.to')}>
-                <Input type="date" className="sm:w-44" value={to} onChange={(e) => onToChange(e.target.value)} />
-            </Field>
+                <Field label={t('invoice.to')} className="flex-1 sm:w-36 sm:flex-none">
+                    <Input type="date" className="w-full" value={to} onChange={(e) => onToChange(e.target.value)} />
+                </Field>
 
-            {(from || to) && (
-                <Button size="sm" onClick={onClearDates}>
-                    {t('invoice.clearDates')}
-                </Button>
-            )}
+                {(from || to) && (
+                    <Button size="sm" className="w-full sm:w-auto" onClick={onClearDates}>
+                        {t('invoice.clearDates')}
+                    </Button>
+                )}
+            </div>
         </div>
     )
 }

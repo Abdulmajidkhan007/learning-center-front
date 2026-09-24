@@ -27,7 +27,7 @@ export const teacher = {
     'teacher.loadingGroup': 'Guruh yuklanmoqda…',
     'teacher.loadFailed': 'Guruh ma’lumotini yuklab bo’lmadi: {{message}}',
     'teacher.noGroups': "Sizda hali guruh yo'q.",
-    'teacher.noGroupsHint': "Guruhga biriktirilganingizdan so'ng u shu yerda paydo bo'ladi.",
+    'teacher.noGroupsHint': "Guruhga biriktirilganingizdan so'ng u shu yerda paydo bo'ladi. Guruh biriktirish uchun administratorga murojaat qiling.",
     'teacher.noGroupSelected': 'Guruh tanlanmagan.',
     'teacher.pickGroup': "Ro'yxatni ko'rish uchun yuqoridan guruh tanlang.",
     'teacher.oddDays': 'Toq kunlar',

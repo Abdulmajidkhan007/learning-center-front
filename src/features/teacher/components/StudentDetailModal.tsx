@@ -23,16 +23,16 @@ export function StudentDetailModal({ student, onClose }: { student: StudentDto; 
             onClose={onClose}
             footer={<Button onClick={onClose}>{t('common.close')}</Button>}
         >
-            <dl>
+            <dl className="divide-y divide-border-base rounded-lg border border-border-base bg-surface p-2 sm:p-3">
                 {ROWS.map((row) => (
                     <div
                         key={row.labelKey}
-                        className="flex items-center justify-between gap-3 border-b border-border-base py-2.5 text-sm"
+                        className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-3 text-sm"
                     >
-                        <dt className="font-mono text-[0.68rem] tracking-[0.06em] text-fg-faint uppercase">
+                        <dt className="font-mono text-[0.68rem] font-semibold tracking-[0.06em] text-fg-faint uppercase">
                             {t(row.labelKey)}
                         </dt>
-                        <dd className="truncate text-fg">{row.get(student) || '—'}</dd>
+                        <dd className="font-medium text-fg break-all sm:truncate">{row.get(student) || '—'}</dd>
                     </div>
                 ))}
             </dl>

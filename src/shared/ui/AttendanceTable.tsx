@@ -146,7 +146,7 @@ export function AttendanceTable({
                 <tbody>
                     {students.map((student, index) => (
                         <tr key={student.id} className="group hover:bg-surface-hover">
-                            <td className="sticky left-0 z-10 border-b border-border-base bg-surface-card px-4 py-1.5 whitespace-nowrap group-hover:bg-surface-hover">
+                            <td className="sticky left-0 z-10 border-b border-border-base bg-surface-card px-4 py-2.5 max-sm:py-3 whitespace-nowrap group-hover:bg-surface-hover">
                                 <div className="flex items-center gap-2.5">
                                     <span className="w-5 shrink-0 font-mono text-xs font-bold tabular-nums text-accent-fg">
                                         {index + 1}

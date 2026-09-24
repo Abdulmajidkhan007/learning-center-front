@@ -24,7 +24,7 @@ export const teacher: Record<TeacherKeys, string> = {
     'teacher.loadingGroup': 'Загрузка группы…',
     'teacher.loadFailed': 'Не удалось загрузить данные группы: {{message}}',
     'teacher.noGroups': 'У вас пока нет групп.',
-    'teacher.noGroupsHint': 'Как только вас назначат на группу, она появится здесь.',
+    'teacher.noGroupsHint': 'Как только вас назначат на группу, она появится здесь. Обратитесь к администратору для назначения группы.',
     'teacher.noGroupSelected': 'Группа не выбрана.',
     'teacher.pickGroup': 'Выберите группу выше, чтобы увидеть состав.',
     'teacher.oddDays': 'Нечётные дни',

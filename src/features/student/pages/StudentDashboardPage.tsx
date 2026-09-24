@@ -107,8 +107,8 @@ export function StudentDashboardPage() {
                     </Button>
                 </CollapsibleSection>
 
-                <div className="mt-2 flex justify-center">
-                    <Button variant="danger" onClick={signOut}>
+                <div className="mt-4 flex justify-center">
+                    <Button variant="danger" className="min-h-[44px] w-full sm:w-auto px-6" onClick={signOut}>
                         {t('common.signOut')}
                     </Button>
                 </div>
