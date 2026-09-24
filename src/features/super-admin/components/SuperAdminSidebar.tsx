@@ -40,7 +40,9 @@ interface SuperAdminSidebarProps {
 function itemClasses(isActive: boolean) {
     return cn(
         // 44px — telefonda barmoq uchun eng kam o'lcham.
-        'min-h-11 w-full rounded-lg px-3 text-left text-sm transition-colors',
+        // `cursor-pointer` ataylab yozilgan: Tailwind 4 da tugmalarga u
+        // avtomatik qo'yilmaydi va ular bosilmaydigandek ko'rinadi.
+        'min-h-11 w-full cursor-pointer rounded-lg px-3 text-left text-sm transition-colors',
         isActive
             ? 'bg-accent-soft font-medium text-accent-fg'
             : 'text-fg-muted hover:bg-surface-hover hover:text-fg'
@@ -85,7 +87,7 @@ export function SuperAdminSidebar({ active, onChange }: SuperAdminSidebarProps) 
                         type="button"
                         onClick={() => onChange(item.key)}
                         className={cn(
-                            'min-h-11 shrink-0 rounded-lg px-3.5 text-sm whitespace-nowrap transition-colors',
+                            'min-h-11 shrink-0 cursor-pointer rounded-lg px-3.5 text-sm whitespace-nowrap transition-colors',
                             active === item.key
                                 ? 'bg-accent-soft font-medium text-accent-fg'
                                 : 'text-fg-muted hover:bg-surface-hover'
