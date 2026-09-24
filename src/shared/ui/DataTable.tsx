@@ -29,7 +29,8 @@ export function DataTable<T>({
     const colSpan = columns.length + (hasActions ? 1 : 0)
 
     return (
-        <div className={dataTableClasses.container}>
+        <div className={cn(dataTableClasses.container, 'relative')}>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-surface-card/80 to-transparent sm:hidden" />
             <table className={dataTableClasses.table}>
                 <thead>
                     <tr>

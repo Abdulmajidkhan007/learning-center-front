@@ -13,19 +13,19 @@ export function Pagination({ page, totalPages, totalElements, onPageChange }: Pa
     const { t } = useT()
 
     return (
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <Button size="sm" disabled={page <= 0} onClick={() => onPageChange(Math.max(0, page - 1))}>
-                ← {t('common.prev')}
+        <div className="mt-4 flex flex-nowrap items-center justify-between gap-2 sm:justify-center sm:gap-3">
+            <Button size="sm" className="shrink-0" disabled={page <= 0} onClick={() => onPageChange(Math.max(0, page - 1))}>
+                ← <span className="hidden sm:inline">{t('common.prev')}</span>
             </Button>
-            <span className="rounded-full bg-surface-muted px-3 py-2 font-mono text-xs tabular-nums text-fg-faint">
+            <span className="truncate rounded-full bg-surface-muted px-3 py-1.5 font-mono text-xs tabular-nums text-fg-faint text-center">
                 {t('common.pageInfo', {
                     page: page + 1,
                     total: Math.max(totalPages, 1),
                     count: totalElements,
                 })}
             </span>
-            <Button size="sm" disabled={page + 1 >= totalPages} onClick={() => onPageChange(page + 1)}>
-                {t('common.next')} →
+            <Button size="sm" className="shrink-0" disabled={page + 1 >= totalPages} onClick={() => onPageChange(page + 1)}>
+                <span className="hidden sm:inline">{t('common.next')}</span> →
             </Button>
         </div>
     )

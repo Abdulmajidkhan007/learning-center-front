@@ -25,7 +25,7 @@ export function CollapsibleSection({ title, defaultOpen = false, children }: Col
                 type="button"
                 onClick={() => setOpen((current) => !current)}
                 aria-expanded={open}
-                className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
+                className="flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-3 py-2 text-left"
             >
                 <span className="font-display text-lg font-semibold text-fg">{title}</span>
                 <span
