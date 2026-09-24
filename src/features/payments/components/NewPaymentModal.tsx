@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { errorMessage } from '@/shared/api'
 import { useT } from '@/shared/i18n'
+import { formatAmount } from '@/shared/lib'
 import { Button, ErrorBox, Field, Input, Modal, Select, type SelectOption } from '@/shared/ui'
 import { TRANSACTION_TYPES, type TransactionType } from '@/shared/types'
 
@@ -70,6 +71,12 @@ export function NewPaymentModal({
                         onChange={(event) => setAmount(event.target.value)}
                     />
                 </Field>
+
+                {Number.isFinite(parsedAmount) && parsedAmount > 0 && (
+                    <p className="-mt-1 text-xs font-semibold text-accent-fg">
+                        {formatAmount(parsedAmount)}
+                    </p>
+                )}
 
                 <p className="text-[0.72rem] leading-snug text-fg-faint">{t('transaction.hint')}</p>
 
