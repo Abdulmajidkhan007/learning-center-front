@@ -88,8 +88,10 @@ export function AdminTabStrip({ entities, activeTab, onTabChange, links }: Admin
     const { t } = useT()
 
     return (
-        <div className="flex gap-2 overflow-x-auto lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {entities.map((entity) => (
+        <div className="relative lg:hidden">
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-surface to-transparent" />
+            <div className="flex gap-2 overflow-x-auto pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {entities.map((entity) => (
                 <button
                     key={entity.key}
                     type="button"
@@ -119,6 +121,7 @@ export function AdminTabStrip({ entities, activeTab, onTabChange, links }: Admin
                     ))}
                 </>
             )}
+            </div>
         </div>
     )
 }
